@@ -3,7 +3,7 @@
 #include "DataParse.h"
 
 
-void set_relation_R() {
+relation* get_relation_R() {
 
     char* line = NULL;
     size_t length;
@@ -11,7 +11,7 @@ void set_relation_R() {
 
     FILE* file = fopen(relR_name, "r");
 
-    relation_R = malloc(sizeof(relation));
+    relation* relation_R = malloc(sizeof(relation));
     relation_R->num_tuples = RELR_SIZE;
     relation_R->tuples = malloc(relation_R->num_tuples * sizeof(tuple));
 
@@ -28,16 +28,18 @@ void set_relation_R() {
     }
 
     fclose(file);
+
+    return relation_R;
 }
 
-void set_relation_S() {
+relation* get_relation_S() {
 
     char* line = NULL;
     size_t length;
 
     FILE* file = fopen(relS_name, "r");
 
-    relation_S = malloc(sizeof(relation));
+    relation* relation_S = malloc(sizeof(relation));
     relation_S->num_tuples = RELS_SIZE;
     relation_S->tuples = malloc(relation_S->num_tuples * sizeof(tuple));
 
@@ -54,24 +56,134 @@ void set_relation_S() {
     }
 
     fclose(file);
+
+    return relation_S;
 }
 
-int find_suffix(){
 
-    int suffix1 = find_suffix_R();
-    int suffix2 = find_suffix_S();
+relation* get_relation(char* name, int size){
 
-    return suffix1 > suffix2? suffix1 : suffix2;
+    char* line = NULL;
+    size_t length;
+
+    FILE* file = fopen(name, "r");
+
+    relation* rel = malloc(sizeof(relation));
+    rel->num_tuples = (uint32_t ) size;
+    rel->tuples = malloc(rel->num_tuples * sizeof(tuple));
+
+    for(int i=0; i<rel->num_tuples; i++){
+
+        getline(&line, &length, file);
+
+        rel->tuples[i].key = i;
+        rel->tuples[i].payload = (int32_t) atoi(line);
+
+        free(line);
+        line = NULL;
+
+    }
+
+    fclose(file);
+
+    return rel;
+
 }
 
-int find_suffix_R(){
 
-    
+int* create_histogram(relation* rel, int suffix, int relation_num){
 
+    int i, buckets, pos;
+
+    int cache_size = CACHE_SIZE;
+
+    buckets = power_of_2(suffix);
+
+    int* histogram = malloc(buckets * sizeof(int));
+
+    for(i=0; i<buckets; i++){
+        histogram[i] = 0;
+    }
+
+    for(i=0; i<rel->num_tuples; i++){
+
+        pos = rel->tuples[i].payload % buckets;
+
+        histogram[pos]++;
+
+        if(histogram[pos]*(sizeof(int32_t) + sizeof(int32_t)) > cache_size){
+
+            free(histogram);
+
+            return create_histogram(rel, suffix+1, relation_num);
+
+        }
+
+    }
+
+    if(relation_num == 1)
+        suffix_R = suffix;
+    else if(relation_num == 2)
+        suffix_S = suffix;
+    else {
+        printf("ERROR. Wrong Suffix!\n");
+        return NULL;
+    }
+
+    return histogram;
 }
 
-int find_suffix_S() {
 
+int power_of_2(int power){
 
+    int sum=1;
 
+    for(int i=0; i<power; i++){
+
+        sum *= 2;
+
+    }
+
+    return sum;
 }
+
+
+int* create_psum(int* histogram, int size) {
+
+    int i, sum = 0;
+    int* psum = malloc(size * sizeof(int));
+
+    for(i=0; i<size; i++){
+
+        psum[i] = sum;
+        sum += histogram[i];
+
+    }
+
+    return psum;
+}
+
+
+relation *create_relation_new(relation *rel, int *psum, int buckets) {
+
+    int i, pos;
+
+    relation* relation_new = malloc(sizeof(relation));
+
+    relation_new->num_tuples = rel->num_tuples;
+    relation_new->tuples = malloc(rel->num_tuples * sizeof(tuple));
+
+    for(i=0; i<relation_new->num_tuples; i++){
+
+        pos = psum[rel->tuples[i].payload % buckets];
+
+        relation_new->tuples[pos].key = pos;
+        relation_new->tuples[pos].payload = rel->tuples[i].payload;
+
+        psum[rel->tuples[i].payload % buckets]++;
+    }
+
+    return  relation_new;
+}
+
+

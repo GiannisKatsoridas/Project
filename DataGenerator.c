@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 #include "DataGenerator.h"
 
 relation* create_relation_R(){
@@ -31,6 +32,8 @@ relation* create_relation_S(){
     int i;
     int maxValue = (int) MAX_VALUE;
     relation* relS = malloc(sizeof(relation));
+
+    sleep(1);       // Needs this otherwise parallel execution of threads creates same relations R and S
 
     srand((unsigned int) time(0));
 
