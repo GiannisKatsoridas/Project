@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "DataParse.h"
+#include "Results.h"
 
 result* RadixHashJoin(relation* relR, relation* relS){
 
@@ -11,9 +11,29 @@ result* RadixHashJoin(relation* relR, relation* relS){
     int* psumS = create_psum(histogramS, power_of_2(suffix_S));     // Creates the accumulative histogram of the relation S
 
     relation* relation_R_new = create_relation_new(relR, psumR, power_of_2(suffix_R));    // Create the new relation
-                                                                                                // used for the Join
+                                                                                          // used for the Join
     relation* relation_S_new = create_relation_new(relS, psumS, power_of_2(suffix_S));    // Create the new relation
-                                                                                                // used for the Join
+                                                                                          // used for the Join
+
+
+    /**
+     * Example: create a results list with random numbers.
+     */
+
+    result* results = create_results_page();
+    int results_num=0;
+
+    for(int i=0; i<20; i++){
+
+        results_num = add_result(results, i+1, i-1);
+
+    }
+
+    /**
+     * End of example
+     */
+
+    print_results(results, results_num);
 
     free(histogramR);
     free(histogramS);
@@ -25,5 +45,5 @@ result* RadixHashJoin(relation* relR, relation* relS){
     free(psumS);
 
 
-    return NULL;
+    return results;
 }

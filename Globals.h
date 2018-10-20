@@ -26,8 +26,22 @@ typedef struct relation {
  * Type definition for a relation.
  * It consists of an array of tuples and a size of the relation.
  */
+typedef struct s_tuple {
+    int32_t relation_R;
+    int32_t relation_S;
+} s_tuple;
+/**
+ * Type definition of a simple tuple.
+ * It consists of the row IDs of the relations joined (in this case relation R and S).
+ */
 typedef struct result {
-//    ...
+    s_tuple* results;
+    struct result* next;
 } result;
+/**
+ * Type definition of the results list.
+ * It consists of the list of results and the link the next block.
+ */
+
 /** Radix Hash Join**/
 result* RadixHashJoin(relation *relR, relation *relS);
