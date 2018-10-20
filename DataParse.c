@@ -2,65 +2,6 @@
 #include <stdlib.h>
 #include "DataParse.h"
 
-
-relation* get_relation_R() {
-
-    char* line = NULL;
-    size_t length;
-    int size;
-
-    FILE* file = fopen(relR_name, "r");
-
-    relation* relation_R = malloc(sizeof(relation));
-    relation_R->num_tuples = RELR_SIZE;
-    relation_R->tuples = malloc(relation_R->num_tuples * sizeof(tuple));
-
-    for(int i=0; i<relation_R->num_tuples; i++){
-
-        size = getline(&line, &length, file);
-
-        relation_R->tuples[i].key = i;
-        relation_R->tuples[i].payload = (int32_t) atoi(line);
-
-        free(line);
-        line = NULL;
-
-    }
-
-    fclose(file);
-
-    return relation_R;
-}
-
-relation* get_relation_S() {
-
-    char* line = NULL;
-    size_t length;
-
-    FILE* file = fopen(relS_name, "r");
-
-    relation* relation_S = malloc(sizeof(relation));
-    relation_S->num_tuples = RELS_SIZE;
-    relation_S->tuples = malloc(relation_S->num_tuples * sizeof(tuple));
-
-    for(int i=0; i<relation_S->num_tuples; i++){
-
-        getline(&line, &length, file);
-
-        relation_S->tuples[i].key = i;
-        relation_S->tuples[i].payload = (int32_t) atoi(line);
-
-        free(line);
-        line = NULL;
-
-    }
-
-    fclose(file);
-
-    return relation_S;
-}
-
-
 relation* get_relation(char* name, int size){
 
     char* line = NULL;
