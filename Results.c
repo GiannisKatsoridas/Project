@@ -3,7 +3,7 @@
 #include "Results.h"
 
 result* create_results_page(){
-    
+
     tuples_per_page = page_size / sizeof(s_tuple);
 
     result* res = malloc(sizeof(result));

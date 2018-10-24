@@ -5,7 +5,18 @@
 result* RadixHashJoin(relation* relR, relation* relS){
 
     int* histogramR = create_histogram(relR, 1, 1);    // Creates the histogram of the relation R
-    int* histogramS = create_histogram(relS, 1, 2);    // Creates the histogram of the relation S
+    int* histogramS = create_histogram(relS, suffix_R, 2);    // Creates the histogram of the relation S
+
+    /**
+     * The two histograms must have the same size. To do so, the histogram S starts with
+     * R's suffix as the base and if it needs a bigger suffix then R's histogram gets recreated
+     * with the same suffix as S.
+     */
+
+    if(suffix_S > suffix_R){
+        free(histogramR);
+        histogramR = create_histogram(relR, suffix_S, 1);
+    }
 
     int* psumR = create_psum(histogramR, power_of_2(suffix_R));     // Creates the accumulative histogram of the relation R
     int* psumS = create_psum(histogramS, power_of_2(suffix_S));     // Creates the accumulative histogram of the relation S
@@ -19,7 +30,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
     /**
      * Example: create a results list with random numbers.
      */
-
+    
     result* results = create_results_page();
     int results_num=0;
 
@@ -28,7 +39,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
         results_num = add_result(results, i+1, i-1);
 
     }
-
+    
     /**
      * End of example
      */
