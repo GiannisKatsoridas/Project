@@ -25,11 +25,9 @@ relation* get_relation(char* name, int size){
         rel->tuples[i].key = i;
         rel->tuples[i].payload = (int32_t) atoi(line);
 
-        free(line);
-        line = NULL;
-
     }
-
+    free(line);
+    line = NULL;
     fclose(file);
 
     return rel;
