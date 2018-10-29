@@ -8,6 +8,11 @@ relation* get_relation(char* name, int size){
     size_t length;
 
     FILE* file = fopen(name, "r");
+    if (file==NULL)
+    {
+        fprintf(stderr, "get_relation:fopen()\n");
+        exit(-1);
+    }
 
     relation* rel = malloc(sizeof(relation));
     rel->num_tuples = (uint32_t ) size;
