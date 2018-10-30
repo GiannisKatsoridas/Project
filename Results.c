@@ -71,3 +71,25 @@ void print_results(result *res, int results_num) {
 
 }
 
+
+unsigned int int_to_int(unsigned int k) {
+//function created by HalosGhost
+//used to create the binary form of the integer k
+//https://stackoverflow.com/questions/5488377/converting-an-integer-to-binary-in-c
+    return (k == 0 || k == 1 ? k : ((k % 2) + 10 * int_to_int(k / 2)));
+}
+
+void print_relation(relation *rel, FILE *fp)
+{
+    if ((rel==NULL) || (fp==NULL))
+    {
+        fprintf(stderr, "relation_print:NULL argument\n");
+        return;
+    }
+    for (int i = 0; i < rel->num_tuples; i++)
+    {
+        unsigned int binary_payload = int_to_int(rel->tuples[i].payload);
+        fprintf(fp, "%4d - %4d (%08d)\n", rel->tuples[i].key, rel->tuples[i].payload, binary_payload);
+    }
+    fprintf(fp, "\n");
+}
