@@ -13,3 +13,8 @@ int add_result(result* res, int32_t value_R, int32_t value_S);     // Adds the v
                                                                    // Returns the current number of results.
 
 void print_results(result *res, int results_num);   // Prints the results from the given list.
+
+
+void print_relation(relation *rel, FILE *fp);
+
+unsigned int int_to_int(unsigned int k);

@@ -5,6 +5,10 @@
 result* RadixHashJoin(relation* relR, relation* relS){
 
     suffix = RADIX_N;
+    printf("Relation R before hashing:\n");
+    print_relation(relR, stdout);
+    printf("Relation S before hashing:\n");
+    print_relation(relS, stdout);
 
     int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
     int* histogramS = create_histogram(relS);    // Creates the histogram of the relation S
@@ -18,7 +22,10 @@ result* RadixHashJoin(relation* relR, relation* relS){
     relation* relation_S_new = create_relation_new(relS, psumS, power_of_2(suffix));    // Create the new relation
                                                                                           // used for the Join
 
-
+    printf("Relation R after hashing:\n");
+    print_relation(relation_R_new, stdout);
+    printf("Relation S after hashing:\n");
+    print_relation(relation_S_new, stdout);
     /**
      * Example: create a results list with random numbers.
      */
@@ -36,7 +43,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
      * End of example
      */
 
-    print_results(results, results_num);
+    //print_results(results, results_num);
 
     free(histogramR);
     free(histogramS);
