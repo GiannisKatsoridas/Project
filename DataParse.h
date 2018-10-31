@@ -1,13 +1,11 @@
 #include "Globals.h"
 
-int suffix_R;
-int suffix_S;
+int suffix;
 
 relation* get_relation(char* name, int size);   // Gets the relation from the file "name", where the relation size is "size"
 
-int* create_histogram(relation* rel, int suffix, int relation_num); // create the histogram of the relation by recursively
-                                                                    // calculating the suffix. The relation_num is 1 for
-                                                                    // the relation R and 2 for S.
+int* create_histogram(relation* rel); // create the histogram of the relation by using
+                                      // the suffix.
 
 int power_of_2(int power);  // Simply calculates the nth power of 2
 

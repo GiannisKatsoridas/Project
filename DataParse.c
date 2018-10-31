@@ -31,8 +31,32 @@ relation* get_relation(char* name, int size){
 
 }
 
+int* create_histogram(relation* rel){
 
-int* create_histogram(relation* rel, int suffix, int relation_num){
+    int i, buckets, pos;
+    int suffix = RADIX_N;
+
+    buckets = power_of_2(suffix);
+
+    int* histogram = malloc(buckets * sizeof(int));
+
+    for(i=0; i<buckets; i++){
+        histogram[i] = 0;
+    }
+
+    for(i=0; i<rel->num_tuples; i++){
+
+        pos = rel->tuples[i].payload % buckets;
+
+        histogram[pos]++;
+
+
+    }
+
+    return histogram;
+}
+
+/*int* create_histogram(relation* rel, int suffix, int relation_num){
 
     int i, buckets, pos;
 
@@ -72,7 +96,7 @@ int* create_histogram(relation* rel, int suffix, int relation_num){
     }
 
     return histogram;
-}
+}*/
 
 
 int power_of_2(int power){
@@ -118,7 +142,7 @@ relation *create_relation_new(relation *rel, int *psum, int buckets) {
 
         pos = psum[rel->tuples[i].payload % buckets];
 
-        relation_new->tuples[pos].key = pos;
+        relation_new->tuples[pos].key = rel->tuples[i].key;
         relation_new->tuples[pos].payload = rel->tuples[i].payload;
 
         psum[rel->tuples[i].payload % buckets]++;
