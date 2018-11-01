@@ -1,3 +1,7 @@
+#ifndef _DATAPARSE_H_
+#define _DATAPARSE_H_
+
+
 #include "Globals.h"
 
 int suffix;
@@ -13,3 +17,6 @@ int* create_psum(int* histogram, int size);       // Create the accumulative his
                                                   // each bucket.
 
 relation* create_relation_new(relation* relation, int* psum, int buckets);  // Create the new hashed relation.
+
+
+#endif

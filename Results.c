@@ -49,6 +49,10 @@ int add_result(result* res, int32_t value_R, int32_t value_S){
 
 void print_results(result *res, int results_num) {
 
+    if ((res==NULL) || (results_num==0))
+    {
+        return;
+    }
     result* pointer = res;
     int i;
 

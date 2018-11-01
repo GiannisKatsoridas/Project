@@ -1,11 +1,14 @@
+#ifndef _GLOBALS_H_
+#define _GLOBALS_H_
+
 #include <stdint.h>
 
 //#define CACHE_SIZE 3145728;                             // Processor Cache
-#define CACHE_SIZE 100;
-#define RELR_SIZE 40;                                 // Relation R size
-#define RELS_SIZE 40;                                 // Relation S size
-#define MAX_VALUE 100;                                  // Max value that the relation values can go to
-#define RADIX_N 2;
+#define CACHE_SIZE 100
+#define RELR_SIZE 2                             // Relation R size
+#define RELS_SIZE 2                              // Relation S size
+#define MAX_VALUE 1000                                  // Max value that the relation values can go to
+#define RADIX_N 12
 
 static const char relR_name[] = "DataRelationR.txt";    // Text file containing all the values of the first relation
 static const char relS_name[] = "DataRelationS.txt";    // Text file containing all the values of the second relation
@@ -46,3 +49,5 @@ typedef struct result {
 
 /** Radix Hash Join**/
 result* RadixHashJoin(relation *relR, relation *relS);
+
+#endif

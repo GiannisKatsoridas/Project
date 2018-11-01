@@ -1,3 +1,6 @@
+#ifndef _RESULTS_H_
+#define _RESULTS_H_
+
 #include "DataParse.h"
 
 //static int const page_size = 1048576;
@@ -18,3 +21,5 @@ void print_results(result *res, int results_num);   // Prints the results from t
 void print_relation(relation *rel, FILE *fp);
 
 unsigned int int_to_int(unsigned int k);
+
+#endif

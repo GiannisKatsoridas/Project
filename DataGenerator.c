@@ -19,7 +19,7 @@ relation* create_relation_R(){
     for(i=0; i<relR->num_tuples; i++){
 
         relR->tuples[i].key = (int32_t ) i;
-        relR->tuples[i].payload = rand() % maxValue + 1;
+        relR->tuples[i].payload = 1;
 
     }
 
@@ -43,7 +43,7 @@ relation* create_relation_S(){
     for(i=0; i<relS->num_tuples; i++){
 
         relS->tuples[i].key = (int32_t ) i;
-        relS->tuples[i].payload = rand() % maxValue + 1;
+        relS->tuples[i].payload = 1;
 
     }
 
