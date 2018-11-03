@@ -5,6 +5,13 @@
 #include <unistd.h>
 #include "DataGenerator.h"
 
+#define RANDOM 0
+#define INCREASING 1
+#define IDENTICAL 2
+#define EXCLUSIVE 3
+
+int data_flag;
+
 relation* create_relation_R(){
 
     int i;
@@ -19,7 +26,26 @@ relation* create_relation_R(){
     for(i=0; i<relR->num_tuples; i++){
 
         relR->tuples[i].key = (int32_t ) i;
-        relR->tuples[i].payload = 1;
+        if (data_flag == RANDOM)
+        {
+            relR->tuples[i].payload = rand() % MAX_VALUE;
+        }
+        else if (data_flag == INCREASING)
+        {
+            relR->tuples[i].payload = i;
+        }
+        else if (data_flag == IDENTICAL)
+        {
+            relR->tuples[i].payload = 1;
+        }
+        else if (data_flag == EXCLUSIVE)
+        {
+            relR->tuples[i].payload = 1;
+        }
+        else
+        {
+            relR->tuples[i].payload = 0;
+        }
 
     }
 
@@ -43,7 +69,26 @@ relation* create_relation_S(){
     for(i=0; i<relS->num_tuples; i++){
 
         relS->tuples[i].key = (int32_t ) i;
-        relS->tuples[i].payload = 1;
+        if (data_flag == RANDOM)
+        {
+            relS->tuples[i].payload = rand() % MAX_VALUE;
+        }
+        else if (data_flag == INCREASING)
+        {
+            relS->tuples[i].payload = i;
+        }
+        else if (data_flag == IDENTICAL)
+        {
+            relS->tuples[i].payload = 1;
+        }
+        else if (data_flag == EXCLUSIVE)
+        {
+            relS->tuples[i].payload = 2;
+        }
+        else
+        {
+            relS->tuples[i].payload = 0;
+        }
 
     }
 
@@ -83,8 +128,33 @@ void print_to_file_S(){
 }
 
 
-int main(void){
+int main(int argc, char **argv){
 
+    if (argc==1)
+    {
+        fprintf(stderr, "Random payloads\n");
+        data_flag = RANDOM;
+    }
+    else if ((strncmp(argv[1], "1", sizeof(char)))==0)
+    {
+        fprintf(stderr, "Increasing payloads\n");
+        data_flag = INCREASING;
+    }
+    else if ((strncmp(argv[1], "2", sizeof(char)))==0)
+    {
+        fprintf(stderr, "Identical payloads\n");
+        data_flag = IDENTICAL;
+    }
+    else if ((strncmp(argv[1], "3", sizeof(char)))==0)
+    {
+        fprintf(stderr, "Exclusive per relation payloads\n");
+        data_flag = EXCLUSIVE;
+    }
+    else
+    {
+        fprintf(stderr, "Random payloads\n");
+        data_flag = RANDOM;
+    }
     print_to_file_R();
     print_to_file_S();
 

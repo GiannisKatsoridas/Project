@@ -5,8 +5,8 @@
 
 //#define CACHE_SIZE 3145728;                             // Processor Cache
 #define CACHE_SIZE 100
-#define RELR_SIZE 2                             // Relation R size
-#define RELS_SIZE 2                              // Relation S size
+#define RELR_SIZE 10                             // Relation R size
+#define RELS_SIZE 10                              // Relation S size
 #define MAX_VALUE 1000                                  // Max value that the relation values can go to
 #define RADIX_N 12
 
