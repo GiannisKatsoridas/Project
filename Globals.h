@@ -5,10 +5,10 @@
 
 //#define CACHE_SIZE 3145728;                             // Processor Cache
 #define CACHE_SIZE 100
-#define RELR_SIZE 10                             // Relation R size
-#define RELS_SIZE 10                              // Relation S size
+#define RELR_SIZE 100                             // Relation R size
+#define RELS_SIZE 100                              // Relation S size
 #define MAX_VALUE 1000                                  // Max value that the relation values can go to
-#define RADIX_N 12
+#define RADIX_N 5
 
 static const char relR_name[] = "DataRelationR.txt";    // Text file containing all the values of the first relation
 static const char relS_name[] = "DataRelationS.txt";    // Text file containing all the values of the second relation

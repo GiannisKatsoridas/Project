@@ -64,7 +64,20 @@ result* RadixHashJoin(relation* relR, relation* relS){
     int pos = -1;
     int first_pos = -1;
     int last_pos = -1;
+    /*fprintf(stdout, "\nHISTOGRAMS\n");
+    for (int j = 0; j < power_of_2(suffix); j++)
+    {
+        fprintf(stdout, "histR[%2d] = %2d\t", j, histogramR[j]);
 
+        fprintf(stdout, "histS[%2d] = %2d\n", j, histogramS[j]);
+    }
+    fprintf(stdout, "\nPSUMS\n");
+    for (int j = 0; j < power_of_2(suffix); j++)
+    {
+        fprintf(stdout, "psumR[%2d] = %2d\t", j, psumR[j]);
+
+        fprintf(stdout, "psums[%2d] = %2d\n", j, psumS[j]);
+    }*/
     //for each relation bucket
     for (int i = 0; i < power_of_2(suffix); i++)
     {
@@ -90,6 +103,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
             x_histogram = histogramS;
             x_psum = psumS;
         }
+        //fprintf(stderr, "BUCKET #%d\n",i);
         if(y_histogram[i] == 0)
             continue;
         //initialize bucket array
@@ -106,7 +120,6 @@ result* RadixHashJoin(relation* relR, relation* relS){
             chain[j] = -1;
         }
 
-        //printf("%d - %d\n", histogramR[i], psumR[i]);
         
         //assign boundaries of the bucket i of relation y
         first_pos = y_psum[i] - y_histogram[i]; //starting position of bucket i within relation y
@@ -119,25 +132,31 @@ result* RadixHashJoin(relation* relR, relation* relS){
             int n = hash2(y->tuples[pos].payload);
             if (bucket_array[n]== -1)
             {
-                //printf("(-1)\n");
                 bucket_array[n] = pos - first_pos;
-                //printf("%d\n", bucket_array[n]);
             }
             else
             {
                 int temp_pos = bucket_array[n];
-                //printf("%d\n", temp_pos);
                 while(chain[temp_pos] != -1)
                 {
-                    //printf("->%d\n", chain[temp_pos]);
                     temp_pos = chain[temp_pos];
                 }
                 chain[temp_pos] = pos - first_pos;
             }
             pos--;
         }
-
-
+        
+        /*fprintf(stdout, "\nBUCKET ARRAY\n");
+        for (int j = 0; j < HASH2_RANGE; j++)
+        {
+            fprintf(stdout, "bucket[%02d] = %02d\n", j, bucket_array[j]);
+        }
+        fprintf(stdout, "\nCHAIN ARRAY\n");
+        for (int j = 0; j < y_histogram[i]; j++)
+        {
+            fprintf(stdout, "chain[%02d] = %02d\n", j, chain[j]);
+        }
+        fprintf(stdout, "\n");*/
         //compare elements in bucket i of relation x to those on bucket i of relation y
 
         //assign boundaries of the bucket i of relation x
@@ -149,13 +168,22 @@ result* RadixHashJoin(relation* relR, relation* relS){
         {
             //printf("x->pos = %d..\n", pos);
             int n = hash2(x->tuples[pos].payload);
-            printf("BUCKET #%d -> %d\n",i, n );
+            //printf("BUCKET #%d -> %d\n",i, n );
             if (bucket_array[n]!= -1)
             {
                 int curr_pos = bucket_array[n];
-                int real_pos = curr_pos + y_psum[i] -1;
+                int real_pos = curr_pos ;
+                if(i>0)
+                    real_pos = real_pos + y_psum[i-1];
+                
+                /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
+                 pos, real_pos,
+                 pos- first_pos, curr_pos,
+                 x->tuples[pos].payload, y->tuples[real_pos].payload);*/
+                
                 if (x->tuples[pos].payload == y->tuples[real_pos].payload)
                 {
+                    //fprintf(stdout, "equals!\n");
                     if (histogramR[i] > histogramS[i])
                         results_num = add_result(results, x->tuples[pos].key, y->tuples[real_pos].key);
                     else
@@ -164,9 +192,18 @@ result* RadixHashJoin(relation* relR, relation* relS){
                 while(chain[curr_pos] != -1)
                 {
                     curr_pos = chain[curr_pos];
-                    real_pos = curr_pos + y_psum[i] -1;
+                    real_pos = curr_pos ;
+                    if(i>0)
+                        real_pos = real_pos + y_psum[i-1];
+                    
+                    /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
+                     pos, real_pos,
+                     pos- first_pos, curr_pos,
+                     x->tuples[pos].payload, y->tuples[real_pos].payload);*/
+                    
                     if (x->tuples[pos].payload == y->tuples[real_pos].payload)
                     {
+                        //fprintf(stdout, "equals!\n");
                         if (histogramR[i] > histogramS[i])
                             results_num = add_result(results, x->tuples[pos].key, y->tuples[real_pos].key);
                         else
@@ -193,9 +230,6 @@ result* RadixHashJoin(relation* relR, relation* relS){
 
     }*/
     
-    /**
-     * End of example
-     */
 
     print_results(results, results_num);
 
