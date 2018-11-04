@@ -59,49 +59,6 @@ int* create_histogram(relation* rel){
     return histogram;
 }
 
-/*int* create_histogram(relation* rel, int suffix, int relation_num){
-
-    int i, buckets, pos;
-
-    int cache_size = CACHE_SIZE;
-
-    buckets = power_of_2(suffix);
-
-    int* histogram = malloc(buckets * sizeof(int));
-
-    for(i=0; i<buckets; i++){
-        histogram[i] = 0;
-    }
-
-    for(i=0; i<rel->num_tuples; i++){
-
-        pos = rel->tuples[i].payload % buckets;
-
-        histogram[pos]++;
-
-        if(histogram[pos]*(sizeof(int32_t) + sizeof(int32_t)) > cache_size){
-
-            free(histogram);
-
-            return create_histogram(rel, suffix+1, relation_num);
-
-        }
-
-    }
-
-    if(relation_num == 1)
-        suffix_R = suffix;
-    else if(relation_num == 2)
-        suffix_S = suffix;
-    else {
-        printf("ERROR. Wrong Suffix!\n");
-        return NULL;
-    }
-
-    return histogram;
-}*/
-
-
 int power_of_2(int power){
 
     int sum=1;
