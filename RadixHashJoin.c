@@ -1,15 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Results.h"
+#include "Index.h"
 
-#define HASH2_RANGE 10
 
-int hash2(int32_t payload)
-{
-    int index =( payload >> RADIX_N ) % HASH2_RANGE;
-    //printf("%d -> %d\n", payload, index);
-    return index;
-}
 
 result* RadixHashJoin(relation* relR, relation* relS){
 
@@ -43,13 +37,17 @@ result* RadixHashJoin(relation* relR, relation* relS){
     //start of payload comparison between buckets of R and S
 
     //create bucket array with size equal to HASH2_RANGE
-    int *bucket_array = malloc(HASH2_RANGE * sizeof(int));
+    //int *bucket_array = malloc(HASH2_RANGE * sizeof(int));
 
     //declare chain array
-    int *chain = NULL;
+    //int *chain = NULL;
+
+    //create index
+    index *indx = NULL;
+    index_create(&indx, HASH2_RANGE);
 
     //create 2 temporary sets of relations, histograms and psums: x and y
-    //y will be the relation whose bucket will be the smallest
+    //y will be the relation whose bucket will be the smallest (and consequently indexed)
     //x will be the relation whose bucket will be the biggest
 
     relation *x = NULL;
@@ -59,6 +57,8 @@ result* RadixHashJoin(relation* relR, relation* relS){
     relation *y = NULL;
     int *y_histogram = NULL;
     int *y_psum = NULL;
+
+    int column_id;//1 if bucket(R) > bucket(S), 2 otherwise
 
     //declare temporary position variables
     int pos = -1;
@@ -92,6 +92,8 @@ result* RadixHashJoin(relation* relR, relation* relS){
             y = relation_S_new;
             y_histogram = histogramS;
             y_psum = psumS;
+
+            column_id = 1;
         }
         else
         {//bucket i of relation R is smaller; R will be hashed
@@ -102,27 +104,31 @@ result* RadixHashJoin(relation* relR, relation* relS){
             x = relation_S_new;
             x_histogram = histogramS;
             x_psum = psumS;
+
+            column_id = 2;
         }
         //fprintf(stderr, "BUCKET #%d\n",i);
         if(y_histogram[i] == 0)
             continue;
         //initialize bucket array
-        for (int j = 0; j < HASH2_RANGE; j++)
+        /*for (int j = 0; j < HASH2_RANGE; j++)
         {
             bucket_array[j] = -1;
-        }
+        }*/
 
         //now the bucket i of the relation y is the one that will be hashed
         //create the chain array
-        chain = malloc(y_histogram[i] * sizeof(int));
+        /*chain = malloc(y_histogram[i] * sizeof(int));
         for (int j = 0; j < y_histogram[i]; j++)
         {
             chain[j] = -1;
-        }
+        }*/
+
+
 
         
         //assign boundaries of the bucket i of relation y
-        first_pos = y_psum[i] - y_histogram[i]; //starting position of bucket i within relation y
+        /*first_pos = y_psum[i] - y_histogram[i]; //starting position of bucket i within relation y
         last_pos = y_psum[i] -1;  //ending position of bucket i within relation y
         pos = last_pos;     //variable for current position
         //printf("y: bucket[%d]: [%d, %d]\n", i, first_pos, last_pos);
@@ -144,7 +150,9 @@ result* RadixHashJoin(relation* relR, relation* relS){
                 chain[temp_pos] = pos - first_pos;
             }
             pos--;
-        }
+        }*/
+
+        index_fill(indx, y, y_histogram[i], y_psum[i]);
         
         /*fprintf(stdout, "\nBUCKET ARRAY\n");
         for (int j = 0; j < HASH2_RANGE; j++)
@@ -164,64 +172,32 @@ result* RadixHashJoin(relation* relR, relation* relS){
         last_pos = x_psum[i] -1;  //ending position of bucket i within relation x
         pos = last_pos;     //variable for current position
 
+        int bucket_start;
+        if(i>0)
+            bucket_start = y_psum[i-1];
+        else
+            bucket_start = 0;
+
+        //values of tuple to be searched
+        int32_t key;
+        int32_t payload;
+
         while(pos >= first_pos)
         {
-            //printf("x->pos = %d..\n", pos);
-            int n = hash2(x->tuples[pos].payload);
-            //printf("BUCKET #%d -> %d\n",i, n );
-            if (bucket_array[n]!= -1)
-            {
-                int curr_pos = bucket_array[n];
-                int real_pos = curr_pos ;
-                if(i>0)
-                    real_pos = real_pos + y_psum[i-1];
-                
-                /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
-                 pos, real_pos,
-                 pos- first_pos, curr_pos,
-                 x->tuples[pos].payload, y->tuples[real_pos].payload);*/
-                
-                if (x->tuples[pos].payload == y->tuples[real_pos].payload)
-                {
-                    //fprintf(stdout, "equals!\n");
-                    if (histogramR[i] > histogramS[i])
-                        results_num = add_result(results, x->tuples[pos].key, y->tuples[real_pos].key);
-                    else
-                        results_num = add_result(results, y->tuples[real_pos].key, x->tuples[pos].key);                                        
-                }
-                while(chain[curr_pos] != -1)
-                {
-                    curr_pos = chain[curr_pos];
-                    real_pos = curr_pos ;
-                    if(i>0)
-                        real_pos = real_pos + y_psum[i-1];
-                    
-                    /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
-                     pos, real_pos,
-                     pos- first_pos, curr_pos,
-                     x->tuples[pos].payload, y->tuples[real_pos].payload);*/
-                    
-                    if (x->tuples[pos].payload == y->tuples[real_pos].payload)
-                    {
-                        //fprintf(stdout, "equals!\n");
-                        if (histogramR[i] > histogramS[i])
-                            results_num = add_result(results, x->tuples[pos].key, y->tuples[real_pos].key);
-                        else
-                            results_num = add_result(results, y->tuples[real_pos].key, x->tuples[pos].key);                                        
-                    }
-                }
+            key = x->tuples[pos].key;
+            payload = x->tuples[pos].payload;
 
-            }
-
+            results_num = search_val(y, bucket_start, indx, key, payload, column_id, results);
+            
             pos--;
         }
 
-        free(chain);
-        chain = NULL;
+        /*free(chain);
+        chain = NULL;*/
     }
 
-    free(bucket_array);
-
+    //free(bucket_array);
+    index_destroy(&indx);
     
 
     /*for(int i=0; i<20; i++){
