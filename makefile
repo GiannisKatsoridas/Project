@@ -12,9 +12,9 @@ OUT2  = DataGenerator
 BASIC_PATH = CUnit/Sources/Basic
 FRAM_PATH = CUnit/Sources/Framework
 
-OBJ3 = UnitTests.o DataParse.o $(BASIC_PATH)/Basic.o $(FRAM_PATH)/CUError.o $(FRAM_PATH)/MyMem.o $(FRAM_PATH)/TestDB.o $(FRAM_PATH)/TestRun.o $(FRAM_PATH)/Util.o
-SOURCE3 = UnitTests.c DataParse.c $(BASIC_PATH)/Basic.c $(FRAM_PATH)/CUError.c $(FRAM_PATH)/MyMem.c $(FRAM_PATH)/TestDB.c $(FRAM_PATH)/TestRun.c $(FRAM_PATH)/Util.c
-HEAD3 = DataParse.h
+OBJ3 = UnitTests.o DataParse.o Index.o Results.o $(BASIC_PATH)/Basic.o $(FRAM_PATH)/CUError.o $(FRAM_PATH)/MyMem.o $(FRAM_PATH)/TestDB.o $(FRAM_PATH)/TestRun.o $(FRAM_PATH)/Util.o
+SOURCE3 = UnitTests.c DataParse.c Index.c results.c $(BASIC_PATH)/Basic.c $(FRAM_PATH)/CUError.c $(FRAM_PATH)/MyMem.c $(FRAM_PATH)/TestDB.c $(FRAM_PATH)/TestRun.c $(FRAM_PATH)/Util.c
+HEAD3 = DataParse.h Index.h Results.h
 OUT3 = UnitTests
 
 TXT = DataRelationR.txt DataRelationS.txt

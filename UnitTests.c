@@ -9,6 +9,8 @@
 #include "CUnit/Headers/CUnit.h"
 #include "DataParse.h"
 #include "DataGenerator.h"
+#include "Index.h"
+
 
 /* Pointer to the file used by the tests. */
 static FILE* temp_file = NULL;
@@ -207,6 +209,85 @@ void testCREATERELATIONNEW(void){
 }
 
 
+/**
+ * Test for the "index_fill" function
+ */
+void testINDEXFILL(void)
+{
+    //int radix_n = 2;
+    int hash2_range = 10;
+
+    int rel_size = 10;
+
+    relation* rel = malloc(sizeof(relation));
+    rel->num_tuples = (uint32_t) rel_size;
+    rel->tuples = malloc(rel_size * sizeof(tuple));
+
+    for(int i=0; i<rel_size; i++){
+        rel->tuples[i].key = i;
+    }
+
+    rel->tuples[0].payload = 3;
+    rel->tuples[1].payload = 2;
+    rel->tuples[2].payload = 5;
+    rel->tuples[3].payload = 6;
+    rel->tuples[4].payload = 3;
+    rel->tuples[5].payload = 9;
+    rel->tuples[6].payload = 8;
+    rel->tuples[7].payload = 0;
+    rel->tuples[8].payload = 3;
+    rel->tuples[9].payload = 5;    
+
+    int* histogram = create_histogram(rel);
+    int* psum = create_psum(histogram, rel_size);
+
+    relation* relNew = create_relation_new(rel, psum, 4);
+
+    hash_index *indx = NULL;
+    index_create(&indx, hash2_range);
+
+
+    index_fill(indx, relNew, 3, 5);
+
+    CU_ASSERT(indx->bucket_array[0] == -1);
+    CU_ASSERT(indx->bucket_array[1] == 2);
+    CU_ASSERT(indx->bucket_array[2] == 1);
+    CU_ASSERT(indx->bucket_array[3] == -1);
+    CU_ASSERT(indx->bucket_array[4] == -1);
+    CU_ASSERT(indx->bucket_array[5] == -1);
+    CU_ASSERT(indx->bucket_array[6] == -1);
+    CU_ASSERT(indx->bucket_array[7] == -1);
+    CU_ASSERT(indx->bucket_array[8] == -1);
+    CU_ASSERT(indx->bucket_array[9] == -1);
+
+    CU_ASSERT(indx->chain[0] == -1);
+    CU_ASSERT(indx->chain[1] == -1);
+    CU_ASSERT(indx->chain[2] == 0);
+
+
+    index_fill(indx, relNew, 3, 10);
+
+    CU_ASSERT(indx->bucket_array[0] == 2);
+    CU_ASSERT(indx->bucket_array[1] == -1);
+    CU_ASSERT(indx->bucket_array[2] == -1);
+    CU_ASSERT(indx->bucket_array[3] == -1);
+    CU_ASSERT(indx->bucket_array[4] == -1);
+    CU_ASSERT(indx->bucket_array[5] == -1);
+    CU_ASSERT(indx->bucket_array[6] == -1);
+    CU_ASSERT(indx->bucket_array[7] == -1);
+    CU_ASSERT(indx->bucket_array[8] == -1);
+    CU_ASSERT(indx->bucket_array[9] == -1);
+
+    CU_ASSERT(indx->chain[0] == -1);
+    CU_ASSERT(indx->chain[1] == 0);
+    CU_ASSERT(indx->chain[2] == 1);
+
+    index_destroy(&indx);
+}
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////     MAIN TO RUN TESTS   //////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +309,8 @@ int main() {
         (NULL == CU_add_test(pSuite, "test of get_relation", testGETRELATION)) ||
         (NULL == CU_add_test(pSuite, "test of create_psum", testCREATEPSUM)) ||
         (NULL == CU_add_test(pSuite, "test of create_relation_new", testCREATERELATIONNEW)) ||
-        (NULL == CU_add_test(pSuite, "test of create_histogram", testCREATEHISTOGRAM))) {
+        (NULL == CU_add_test(pSuite, "test of create_histogram", testCREATEHISTOGRAM)) ||
+        (NULL == CU_add_test(pSuite, "test of index_fill", testINDEXFILL))) {
         CU_cleanup_registry();
         return CU_get_error();
     }

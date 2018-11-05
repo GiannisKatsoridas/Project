@@ -6,15 +6,15 @@
 
 int hash2(int32_t payload)
 {
-    int index =( payload >> RADIX_N ) % HASH2_RANGE;
-    //printf("%d -> %d\n", payload, index);
-    return index;
+    int n =( payload >> RADIX_N ) % HASH2_RANGE;
+    //printf("%d -> %d\n", payload, n);
+    return n;
 }
 
-void index_create(index **indx_addr, int bucket_array_sz)
+void index_create(hash_index **indx_addr, int bucket_array_sz)
 {
-	(*indx_addr) = malloc(sizeof(index));
-	index * indx = *indx_addr;
+	(*indx_addr) = malloc(sizeof(hash_index));
+	hash_index * indx = *indx_addr;
 
 	indx -> bucket_array = malloc(bucket_array_sz * sizeof(int));
 	indx -> bucket_array_sz = bucket_array_sz;
@@ -23,7 +23,7 @@ void index_create(index **indx_addr, int bucket_array_sz)
 	indx -> chain_sz = -1;
 }
 
-void index_fill(index *indx, relation *rel, int tuple_amount, int bucket_end)
+void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_end)
 {//tuple amount: histogram[i] ; bucket_end : psum[i]
 	
 	//initialize bucket array
@@ -80,7 +80,7 @@ void index_fill(index *indx, relation *rel, int tuple_amount, int bucket_end)
     fprintf(stdout, "\n");*/
 }
 
-void index_destroy(index **indx)
+void index_destroy(hash_index **indx)
 {
 	free((*indx) -> bucket_array);
 	(*indx) -> bucket_array = NULL;
@@ -94,7 +94,7 @@ void index_destroy(index **indx)
 	*indx = NULL;
 }
 
-int search_val(relation *rel, int bucket_start, index *indx, int32_t key, int32_t payload, int column_id, result* results)
+int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, result* results)
 {//search all instances equal to payload in the current index bucket of rel
 	//rel is the relation whose bucket is currently indexed
 	//bucket_start is the first index of the current bucket in rel
