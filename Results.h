@@ -22,4 +22,6 @@ void print_relation(relation *rel, FILE *fp);
 
 unsigned int int_to_int(unsigned int k);
 
+void freeResults(result* results);
+
 #endif

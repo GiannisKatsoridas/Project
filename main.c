@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "DataParse.h"
+#include "Tables.h"
+#include "Results.h"
 
 
 int main() {
+
+    //table* t = loadRelation("r1");
+
+    table** t = createTablesArray();
 
     int relr_size = RELR_SIZE;
     int rels_size = RELS_SIZE;
@@ -13,6 +19,8 @@ int main() {
 
     result* results = RadixHashJoin(relation_R, relation_S);
 
+    freeTable(t);
+    freeResults(results);
     free(relation_R->tuples);
     free(relation_R);
     free(relation_S->tuples);

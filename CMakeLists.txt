@@ -7,7 +7,9 @@ add_executable(Caramel
         main.c
         DataParse.c
         RadixHashJoin.c
-        Results.c)
+        Results.c
+        Tables.c
+        Index.c)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests

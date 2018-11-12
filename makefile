@@ -1,8 +1,8 @@
 CC = gcc
 FLAGS = -g
 
-OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o
-HEAD1 = DataParse.h Results.h Globals.h Index.h
+OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o
+HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h
 OUT1 = Caramel
 
 OBJ2 = DataGenerator.o

@@ -97,3 +97,15 @@ void print_relation(relation *rel, FILE *fp)
     }
     fprintf(fp, "\n");
 }
+
+
+void freeResults(result *results) {
+
+    if(results->next!=NULL){
+        freeResults(results->next);
+    }
+
+    free(results->results);
+
+    free(results);
+}
