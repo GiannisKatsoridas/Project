@@ -19,7 +19,7 @@ Query* getQueries(){
 
     size = (int) getline(&line, &length, stdin);
 
-    while(size > 0){
+    while(strcmp(line, "F")){
 
         q = getQueryFromLine(line, length);
 
