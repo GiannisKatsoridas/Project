@@ -165,19 +165,30 @@ Comparison_t *getComparisons(char *line) {
         return result;
     }
 
+    char** comps = malloc(sizeof(char*)*result->comparisons_num);
+
     num = strtok(l, delimeters);
     int index = 0;
 
     while(num != NULL){
 
-        result->comparisons[index] = getComparisonFromQuery(num);
+        comps[index] = malloc((strlen(num)+1)*sizeof(char));
+        strcpy(comps[index], num);
         index++;
         num = strtok(NULL, delimeters);
 
     }
 
+    for(int i=0; i<result->comparisons_num; i++){
+        result->comparisons[i] = getComparisonFromQuery(comps[i]);
+    }
+
     free(line);
     free(l);
+    for(int i=0; i<result->comparisons_num; i++){
+        free(comps[i]);
+    }
+    free(comps);
 
     return result;
 }
@@ -189,13 +200,16 @@ Comparison getComparisonFromQuery(char *line) {
     char* delimeters = ".=<>";
     char* num;
 
-    for(int i=0; i<strlen(line); i++){
+    char* l = malloc(sizeof(char)*(strlen(line)+1));
+    strcpy(l, line);
 
-        if(line[i] == '=')
+    for(int i=0; i<strlen(l); i++){
+
+        if(l[i] == '=')
             result.action = 0;
-        else if(line[i] == '<')
+        else if(l[i] == '<')
             result.action = 1;
-        else if(line[i] == '>')
+        else if(l[i] == '>')
             result.action = 2;
         else{
             continue;
@@ -204,7 +218,7 @@ Comparison getComparisonFromQuery(char *line) {
         break;
     }
 
-    num = strtok(line, delimeters);
+    num = strtok(l, delimeters);
     result.relationA = atoi(num);
     num = strtok(NULL, delimeters);
     result.columnA = atoi(num);
@@ -216,6 +230,8 @@ Comparison getComparisonFromQuery(char *line) {
     }
     else
         result.columnB = -1;
+
+    free(l);
 
     return result;
 }
@@ -271,6 +287,8 @@ Column getColumnsFromQuery(char *line) {
 
     char* rel = malloc(strlen(line));
     char* col = malloc(strlen(line));
+    strcpy(rel, "0");
+    strcpy(col, "0");
 
     int index = 0, rel_index;
 

@@ -9,7 +9,8 @@ add_executable(Caramel
         RadixHashJoin.c
         Results.c
         Tables.c
-        Index.c)
+        Index.c
+        Query.c)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests

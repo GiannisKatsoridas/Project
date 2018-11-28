@@ -15,7 +15,11 @@ int main() {
 
     printf("Done\n");
 
+    printf("%d - %d\n", (int) t[1]->columns[1][3], (int) t[0]->columns[2][30]);
+
     Query* queries = getQueries();
+
+    printf("%d - %d - %d\n", queries[0].comparisons->comparisons[0].relationA, queries[1].columns->columns[1].relation, queries[0].comparisons->comparisons[1].columnB);
 
     int relr_size = RELR_SIZE;
     int rels_size = RELS_SIZE;
