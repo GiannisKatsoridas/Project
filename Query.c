@@ -5,8 +5,6 @@
 
 Query* getQueries(){
 
-    freopen("queries.txt","r",stdin);
-
     char* line = NULL;
     size_t length;
     int size;
@@ -19,7 +17,12 @@ Query* getQueries(){
 
     size = (int) getline(&line, &length, stdin);
 
-    while(strcmp(line, "F")){
+    if(size < 0){
+        free(line);
+        return NULL;
+    }
+
+    while(strncmp(line, "F", strlen("F"))){
 
         q = getQueryFromLine(line, length);
 
