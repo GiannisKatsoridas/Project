@@ -13,9 +13,11 @@ int main() {
 
     table** t = createTablesArray();
 
+    parseTableMetadata(t);
+
     printf("Done\n");
 
-    printf("%d - %d\n", (int) t[1]->columns[1][3], (int) t[0]->columns[2][30]);
+    printf("%d - %d - %d\n", (int) t[1]->metadata[1].min, (int) t[1]->metadata[1].max, t[1]->metadata[1].distincts);
 
     freopen("queries.txt","r",stdin);
 

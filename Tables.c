@@ -96,6 +96,74 @@ table **createTablesArray() {
     return t;
 }
 
+void parseTableMetadata(table** t){
+
+    for(int i=0; i<relationsNum; i++){
+
+        t[i]->metadata = malloc(t[i]->columns_size*sizeof(Metadata));
+
+        for(int j=0; j<t[i]->columns_size; j++){
+
+            findMinMax(t, i, j);
+
+            u_int64_t range = t[i]->metadata[j].max - t[i]->metadata[j].min + 1;
+
+            if(range > MAX_TABLE_RANGE){
+                //t[i]->metadata[j].distincts = findSampleDistincts(t, i, j);
+                t[i]->metadata[j].distincts = -1;
+                continue;
+            }
+
+            findAllDistincts(t, i, j);
+
+        }
+
+    }
+
+}
+
+void findMinMax(table** t, int i, int j){
+
+    t[i]->metadata[j].max = t[i]->columns[j][0];
+    t[i]->metadata[j].min = t[i]->columns[j][0];
+
+    for(int k=0; k<t[i]->size; k++){
+
+        if(t[i]->columns[j][k] < t[i]->metadata[j].min){
+            t[i]->metadata[j].min = t[i]->columns[j][k];
+        }
+        else if(t[i]->columns[j][k] > t[i]->metadata[j].max){
+            t[i]->metadata[j].max = t[i]->columns[j][k];
+        }
+
+    }
+
+}
+
+void findAllDistincts(table** t, int i, int j){
+
+    u_int64_t range = t[i]->metadata[j].max - t[i]->metadata[j].min + 1;
+
+    char* values = malloc(sizeof(char)*range);
+    for(int k=0; k<range; k++){
+        values[k] = 0;
+    }
+
+    for(int k=0; k<t[i]->size; k++){
+        if(values[t[i]->columns[j][k] - t[i]->metadata[j].min] == 0)
+            values[t[i]->columns[j][k] - t[i]->metadata[j].min] = 1;
+    }
+
+    t[i]->metadata[j].distincts = 0;
+
+    for(int k=0; k<range; k++){
+        if(values[k] == 1)
+            t[i]->metadata[j].distincts++;
+    }
+
+
+}
+
 void freeTable(table** t){
 
     for(int i=0; i<relationsNum; i++){
