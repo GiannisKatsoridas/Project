@@ -43,9 +43,9 @@ typedef struct columns_t {
 
 typedef struct query {
 
-    Relation_t* relations;
-    Comparison_t* comparisons;
-    Column_t* columns;
+    Relation_t* relation_set;
+    Comparison_t* comparison_set;
+    Column_t* column_set;
 
 } Query;
 

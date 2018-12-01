@@ -17,14 +17,14 @@ int main() {
 
     printf("Done\n");
 
-    printf("%d - %d - %d\n", (int) t[1]->metadata[1].min, (int) t[1]->metadata[1].max, t[1]->metadata[1].distincts);
+    //printf("%d - %d - %d\n", (int) t[1]->metadata[1].min, (int) t[1]->metadata[1].max, t[1]->metadata[1].distincts);
 
     freopen("queries.txt","r",stdin);
 
     Query* queries = getQueries();
 
     while(queries != NULL){
-        printf("%d - %d - %d\n", queries[0].comparisons->comparisons[0].relationA, queries[1].columns->columns[1].relation, queries[0].comparisons->comparisons[1].columnB);
+        //printf("%d - %d - %d\n", queries[0].comparisons->comparisons[0].relationA, queries[1].columns->columns[1].relation, queries[0].comparisons->comparisons[1].columnB);
         freeQueries(queries);
         queries = getQueries();
     }

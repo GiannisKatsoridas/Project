@@ -89,9 +89,9 @@ Query getQueryFromLine(char* line, size_t length){
 
     Query result;
 
-    result.columns = col;
-    result.relations = rel;
-    result.comparisons = comp;
+    result.column_set = col;
+    result.relation_set = rel;
+    result.comparison_set = comp;
 
     free(line);
     free(line_copy);
@@ -107,8 +107,8 @@ Relation_t *getRelations(char *line) {
     Relation_t* result = malloc(sizeof(Relation_t));
     result->relations_num = 0;
 
-    char* l = malloc(strlen(line) + 1);
-    strcpy(l, line);
+    char* line_copy = malloc(strlen(line) + 1);
+    strcpy(line_copy, line);
 
     num = strtok(line, delimeters);
 
@@ -125,7 +125,7 @@ Relation_t *getRelations(char *line) {
         return result;
     }
 
-    num = strtok(l, delimeters);
+    num = strtok(line_copy, delimeters);
     int index = 0;
 
     while(num != NULL){
@@ -137,7 +137,7 @@ Relation_t *getRelations(char *line) {
     }
 
     free(line);
-    free(l);
+    free(line_copy);
 
     return result;
 }
@@ -150,8 +150,8 @@ Comparison_t *getComparisons(char *line) {
     Comparison_t* result = malloc(sizeof(Comparison_t));
     result->comparisons_num = 0;
 
-    char* l = malloc(strlen(line) + 1);
-    strcpy(l, line);
+    char* line_copy = malloc(strlen(line) + 1);
+    strcpy(line_copy, line);
 
     num = strtok(line, delimeters);
 
@@ -170,7 +170,7 @@ Comparison_t *getComparisons(char *line) {
 
     char** comps = malloc(sizeof(char*)*result->comparisons_num);
 
-    num = strtok(l, delimeters);
+    num = strtok(line_copy, delimeters);
     int index = 0;
 
     while(num != NULL){
@@ -187,7 +187,7 @@ Comparison_t *getComparisons(char *line) {
     }
 
     free(line);
-    free(l);
+    free(line_copy);
     for(int i=0; i<result->comparisons_num; i++){
         free(comps[i]);
     }
@@ -203,16 +203,16 @@ Comparison getComparisonFromQuery(char *line) {
     char* delimeters = ".=<>";
     char* num;
 
-    char* l = malloc(sizeof(char)*(strlen(line)+1));
-    strcpy(l, line);
+    char* line_copy = malloc(sizeof(char)*(strlen(line)+1));
+    strcpy(line_copy, line);
 
-    for(int i=0; i<strlen(l); i++){
+    for(int i=0; i<strlen(line_copy); i++){
 
-        if(l[i] == '=')
+        if(line_copy[i] == '=')
             result.action = 0;
-        else if(l[i] == '<')
+        else if(line_copy[i] == '<')
             result.action = 1;
-        else if(l[i] == '>')
+        else if(line_copy[i] == '>')
             result.action = 2;
         else{
             continue;
@@ -221,7 +221,7 @@ Comparison getComparisonFromQuery(char *line) {
         break;
     }
 
-    num = strtok(l, delimeters);
+    num = strtok(line_copy, delimeters);
     result.relationA = atoi(num);
     num = strtok(NULL, delimeters);
     result.columnA = atoi(num);
@@ -234,7 +234,7 @@ Comparison getComparisonFromQuery(char *line) {
     else
         result.columnB = -1;
 
-    free(l);
+    free(line_copy);
 
     return result;
 }
@@ -248,9 +248,9 @@ Column_t *getColumns(char *line) {
     Column_t* result = malloc(sizeof(Column_t));
     result->columns_num = 0;
 
-    char* l = malloc(strlen(line) + 1);
-    strcpy(l, line);
-    l[strlen(line)] = '\0';
+    char* line_copy = malloc(strlen(line) + 1);
+    strcpy(line_copy, line);
+    line_copy[strlen(line)] = '\0';
 
     num = strtok(line, delimeters);
 
@@ -267,7 +267,7 @@ Column_t *getColumns(char *line) {
         return result;
     }
 
-    num = strtok(l, delimeters);
+    num = strtok(line_copy, delimeters);
     int index = 0;
 
     while(num != NULL){
@@ -279,7 +279,7 @@ Column_t *getColumns(char *line) {
     }
 
     free(line);
-    free(l);
+    free(line_copy);
 
     return result;
 }
@@ -327,12 +327,12 @@ void freeQueries(Query *queries) {
 
     for(int i=0; i<queries_num; i++) {
 
-        free(queries[i].columns->columns);
-        free(queries[i].columns);
-        free(queries[i].comparisons->comparisons);
-        free(queries[i].comparisons);
-        free(queries[i].relations->relations);
-        free(queries[i].relations);
+        free(queries[i].column_set->columns);
+        free(queries[i].column_set);
+        free(queries[i].comparison_set->comparisons);
+        free(queries[i].comparison_set);
+        free(queries[i].relation_set->relations);
+        free(queries[i].relation_set);
 
     }
 
