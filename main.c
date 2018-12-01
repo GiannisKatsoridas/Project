@@ -15,9 +15,17 @@ int main() {
 
     parseTableMetadata(t);
 
-    printf("Done\n");
+    //printf("Done\n");
 
-    //printf("%d - %d - %d\n", (int) t[1]->metadata[1].min, (int) t[1]->metadata[1].max, t[1]->metadata[1].distincts);
+    printf("%d relations.\n", relationsNum);
+    for (int i = 0; i < relationsNum; i++)
+    {
+        printf("%lu X %lu. ", t[i]->size, t[i]->columns_size);
+        printf("Min: %lu, Max: %lu, Distinct values: %d\n", 
+            t[i]->metadata->min,
+            t[i]->metadata->max,
+            t[i]->metadata->distincts);
+    }
 
     freopen("queries.txt","r",stdin);
 

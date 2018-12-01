@@ -20,7 +20,7 @@ OUT3 = UnitTests
 TXT = DataRelationR.txt DataRelationS.txt
 
 
-all: $(OUT1) $(OUT2) $(OUT3)
+all: $(OUT1) $(OUT2) #$(OUT3)
 
 
 Caramel: $(OBJ1) $(HEAD1)
@@ -65,5 +65,5 @@ clean:
 	rm -f $(OUT1) $(OUT2) $(OUT3) 
 	rm -f $(OBJ1) 
 	rm -f $(OBJ2) 
-	rm -f $(OBJ3)
+	#rm -f $(OBJ3)
 

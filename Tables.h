@@ -15,8 +15,11 @@ typedef struct tableMetadata {
 } Metadata;
 
 typedef struct Table {
+	/// The number of tuples
     uint64_t size;
+  	/// The number of columns
     uint64_t columns_size;
+    /// The join column containing the keys
     uint64_t** columns;
     Metadata* metadata;
 } table;

@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <unistd.h>
 #include "Globals.h"
 #include "Tables.h"
 
@@ -36,17 +37,21 @@ table* loadRelation(const char* fileName){
         printf("relation file %s does not contain a valid header.\n", fileName);
     }
 
-    t->size=*(uint64_t*)(addr);
-    addr+=sizeof(t->size);
-    size_t numColumns=*(size_t*)(addr);
+    t->size = *(uint64_t*)(addr);
+    addr += sizeof(t->size);
+
+    size_t numColumns = *(size_t*)(addr);
     t->columns_size = numColumns;
-    addr+=sizeof(size_t);
+    addr += sizeof(size_t);
+
     t->columns = malloc(numColumns*sizeof(uint32_t*));
-    for (unsigned i=0;i<numColumns;++i) {
+
+    for (unsigned i=0 ; i<numColumns ; ++i) {
         t->columns[i] = (uint64_t*) (addr);
-        addr+=t->size*sizeof(uint64_t);
+        addr += t->size*sizeof(uint64_t);
     }
 
+    //close(fd);
     return t;
 }
 
@@ -65,8 +70,7 @@ table **createTablesArray() {
 
     size = (size_t) getline(&file, &length, stdin);
 
-    while((int) size > 0){
-
+    while((strcmp(file, "Done")!=0)&&((int) size > 0)){
         if(file[strlen(file)-1]=='\n'){
             file[strlen(file) - 1] = '\0';
         }
@@ -161,7 +165,7 @@ void findAllDistincts(table** t, int i, int j){
             t[i]->metadata[j].distincts++;
     }
 
-
+    free(values);
 }
 
 void freeTable(table** t){
@@ -169,9 +173,8 @@ void freeTable(table** t){
     for(int i=0; i<relationsNum; i++){
 
         free(t[i]->columns);
-
+        free(t[i]->metadata);
         free(t[i]);
-
     }
 
     free(t);
