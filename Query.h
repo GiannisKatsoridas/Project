@@ -1,6 +1,11 @@
 //
 // Created by kats on 23/11/2018.
 //
+
+#ifndef _QUERY_H
+#define _QUERY_H
+
+
 int queries_num;
 
 typedef struct column {
@@ -20,12 +25,12 @@ typedef struct comparison {
 
 } Comparison;
 
-typedef struct relations_t {
+typedef struct query_relations_t {
 
-    int relations_num;
-    int* relations;
+    int query_relations_num;
+    int* query_relations;
 
-} Relation_t;
+} Query_Relation_t;
 
 typedef struct comparison_t {
 
@@ -43,7 +48,7 @@ typedef struct columns_t {
 
 typedef struct query {
 
-    Relation_t* relation_set;
+    Query_Relation_t* query_relation_set;
     Comparison_t* comparison_set;
     Column_t* column_set;
 
@@ -72,7 +77,7 @@ Column_t* getColumns(char* line);
  * @param line: the relation part of the query
  * @return The array of relations
  */
-Relation_t* getRelations(char* line);
+Query_Relation_t* getQueryRelations(char* line);
 /**
  * Given the comparisons part of the query, returns an array of Comparison objects, corresponding to the comparisons
  * @param line: the comparison part of the query
@@ -96,3 +101,5 @@ Column getColumnsFromQuery(char *line);
  * @param queries: the struct
  */
 void freeQueries(Query* queries);
+
+#endif

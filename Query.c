@@ -68,11 +68,11 @@ Query getQueryFromLine(char* line, size_t length){
     char* line_copy;
     char* num;
 
-    char* relations;
+    char* query_relations;
     char* comparisons;
     char* columns;
 
-    relations = malloc(length*sizeof(char));
+    query_relations = malloc(length*sizeof(char));
     comparisons = malloc(length*sizeof(char));
     columns = malloc(length*sizeof(char));
 
@@ -80,7 +80,7 @@ Query getQueryFromLine(char* line, size_t length){
     strcpy(line_copy, line);
 
     num = strtok(line_copy, delimeters);
-    strcpy(relations, num);
+    strcpy(query_relations, num);
 
     num = strtok(NULL, delimeters);
     strcpy(comparisons, num);
@@ -88,14 +88,14 @@ Query getQueryFromLine(char* line, size_t length){
     num = strtok(NULL, delimeters);
     strcpy(columns, num);
 
-    Relation_t* rel = getRelations(relations);
+    Query_Relation_t* rel = getQueryRelations(query_relations);
     Comparison_t* comp = getComparisons(comparisons);
     Column_t* col = getColumns(columns);
 
     Query result;
 
     result.column_set = col;
-    result.relation_set = rel;
+    result.query_relation_set = rel;
     result.comparison_set = comp;
 
     free(line);
@@ -104,13 +104,13 @@ Query getQueryFromLine(char* line, size_t length){
     return result;
 }
 
-Relation_t *getRelations(char *line) {
+Query_Relation_t *getQueryRelations(char *line) {
 
     char* delimeters = " ";
     char* num;
 
-    Relation_t* result = malloc(sizeof(Relation_t));
-    result->relations_num = 0;
+    Query_Relation_t* result = malloc(sizeof(Query_Relation_t));
+    result->query_relations_num = 0;
 
     char* line_copy = malloc(strlen(line) + 1);
     strcpy(line_copy, line);
@@ -119,14 +119,14 @@ Relation_t *getRelations(char *line) {
 
     while(num != NULL){
 
-        result->relations_num++;
+        result->query_relations_num++;
         num = strtok(NULL, delimeters);
 
     }
 
-    result->relations = malloc(result->relations_num*sizeof(int));
+    result->query_relations = malloc(result->query_relations_num*sizeof(int));
 
-    if(result->relations_num == 0){
+    if(result->query_relations_num == 0){
         return result;
     }
 
@@ -135,7 +135,7 @@ Relation_t *getRelations(char *line) {
 
     while(num != NULL){
 
-        result->relations[index] = atoi(num);
+        result->query_relations[index] = atoi(num);
         index++;
         num = strtok(NULL, delimeters);
 
@@ -336,8 +336,8 @@ void freeQueries(Query *queries) {
         free(queries[i].column_set);
         free(queries[i].comparison_set->comparisons);
         free(queries[i].comparison_set);
-        free(queries[i].relation_set->relations);
-        free(queries[i].relation_set);
+        free(queries[i].query_relation_set->query_relations);
+        free(queries[i].query_relation_set);
 
     }
 

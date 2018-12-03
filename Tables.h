@@ -1,6 +1,8 @@
 //
 // Created by kats on 10/11/2018.
 //
+#ifndef _TABLES_H_
+#define _TABLES_H_
 
 #include <stdint.h>
 #define MAX_TABLE_RANGE 100000000               // The maximum range between max and min values of a table for which
@@ -69,3 +71,5 @@ void findAllDistincts(table** t, int i, int j);
  * @param t: the array of relations to be freed.
  */
 void freeTable(table** t);
+
+#endif

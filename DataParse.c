@@ -34,6 +34,33 @@ relation* get_relation(char* name, int size){
 
 }
 
+relation* get_relation_from_table(table *t, int columnID)
+{
+    if ((t==NULL) || (columnID < 0))
+    {
+        printf("get_relation_from_table(): NULL table\n");
+        return NULL;
+    }
+
+    if ((columnID > (t->size-1) ) || (columnID < 0))
+    {
+        printf("get_relation_from_table(): invalid columnID %d\n", columnID);
+        return NULL;
+    }
+
+    //create relation
+    relation* rel = malloc(sizeof(relation));
+    rel->num_tuples = t -> size;
+
+    //assign to the relation tuples the payloads from the columnID of the table
+    rel->tuples = malloc(rel->num_tuples * sizeof(tuple));
+    for(int i=0; i<rel->num_tuples; i++)
+    {
+        rel->tuples[i].key = i;
+        rel->tuples[i].payload = t->columns[columnID][i];
+    }
+}
+
 int* create_histogram(relation* rel){
 
     int i, buckets, pos;
