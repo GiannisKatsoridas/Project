@@ -22,8 +22,13 @@ Query* getQueries(){
         return NULL;
     }
 
+        
     while(strncmp(line, "F", strlen("F"))){
 
+        if(line[strlen(line)-1]=='\n'){
+            line[strlen(line) - 1] = '\0';
+        }
+        
         q = getQueryFromLine(line, length);
 
         queries_num++;
