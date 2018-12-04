@@ -200,6 +200,7 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     if ((t==NULL) || ((resultColumn !=1 ) && (resultColumn != 2)))
     {
         fprintf(stderr, "getTableKeysFromResult(): invalid arguments\n");
+        return;
     }
 
     //key flag index; 
@@ -216,20 +217,36 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     int counter = 0;
 
     int32_t key = -1;
-    while(res != NULL)
-    {//analyze result; find the table's distinct keys in it
-        for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
-        {
-            if(resultColumn == 1)
+
+    if(resultColumn == 1)
+    {
+        while(res != NULL)
+        {//analyze result; find the table's distinct keys in it
+            for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
+            {
                 key = res->results[i].relation_R;
-            else if(resultColumn == 2)
+
+                if(keyFlags[key] == 0)
+                    keyFlags[key] = 1;//key exists in result
+            }
+            counter += page_size;
+            res = res->next;
+        }
+    }
+    else if(resultColumn == 2)
+    {
+        while(res != NULL)
+        {//analyze result; find the table's distinct keys in it
+            for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
+            {
                 key = res->results[i].relation_S;
 
-            if(keyFlags[key] == 0)
-                keyFlags[key] = 1;//key exists in result
+                if(keyFlags[key] == 0)
+                    keyFlags[key] = 1;//key exists in result
+            }
+            counter += page_size;
+            res = res->next;
         }
-        counter += page_size;
-        res = res->next;
     }
 
     int keySum = 0;//contains the amount of keys in result
@@ -256,4 +273,38 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
             k++;
         }
     }
+}
+
+relation *constructRelationForNextJoin(table *t, int columnID)
+{
+    if (t==NULL)
+    {
+        fprintf(stderr, "constructRelationForNextJoin(): NULL table\n");
+        return NULL;
+    }
+
+    if ((columnID <0) || (columnID > (t->columns_size -1) ))
+    {
+        fprintf(stderr, "constructRelationForNextJoin(): invalid columnID\n");
+        return NULL;
+    }
+
+    if (t->inRes == NULL)
+    {
+        fprintf(stderr, "constructRelationForNextJoin(): found NULL Intermediate Results\n");
+        return NULL;
+    }
+
+    relation *rel = malloc(sizeof(relation));
+    rel->num_tuples = t->inRes->amount;
+
+    rel->tuples = malloc((rel -> num_tuples)* sizeof(tuple));
+
+    for (int32_t i = 0; i < rel->num_tuples; i++)
+    {
+        rel->tuples[i].key = t->inRes->keys[i];
+        rel->tuples[i].payload = t->columns[columnID][i];
+    }
+
+    return rel;
 }

@@ -36,7 +36,6 @@ int main() {
     Query* queries = getQueries();
 
     while(queries != NULL){
-        //printf("%d - %d - %d\n", queries[0].comparisons->comparisons[0].relationA, queries[1].columns->columns[1].relation, queries[0].comparisons->comparisons[1].columnB);
         freeQueries(queries);
         queries = getQueries();
     }

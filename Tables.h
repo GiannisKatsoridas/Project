@@ -23,7 +23,7 @@ typedef struct Table {
     uint64_t columns_size;
     /// The join column containing the keys
     uint64_t** columns;
-    
+
     Metadata* metadata;//metadata FOR EACH COLUMN OF THE TABLE
 
 	int tableID;//relative table ID, as expressed in query predicates    
@@ -34,7 +34,7 @@ typedef struct Table {
 typedef struct IntermediateResults
 {//struct for saving all distinct keys of a table from a join result
     int32_t *keys;
-    int amount;
+    int32_t amount;
 } IntermediateResults;
 
 
