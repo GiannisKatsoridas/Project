@@ -11,14 +11,10 @@
 int relationsNum;
 
 typedef struct tableMetadata {
-	int tableID;//relative table ID, as expressed in predicates
-
     uint64_t min;
     uint64_t max;
     int distincts;
-
-    struct IntermediateResults *inRes;//contains all keys (rowIDs) needed for the next join/comparison
-} Metadata;
+} Metadata;//metadata FOR EACH COLUMN OF THE TABLE
 
 typedef struct Table {
 	/// The number of tuples
@@ -27,7 +23,10 @@ typedef struct Table {
     uint64_t columns_size;
     /// The join column containing the keys
     uint64_t** columns;
-    Metadata* metadata;
+    Metadata* metadata;//metadata FOR EACH COLUMN OF THE TABLE
+
+	int tableID;//relative table ID, as expressed in query predicates    
+    struct IntermediateResults *inRes;//contains all keys (rowIDs) needed for the next join/comparison
 } table;
 
 

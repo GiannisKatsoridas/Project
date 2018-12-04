@@ -107,8 +107,6 @@ void parseTableMetadata(table** t){
 
         t[i]->metadata = malloc(t[i]->columns_size*sizeof(Metadata));
 
-        t[i]->metadata->tableID = i;
-
         for(int j=0; j<t[i]->columns_size; j++){
 
             findMinMax(t, i, j);
@@ -125,14 +123,16 @@ void parseTableMetadata(table** t){
 
         }
 
-        t[i]->metadata->inRes = malloc(sizeof(IntermediateResults));
+        t[i]->tableID = i;
 
-        t[i]->metadata->inRes->amount = t[i]->size;
-        t[i]->metadata->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
+        t[i]->inRes = malloc(sizeof(IntermediateResults));
 
-        for (int i = 0; i < t[i]->metadata->inRes->amount; i++)
+        t[i]->inRes->amount = t[i]->size;
+        t[i]->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
+
+        for (int i = 0; i < t[i]->inRes->amount; i++)
         {
-            t[i]->metadata->inRes->keys[i] = (int32_t) i;
+            t[i]->inRes->keys[i] = (int32_t) i;
         }
 
     }
@@ -186,8 +186,8 @@ void freeTable(table** t){
     for(int i=0; i<relationsNum; i++){
 
         free(t[i]->columns);
-        free(t[i]->metadata->inRes->keys);
-        free(t[i]->metadata->inRes);
+        free(t[i]->inRes->keys);
+        free(t[i]->inRes);
         free(t[i]->metadata);
         free(t[i]);
     }
@@ -240,20 +240,20 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     }
 
     //erase previous intermediate results
-    if(t->metadata->inRes != NULL)
-        free(t->metadata->inRes->keys);
-    free(t->metadata->inRes);
+    if(t->inRes != NULL)
+        free(t->inRes->keys);
+    free(t->inRes);
 
     //and replace them with thw new ones
-    t->metadata->inRes = malloc(sizeof(IntermediateResults));
-    t->metadata->inRes->amount = keySum;
-    t->metadata->inRes->keys = malloc(keySum*sizeof(int32_t));
+    t->inRes = malloc(sizeof(IntermediateResults));
+    t->inRes->amount = keySum;
+    t->inRes->keys = malloc(keySum*sizeof(int32_t));
 
     for (uint64_t i = 0, k = 0; (i < t->size) && (k<keySum); i++)
     {
         if(keyFlags[i] == 1)
         {
-            t->metadata->inRes->keys[k];
+            t->inRes->keys[k];
             k++;
         }
     }
