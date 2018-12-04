@@ -101,7 +101,7 @@ table **createTablesArray() {
     return t;
 }
 
-void parseTableMetadata(table** t){
+void parseTableData(table** t){
 
     for(int i=0; i<relationsNum; i++){
 

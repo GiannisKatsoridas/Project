@@ -23,6 +23,7 @@ typedef struct Table {
     uint64_t columns_size;
     /// The join column containing the keys
     uint64_t** columns;
+    
     Metadata* metadata;//metadata FOR EACH COLUMN OF THE TABLE
 
 	int tableID;//relative table ID, as expressed in query predicates    
@@ -58,7 +59,7 @@ table** createTablesArray();
  * as well as the total number of distinct values. Then fills their Metadata* field
  * @param t: the table** object
  */
-void parseTableMetadata(table** t);
+void parseTableData(table** t);
 
 /**
  * For a certain column of a certain relation of the array of relations t, finds the min and max value and inserts

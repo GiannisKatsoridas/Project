@@ -13,7 +13,7 @@ int main() {
 
     table** t = createTablesArray();
 
-    parseTableMetadata(t);
+    parseTableData(t);
 
     //printf("Done\n");
 
