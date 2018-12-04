@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "Results.h"
 
+
+static int results_num = 0;
+
 result* create_results_page(){
 
     tuples_per_page = page_size / sizeof(s_tuple);
@@ -16,7 +19,7 @@ result* create_results_page(){
 
 int add_result(result* res, int32_t value_R, int32_t value_S){
 
-    static int results_num = 0;
+    //static int results_num = 0;
 
     result* pointer = res;
     int bucket = results_num / tuples_per_page;
@@ -108,4 +111,17 @@ void freeResults(result *results) {
     free(results->results);
 
     free(results);
+
+    results_num = 0;
+}
+
+
+int getResultsAmount()
+{
+    return results_num;
+}
+
+int getResultPageSize()
+{
+    return page_size;
 }

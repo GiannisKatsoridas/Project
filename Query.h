@@ -5,6 +5,11 @@
 #ifndef _QUERY_H
 #define _QUERY_H
 
+#include "Globals.h"
+
+#define JOIN 0
+#define LESS_THAN 1
+#define GREATER_THAN 2
 
 int queries_num;
 
@@ -54,6 +59,10 @@ typedef struct query {
 
 } Query;
 
+
+
+
+
 /**
  * Get all the queries from stdin and returns then in an array of Query type objects
  * @return The queries
@@ -101,5 +110,8 @@ Column getColumnsFromQuery(char *line);
  * @param queries: the struct
  */
 void freeQueries(Query* queries);
+
+
+
 
 #endif

@@ -214,11 +214,11 @@ Comparison getComparisonFromQuery(char *line) {
     for(int i=0; i<strlen(line_copy); i++){
 
         if(line_copy[i] == '=')
-            result.action = 0;
+            result.action = JOIN;
         else if(line_copy[i] == '<')
-            result.action = 1;
+            result.action = LESS_THAN;
         else if(line_copy[i] == '>')
-            result.action = 2;
+            result.action = GREATER_THAN;
         else{
             continue;
         }

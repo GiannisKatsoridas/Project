@@ -24,4 +24,8 @@ unsigned int int_to_int(unsigned int k);
 
 void freeResults(result* results);
 
+int getResultsAmount();
+
+int getResultPageSize();
+
 #endif

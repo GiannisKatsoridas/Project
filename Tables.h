@@ -11,9 +11,13 @@
 int relationsNum;
 
 typedef struct tableMetadata {
+	int tableID;//relative table ID, as expressed in predicates
+
     uint64_t min;
     uint64_t max;
     int distincts;
+
+    struct IntermediateResults *inRes;//contains all keys (rowIDs) needed for the next join/comparison
 } Metadata;
 
 typedef struct Table {
@@ -25,6 +29,15 @@ typedef struct Table {
     uint64_t** columns;
     Metadata* metadata;
 } table;
+
+
+typedef struct IntermediateResults
+{//struct for saving all distinct keys of a table from a join result
+    int32_t *keys;
+    int amount;
+} IntermediateResults;
+
+
 
 /**
  * Loads the relation from the binary file "filename" and using mmap translates it to
@@ -71,5 +84,8 @@ void findAllDistincts(table** t, int i, int j);
  * @param t: the array of relations to be freed.
  */
 void freeTable(table** t);
+
+
+void saveTableKeysFromResult(table *t, result *results, int resultColumn);
 
 #endif

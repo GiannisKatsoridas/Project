@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "Globals.h"
 #include "Tables.h"
+#include "Results.h"
 
 table* loadRelation(const char* fileName){
 
@@ -106,6 +107,8 @@ void parseTableMetadata(table** t){
 
         t[i]->metadata = malloc(t[i]->columns_size*sizeof(Metadata));
 
+        t[i]->metadata->tableID = i;
+
         for(int j=0; j<t[i]->columns_size; j++){
 
             findMinMax(t, i, j);
@@ -120,6 +123,16 @@ void parseTableMetadata(table** t){
 
             findAllDistincts(t, i, j);
 
+        }
+
+        t[i]->metadata->inRes = malloc(sizeof(IntermediateResults));
+
+        t[i]->metadata->inRes->amount = t[i]->size;
+        t[i]->metadata->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
+
+        for (int i = 0; i < t[i]->metadata->inRes->amount; i++)
+        {
+            t[i]->metadata->inRes->keys[i] = (int32_t) i;
         }
 
     }
@@ -173,9 +186,75 @@ void freeTable(table** t){
     for(int i=0; i<relationsNum; i++){
 
         free(t[i]->columns);
+        free(t[i]->metadata->inRes->keys);
+        free(t[i]->metadata->inRes);
         free(t[i]->metadata);
         free(t[i]);
     }
 
     free(t);
+}
+
+
+void saveTableKeysFromResult(table *t, result *res, int resultColumn)
+{
+    if ((t==NULL) || ((resultColumn !=1 ) && (resultColumn != 2)))
+    {
+        fprintf(stderr, "getTableKeysFromResult(): invalid arguments\n");
+    }
+
+    //key flag index; 
+    //if keyFlags[key] == 1, the key is in the result
+    //if keyFlags[key] == 0, the key is NOT in the result
+    short keyFlags[t->size];
+    for (uint64_t i = 0; i < t->size; i++)
+    {
+        keyFlags[i] = 0;
+    }
+
+    int const result_num = getResultsAmount();
+    int const page_size = getResultPageSize();
+    int counter = 0;
+
+    int32_t key = -1;
+    while(res != NULL)
+    {//analyze result; find the table's distinct keys in it
+        for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
+        {
+            if(resultColumn == 1)
+                key = res->results[i].relation_R;
+            else if(resultColumn == 2)
+                key = res->results[i].relation_S;
+
+            if(keyFlags[key] == 0)
+                keyFlags[key] = 1;//key exists in result
+        }
+        counter += page_size;
+        res = res->next;
+    }
+
+    int keySum = 0;//contains the amount of keys in result
+    for (uint64_t i = 0; i < t->size ; i++)
+    {
+        keySum += keyFlags[i];
+    }
+
+    //erase previous intermediate results
+    if(t->metadata->inRes != NULL)
+        free(t->metadata->inRes->keys);
+    free(t->metadata->inRes);
+
+    //and replace them with thw new ones
+    t->metadata->inRes = malloc(sizeof(IntermediateResults));
+    t->metadata->inRes->amount = keySum;
+    t->metadata->inRes->keys = malloc(keySum*sizeof(int32_t));
+
+    for (uint64_t i = 0, k = 0; (i < t->size) && (k<keySum); i++)
+    {
+        if(keyFlags[i] == 1)
+        {
+            t->metadata->inRes->keys[k];
+            k++;
+        }
+    }
 }

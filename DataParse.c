@@ -34,7 +34,7 @@ relation* get_relation(char* name, int size){
 
 }
 
-relation* get_relation_from_table(table *t, int columnID)
+/*relation* get_relation_from_table(table *t, int columnID)
 {
     if ((t==NULL) || (columnID < 0))
     {
@@ -59,7 +59,7 @@ relation* get_relation_from_table(table *t, int columnID)
         rel->tuples[i].key = i;
         rel->tuples[i].payload = t->columns[columnID][i];
     }
-}
+}*/
 
 int* create_histogram(relation* rel){
 
