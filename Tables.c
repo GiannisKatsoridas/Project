@@ -275,6 +275,18 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     }
 }
 
+void saveResult(table *t1, table *t2, result *results)
+{
+    if ((t1==NULL) || (t2==NULL) || (results==NULL))
+    {
+        fprintf(stderr, "saveResult(): NULL argument(s)\n");
+        return;
+    }
+
+    saveTableKeysFromResult(t1, results, 1);
+    saveTableKeysFromResult(t2, results, 2);
+}
+
 relation *constructRelationForNextJoin(table *t, int columnID)
 {
     if (t==NULL)

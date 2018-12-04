@@ -4,8 +4,6 @@
 #include "Index.h"
 
 
-typedef struct index index;
-
 result* RadixHashJoin(relation* relR, relation* relS){
 
     suffix = RADIX_N;

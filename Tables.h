@@ -88,4 +88,5 @@ void freeTable(table** t);
 
 void saveTableKeysFromResult(table *t, result *results, int resultColumn);
 
+relation *constructRelationForNextJoin(table *t, int columnID);
 #endif
