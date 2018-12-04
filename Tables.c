@@ -129,10 +129,9 @@ void parseTableData(table** t){
 
         t[i]->inRes->amount = t[i]->size;
         t[i]->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
-
-        for (int i = 0; i < t[i]->inRes->amount; i++)
+        for (int32_t k = 0; k < t[i]->inRes->amount; k++)
         {
-            t[i]->inRes->keys[i] = (int32_t) i;
+            t[i]->inRes->keys[k] = k;
         }
 
     }
