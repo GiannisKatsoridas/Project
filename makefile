@@ -1,8 +1,8 @@
 CC = gcc
 FLAGS = -g
 
-OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o
-HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h
+OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o
+HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h
 OUT1 = Caramel
 
 OBJ2 = DataGenerator.o
@@ -38,7 +38,7 @@ DataParse.o: DataParse.c DataParse.h Globals.h
 RadixHashJoin.o: RadixHashJoin.c Results.h Globals.h
 	$(CC) -c RadixHashJoin.c $(FLAGS)
 
-main.o: main.c DataParse.h Globals.h Tables.h Results.h Query.h
+main.o: main.c DataParse.h Globals.h Tables.h Results.h Query.h Actions.h
 	$(CC) -c main.c $(FLAGS)
 
 Results.o: Results.c Results.h Globals.h
@@ -52,6 +52,9 @@ Tables.o: Tables.c Tables.h Globals.h
 
 Query.o: Query.c Query.h
 	$(CC) -c Query.c $(FLAGS)
+
+Actions.o: Actions.c Actions.h
+	$(CC) -c Actions.c $(FLAGS)
 
 DataGenerator.o: DataGenerator.c DataGenerator.h Globals.h
 	$(CC) -c DataGenerator.c $(FLAGS)

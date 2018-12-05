@@ -5,7 +5,7 @@
 #include "Tables.h"
 #include "Results.h"
 #include "Query.h"
-
+#include "Actions.h"
 
 int main() {
 
@@ -34,6 +34,7 @@ int main() {
     freopen("queries.txt","r",stdin);
 
     Query* queries = getQueries();
+    executeQueries(t, queries);
 
     while(queries != NULL){
         freeQueries(queries);

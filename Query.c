@@ -214,7 +214,7 @@ Comparison getComparisonFromQuery(char *line) {
     for(int i=0; i<strlen(line_copy); i++){
 
         if(line_copy[i] == '=')
-            result.action = JOIN;
+            result.action = EQUAL;
         else if(line_copy[i] == '<')
             result.action = LESS_THAN;
         else if(line_copy[i] == '>')
@@ -232,9 +232,15 @@ Comparison getComparisonFromQuery(char *line) {
     result.columnA = atoi(num);
     num = strtok(NULL, delimeters);
     result.relationB = atoi(num);
-    if(result.action == 0) {
+    if(result.action == EQUAL) {
         num = strtok(NULL, delimeters);
-        result.columnB = atoi(num);
+        if(num != NULL)
+        {
+            result.columnB = atoi(num);
+            result.action = JOIN;
+        }
+        else
+            result.columnB = -1;
     }
     else
         result.columnB = -1;

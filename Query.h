@@ -10,6 +10,7 @@
 #define JOIN 0
 #define LESS_THAN 1
 #define GREATER_THAN 2
+#define EQUAL 3
 
 int queries_num;
 
@@ -53,9 +54,9 @@ typedef struct columns_t {
 
 typedef struct query {
 
-    Query_Relation_t* query_relation_set;
-    Comparison_t* comparison_set;
-    Column_t* column_set;
+    Query_Relation_t* query_relation_set;//relation tables that will be used in this query ("FROM")
+    Comparison_t* comparison_set;   //query predicates ("WHERE")
+    Column_t* column_set;       //columns that will ("SELECT")
 
 } Query;
 
