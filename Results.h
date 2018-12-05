@@ -4,9 +4,9 @@
 #include "DataParse.h"
 
 //static int const page_size = 1048576;
-static int const page_size = 50;
-
-int tuples_per_page;
+static int const page_size = 500;
+static int results_amount = 0;
+static int tuples_per_page;
 
 
 result* create_results_page();      // Creates a new results page to add new results tuples, if the one already
@@ -15,7 +15,7 @@ result* create_results_page();      // Creates a new results page to add new res
 int add_result(result* res, int32_t value_R, int32_t value_S);     // Adds the values given into the results list.
                                                                    // Returns the current number of results.
 
-void print_results(result *res, int results_num);   // Prints the results from the given list.
+void print_results(result *res);   // Prints the results from the given list.
 
 
 void print_relation(relation *rel, FILE *fp);
@@ -26,6 +26,6 @@ void freeResults(result* results);
 
 int getResultsAmount();
 
-int getResultPageSize();
+int getResultTuplesPerPage();
 
 #endif

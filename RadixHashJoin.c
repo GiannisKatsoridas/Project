@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Results.h"
 #include "Index.h"
 
 
@@ -141,7 +140,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
     index_destroy(&indx);
     
 
-    print_results(results, results_num);
+    //print_results(results, results_num);
 
     free(histogramR);
     free(histogramS);

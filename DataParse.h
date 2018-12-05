@@ -2,7 +2,6 @@
 #define _DATAPARSE_H_
 
 
-#include "Globals.h"
 #include "Tables.h"
 
 int suffix;

@@ -4,7 +4,8 @@
 #ifndef _TABLES_H_
 #define _TABLES_H_
 
-#include <stdint.h>
+//#include <stdint.h>
+#include "Query.h"
 #define MAX_TABLE_RANGE 100000000               // The maximum range between max and min values of a table for which
                                                 // the distinct values will be found.
 

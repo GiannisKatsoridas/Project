@@ -1,18 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include "Actions.h"
 
-
-void executeQueries(table **t, Query *q)
+void executeQuery(table **t, Query *q)
 {
 	//parseTableData(t);
-	result *temp = NULL;
-	int tableID1 = -1;
-	int tableID2 = -1;
-	relation * rel1 = NULL;
-	relation * rel2 = NULL;
 
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
@@ -28,11 +21,11 @@ void executeQueries(table **t, Query *q)
 		{
 			if (cmp->relationA == cmp->relationB)
 			{
-				/* code */
+				joinSameRelation(t[rels[cmp->relationA]], cmp->columnA, cmp->columnB);
 			}
 			else
 			{
-				//radix
+				joinRelationsRadix(t[rels[cmp->relationA]], t[rels[cmp->relationB]], cmp->columnA, cmp->columnB);
 			}
 		}
 		else
@@ -42,11 +35,12 @@ void executeQueries(table **t, Query *q)
 	}
 }
 
+
 void compareColumn(table *t , int colA , int value , int action)
 {
-	fprintf(stdout, "%d %d %d\n", colA, value, action);
+	//fprintf(stdout, "%d %d %d\n", colA, value, action);
 	int counter = 0;
-	uint64_t keytemp;
+	int32_t keytemp;
 	for (int i = 0; i < t->inRes->amount; i++)
 	{
 		keytemp = t->inRes->keys[i];
@@ -106,10 +100,46 @@ void compareColumn(table *t , int colA , int value , int action)
 
 	t->inRes->keys = keys;
 	t->inRes->amount = counter;
-
-	for (int i = 0; i < counter; i++)
-	{
-		printf("%d\n", t->inRes->keys[i]);
-	}
-	printf("%d\n", t->inRes->amount );
 }
+
+void joinSameRelation(table *t, int columnA, int columnB) {
+
+    int counter = 0;
+    int32_t keytemp;
+    for (int i = 0; i < t->inRes->amount; i++)
+    {
+        keytemp = t->inRes->keys[i];
+        if(t->columns[columnA][keytemp] == t->columns[columnB][keytemp])
+            counter++;
+    }
+
+    int32_t* keys = malloc(counter * sizeof(int32_t));
+
+    int k = 0;
+    for (int i = 0; (i < t->inRes->amount) && (k < counter); i++)
+    {
+        keytemp = t->inRes->keys[i];
+        if(t->columns[columnA][keytemp] == t->columns[columnB][keytemp]){
+            keys[k] = keytemp;
+            k++;
+        }
+    }
+
+    free(t->inRes->keys);
+
+    t->inRes->keys = keys;
+    t->inRes->amount = counter;
+}
+
+
+
+void joinRelationsRadix(table *tA, table *tB, int columnA, int columnB) {
+
+    relation* relA = constructRelationForNextJoin(tA, columnA);
+    relation* relB = constructRelationForNextJoin(tB, columnB);
+
+    result* results = RadixHashJoin(relA, relB);
+
+    saveResult(tA, tB, results);
+}
+

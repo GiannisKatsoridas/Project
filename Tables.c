@@ -8,8 +8,6 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <unistd.h>
-#include "Globals.h"
-#include "Tables.h"
 #include "Results.h"
 
 table* loadRelation(const char* fileName){
@@ -127,7 +125,7 @@ void parseTableData(table** t){
 
         t[i]->inRes = malloc(sizeof(IntermediateResults));
 
-        t[i]->inRes->amount = t[i]->size;
+        t[i]->inRes->amount = (int32_t) t[i]->size;
         t[i]->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
         for (int32_t k = 0; k < t[i]->inRes->amount; k++)
         {
@@ -213,23 +211,23 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     }
 
     int const result_num = getResultsAmount();
-    int const page_size = getResultPageSize();
+    int const tuples_per_page = getResultTuplesPerPage();
     int counter = 0;
 
-    int32_t key = -1;
+    int32_t key;
 
     if(resultColumn == 1)
     {
         while(res != NULL)
         {//analyze result; find the table's distinct keys in it
-            for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
+            for (int i = 0; (i < tuples_per_page) && ((i + counter) < result_num); i++)
             {
                 key = res->results[i].relation_R;
 
                 if(keyFlags[key] == 0)
                     keyFlags[key] = 1;//key exists in result
             }
-            counter += page_size;
+            counter += tuples_per_page;
             res = res->next;
         }
     }
@@ -237,14 +235,14 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     {
         while(res != NULL)
         {//analyze result; find the table's distinct keys in it
-            for (int i = 0; (i < page_size) && ((i + counter) < result_num); i++)
+            for (int i = 0; (i < tuples_per_page) && ((i + counter) < result_num); i++)
             {
                 key = res->results[i].relation_S;
 
                 if(keyFlags[key] == 0)
                     keyFlags[key] = 1;//key exists in result
             }
-            counter += page_size;
+            counter += tuples_per_page;
             res = res->next;
         }
     }
@@ -265,11 +263,11 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     t->inRes->amount = keySum;
     t->inRes->keys = malloc(keySum*sizeof(int32_t));
 
-    for (uint64_t i = 0, k = 0; (i < t->size) && (k<keySum); i++)
+    for (int32_t i = 0, k = 0; (i < t->size) && (k<keySum); i++)
     {
         if(keyFlags[i] == 1)
         {
-            t->inRes->keys[k];
+            t->inRes->keys[k] = i;
             k++;
         }
     }
@@ -315,7 +313,7 @@ relation *constructRelationForNextJoin(table *t, int columnID)
     for (int32_t i = 0; i < rel->num_tuples; i++)
     {
         rel->tuples[i].key = t->inRes->keys[i];
-        rel->tuples[i].payload = t->columns[columnID][i];
+        rel->tuples[i].payload = (int32_t) t->columns[columnID][i];
     }
 
     return rel;
