@@ -6,7 +6,7 @@
 //static int const page_size = 1048576;
 static int const page_size = 500;
 static int results_amount = 0;
-static int tuples_per_page;
+static int tuples_per_page = 0;
 
 
 result* create_results_page();      // Creates a new results page to add new results tuples, if the one already

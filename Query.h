@@ -63,7 +63,6 @@ typedef struct query {
 
 
 
-
 /**
  * Get all the queries from stdin and returns then in an array of Query type objects
  * @return The queries
@@ -113,6 +112,7 @@ Column getColumnsFromQuery(char *line);
 void freeQueries(Query* queries);
 
 
+int getQueriesNum();
 
 
 #endif

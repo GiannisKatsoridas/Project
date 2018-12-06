@@ -7,7 +7,7 @@ int main() {
 
     //table* t = loadRelation("r1");
 
-    table** t = createTablesArray();
+    /*table** t = createTablesArray();
 
     parseTableData(t);
 
@@ -30,11 +30,12 @@ int main() {
     freopen("queries.txt","r",stdin);
 
     Query* queries = getQueries();
+    int queries_num;
     while(queries != NULL){
-
+        queries_num = getQueriesNum();
         for(int k=0; k<queries_num; k++) {
-            printf("%d\n", k);
-            executeQuery(t, &queries[k]);
+            //printf("%d\n", k);
+            executeQuery(t, &(queries[k]));
         }
 
         freeQueries(queries);
@@ -43,7 +44,20 @@ int main() {
 
 
     freeTable(t);
-    freeQueries(queries);
+    freeQueries(queries);*/
+        int relr_size = RELR_SIZE;
+    int rels_size = RELS_SIZE;
+
+    relation* relation_R = get_relation((char *) relR_name, relr_size);  // Gets the relation from the file DataRelationR.txt
+    relation* relation_S = get_relation((char *) relS_name, rels_size);  // Gets the relation from the file DataRelationS.txt
+    result* results = RadixHashJoin(relation_R, relation_S);
+    print_results(results);
+    printf("%d\n", getResultsAmount());
+    freeResults(results);
+    free(relation_R->tuples);
+    free(relation_R);
+    free(relation_S->tuples);
+    free(relation_S);
 
     return 0;
 }

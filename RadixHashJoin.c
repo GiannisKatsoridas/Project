@@ -140,7 +140,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
     index_destroy(&indx);
     
 
-    //print_results(results, results_num);
+    //print_results(results);
 
     free(histogramR);
     free(histogramS);

@@ -8,7 +8,8 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <unistd.h>
-#include "Results.h"
+
+#include "Tables.h"
 
 table* loadRelation(const char* fileName){
 
@@ -123,14 +124,14 @@ void parseTableData(table** t){
 
         t[i]->tableID = i;
 
-        t[i]->inRes = malloc(sizeof(IntermediateResults));
+        /*t[i]->inRes = malloc(sizeof(IntermediateResults));
 
         t[i]->inRes->amount = (int32_t) t[i]->size;
         t[i]->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
         for (int32_t k = 0; k < t[i]->inRes->amount; k++)
         {
             t[i]->inRes->keys[k] = k;
-        }
+        }*/
 
     }
 
@@ -183,8 +184,8 @@ void freeTable(table** t){
     for(int i=0; i<relationsNum; i++){
 
         free(t[i]->columns);
-        free(t[i]->inRes->keys);
-        free(t[i]->inRes);
+        //free(t[i]->inRes->keys);
+        //free(t[i]->inRes);
         free(t[i]->metadata);
         free(t[i]);
     }
@@ -193,7 +194,7 @@ void freeTable(table** t){
 }
 
 
-void saveTableKeysFromResult(table *t, result *res, int resultColumn)
+/*void saveTableKeysFromResult(table *t, result *res, int resultColumn)
 {
     if ((t==NULL) || ((resultColumn !=1 ) && (resultColumn != 2)))
     {
@@ -214,63 +215,7 @@ void saveTableKeysFromResult(table *t, result *res, int resultColumn)
     int const tuples_per_page = getResultTuplesPerPage();
     int counter = 0;
 
-    int32_t key;
 
-    if(resultColumn == 1)
-    {
-        while(res != NULL)
-        {//analyze result; find the table's distinct keys in it
-            for (int i = 0; (i < tuples_per_page) && ((i + counter) < result_num); i++)
-            {
-                key = res->results[i].relation_R;
-
-                if(keyFlags[key] == 0)
-                    keyFlags[key] = 1;//key exists in result
-            }
-            counter += tuples_per_page;
-            res = res->next;
-        }
-    }
-    else if(resultColumn == 2)
-    {
-        while(res != NULL)
-        {//analyze result; find the table's distinct keys in it
-            for (int i = 0; (i < tuples_per_page) && ((i + counter) < result_num); i++)
-            {
-                key = res->results[i].relation_S;
-
-                if(keyFlags[key] == 0)
-                    keyFlags[key] = 1;//key exists in result
-            }
-            counter += tuples_per_page;
-            res = res->next;
-        }
-    }
-
-    int keySum = 0;//contains the amount of keys in result
-    for (uint64_t i = 0; i < t->size ; i++)
-    {
-        keySum += keyFlags[i];
-    }
-
-    //erase previous intermediate results
-    if(t->inRes != NULL)
-        free(t->inRes->keys);
-    free(t->inRes);
-
-    //and replace them with thw new ones
-    t->inRes = malloc(sizeof(IntermediateResults));
-    t->inRes->amount = keySum;
-    t->inRes->keys = malloc(keySum*sizeof(int32_t));
-
-    for (int32_t i = 0, k = 0; (i < t->size) && (k<keySum); i++)
-    {
-        if(keyFlags[i] == 1)
-        {
-            t->inRes->keys[k] = i;
-            k++;
-        }
-    }
 }
 
 void saveResult(table *t1, table *t2, result *results)
@@ -287,34 +232,5 @@ void saveResult(table *t1, table *t2, result *results)
 
 relation *constructRelationForNextJoin(table *t, int columnID)
 {
-    if (t==NULL)
-    {
-        fprintf(stderr, "constructRelationForNextJoin(): NULL table\n");
-        return NULL;
-    }
-
-    if ((columnID <0) || (columnID > (t->columns_size -1) ))
-    {
-        fprintf(stderr, "constructRelationForNextJoin(): invalid columnID\n");
-        return NULL;
-    }
-
-    if (t->inRes == NULL)
-    {
-        fprintf(stderr, "constructRelationForNextJoin(): found NULL Intermediate Results\n");
-        return NULL;
-    }
-
-    relation *rel = malloc(sizeof(relation));
-    rel->num_tuples = t->inRes->amount;
-
-    rel->tuples = malloc((rel -> num_tuples)* sizeof(tuple));
-
-    for (int32_t i = 0; i < rel->num_tuples; i++)
-    {
-        rel->tuples[i].key = t->inRes->keys[i];
-        rel->tuples[i].payload = (int32_t) t->columns[columnID][i];
-    }
-
-    return rel;
-}
+    
+}*/

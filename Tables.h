@@ -6,6 +6,8 @@
 
 //#include <stdint.h>
 #include "Query.h"
+#include "Results.h"
+
 #define MAX_TABLE_RANGE 100000000               // The maximum range between max and min values of a table for which
                                                 // the distinct values will be found.
 
@@ -27,16 +29,12 @@ typedef struct Table {
 
     Metadata* metadata;//metadata FOR EACH COLUMN OF THE TABLE
 
-	int tableID;//relative table ID, as expressed in query predicates    
-    struct IntermediateResults *inRes;//contains all keys (rowIDs) needed for the next join/comparison
+	int tableID;//table ID in database
+    //struct IntermediateResults *inRes;//contains all keys (rowIDs) needed for the next join/comparison
 } table;
 
 
-typedef struct IntermediateResults
-{//struct for saving all distinct keys of a table from a join result
-    int32_t *keys;
-    int32_t amount;
-} IntermediateResults;
+
 
 
 
@@ -87,8 +85,10 @@ void findAllDistincts(table** t, int i, int j);
 void freeTable(table** t);
 
 
-void saveTableKeysFromResult(table *t, result *results, int resultColumn);
-void saveResult(table *t1, table *t2, result *results);
 
-relation *constructRelationForNextJoin(table *t, int columnID);
+
+//void saveTableKeysFromResult(table *t, result *results, int resultColumn);
+//void saveResult(table *t1, table *t2, result *results);
+
+//relation *constructRelationForNextJoin(table *t, int columnID);
 #endif
