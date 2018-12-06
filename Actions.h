@@ -26,6 +26,8 @@ void IntermediateResultsInit(IntermediateResults **inRes);
 
 relation *createRelationFromIntermediateResults(IntermediateResults* inRes, table *t, int relationID, int columnID);
 
+void insertResultToIntermediateResults(IntermediateResults **inResAddr, result *results, int relationA, int relationB, int column);
+
 void IntermediateResultsDel(IntermediateResults **inRes);
 
 

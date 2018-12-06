@@ -75,19 +75,19 @@ relation* createRelationFromTable(table *t, int columnID)
     }
 }
 
-/*int relationExistsInIntermediateResults(IntermediateResults* inRes, int relationID)
+int relationInIntermediateResults(IntermediateResults* inRes, int relationID)
 {
-	int flag = 0;
+	int pos = -1;
 	for (int i = 0; i < inRes->relAmount; i++)
 	{
 		if(inRes->relationIDs[i] == relationID)
 		{
-			flag = 1;
+			pos = i;
 			break;
 		}
 	}
-	return flag;
-}*/
+	return pos;
+}
 
 relation *createRelationFromIntermediateResults(IntermediateResults* inRes, table *t, int relationID, int columnID)
 {
@@ -144,9 +144,12 @@ relation *createRelationFromIntermediateResults(IntermediateResults* inRes, tabl
 	return rel;
 }
 
-void insertResultToIntermediateResults(IntermediateResults *inRes, result *results, int relationA, int relationB, int column)
+void insertResultToIntermediateResults(IntermediateResults **inResAddr, result *results, int relationA, int relationB, int column)
 {
+	if((*inResAddr) == NULL)
+		IntermediateResultsInit(inResAddr);
 
+	IntermediateResults *inRes = *inResAddr;
 
 	int const results_num = getResultsAmount();
 	int const tuples_per_page = getResultTuplesPerPage();
@@ -157,7 +160,7 @@ void insertResultToIntermediateResults(IntermediateResults *inRes, result *resul
 		inRes -> tupleIDs = malloc(results_num * sizeof(uint64_t));
 		inRes -> relationIDs = malloc(2 * sizeof(int));
 		inRes -> keys = malloc(2 * sizeof(int32_t*));
-		for (int i = 0; i < 2; ++i)
+		for (int i = 0; i < 2; i++)
 		{
 			inRes -> keys[i] = malloc(results_num * sizeof(int32_t));
 		}
@@ -194,11 +197,20 @@ void insertResultToIntermediateResults(IntermediateResults *inRes, result *resul
 	{
 		//IF IT EXISTS, THEN ??
 
+		//check for each relation if it exists in the previous results
+		int const relationApos = relationExistsInIntermediateResults(inRes, relationA);
+    	int const relationBpos = relationExistsInIntermediateResults(inRes, relationA);
+
+    	if((relationApos == -1)&&(relationBpos == -1))
+    	{
+    		fprintf(stderr, "Relations %d and %d don't exist in IntermediateResults\n", relationA, relationB);
+    		return NULL;
+    	}
 		//create a histogram of all the tuple keys 'i'
-		int tupleIDcounters[inRes->tupleAmount];
+		int tupleIDhist[inRes->tupleAmount];
 		for (int i = 0; i < inRes->tupleAmount; i++)
 		{
-			tupleIDcounters[i] = 0;
+			tupleIDhist[i] = 0;
 		}
 
 
@@ -210,9 +222,9 @@ void insertResultToIntermediateResults(IntermediateResults *inRes, result *resul
 			for (i = 0; (i<tuples_per_page) && (counter < results_num); i++)
 			{
 				if(column == 0)
-					tupleIDcounters[results->results[i].relation_R] ++;
+					tupleIDhist[results->results[i].relation_R] ++;
 				else if(column == 1)
-					tupleIDcounters[results->results[i].relation_S] ++;
+					tupleIDhist[results->results[i].relation_S] ++;
 				counter++;
 			}
 			results = results->next;
@@ -221,19 +233,97 @@ void insertResultToIntermediateResults(IntermediateResults *inRes, result *resul
 		results = r1;
 
 		//create accumulative histogram for the old tuple keys 'i'
-		int psumIDcounters[inRes->tupleAmount];
+		int tupleIDpsum[inRes->tupleAmount];
 		int sum = 0;
 		for(i=0; i<inRes->tupleAmount; i++)
 		{
-	        psumIDcounters[i] = sum;
-	        sum += tupleIDcounters[i];
+	        tupleIDpsum[i] = sum;
+	        sum += tupleIDhist[i];
     	}
 
+    	
+    	//push results to intermediate results
+    	IntermediateResults *inResNew ;//= malloc(sizeof(IntermediateResults));
+    	IntermediateResultsInit(&inResNew);
 
-    	IntermediateResults *inResNew = malloc(sizeof(IntermediateResults));
     	inResNew -> tupleIDs = malloc(sum*sizeof(uint64_t));
-    	inResNew -> relationIDs = malloc((inRes -> relAmount +1)*sizeof(int));
-	}
+
+    	if( (relationApos != -1) && (relationBpos !=-1))//if both recently joined-relations exist in previous results
+    		inResNew -> relAmount = inRes -> relAmount +1;
+		else//one of them exists in intermediate results 
+			inResNew -> relAmount = inRes -> relAmount;
+		//(if none of them exists, there is a return condition above)
+
+
+		inResNew -> relationIDs = malloc((inResNew -> relAmount)*sizeof(int));
+		inResNew -> keys = malloc(inResNew -> relAmount * sizeof(int32_t*));
+		for (int i = 0; i < inResNew -> relAmount; i++)
+		{
+			inResNew -> keys[i] = malloc(results_num * sizeof(int32_t));
+		}
+
+
+		//add valid old relation IDs to the new intermediate results
+		for (int i = 0; i < inRes -> relAmount; i++)
+		{
+			inResNew -> tupleIDs[i] = inRes -> tupleIDs[i];
+		}
+
+
+		//add valid old results to the new intermediate results
+		int newtupleID = 0;
+		for (int tup = 0; tup < inRes -> tupleAmount ; tup++)//for each old tuple
+		{
+			for(int i = 0 ; i< tupleIDhist[tup] ; i++)//for how many times it is repeated in the new results
+			{
+				//new tupleID
+				newtupleID = tupleIDpsum[tup] + i;
+				inResNew -> tupleIDs[newtupleID] = newtupleID;
+				for (int relIndx = 0; relIndx < inRes -> relAmount; relIndx++)
+				{
+					//need to add sth if new relation is added
+					inResNew -> keys[relIndx][newtupleID] = inRes -> keys[relIndx][tup];
+				}
+			}
+		}
+
+		if ((relationApos == -1) && (relationBpos !=-1))
+		{//relation A included in result!
+			//add its ID to Intermediate result, at the end of the list
+			inResNew -> tupleIDs[inResNew->tupleAmount -1] = relationA;	
+		}
+		else if ((relationApos != -1) && (relationBpos ==-1))
+		{//relation B included in result!
+			inResNew -> tupleIDs[inResNew->tupleAmount -1] = relationB;	
+		}
+
+		if (((relationApos == -1) && (relationBpos !=-1)) || ((relationApos == -1) && (relationBpos !=-1)))
+		{
+			int i = 0;
+			int counter = 0;
+			while(results != NULL)
+			{
+				for (i = 0; (i<tuples_per_page) && (counter < results_num); i++)
+				{
+					if(column == 0)
+					{
+						inResNew -> keys[inResNew->tupleAmount -1][tupleIDpsum[results->results[i].relation_R]] = results->results[i].relation_S;
+						tupleIDpsum[results->results[i].relation_R] ++;
+					}
+					else if(column == 1)
+					{
+						inResNew -> keys[inResNew->tupleAmount -1][tupleIDpsum[results->results[i].relation_S]] = results->results[i].relation_R;
+						tupleIDpsum[results->results[i].relation_S] ++;
+					}
+					counter++;
+				}
+				results = results->next;
+			}
+		}
+
+		IntermediateResultsDel(inResAddr);
+		*inResAddr = inResNew;
+}
 }
 
 void IntermediateResultsDel(IntermediateResults **inRes)
@@ -241,6 +331,8 @@ void IntermediateResultsDel(IntermediateResults **inRes)
 	free((*inRes) ->tupleIDs);
 	free((*inRes) ->relationIDs);
 	free((*inRes) ->keys);
+	free((*inRes));
+	(*inRes) == NULL;
 }
 
 void compareColumn(table *t , int colA , int value , int action)
