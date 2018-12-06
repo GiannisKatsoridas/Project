@@ -45,7 +45,7 @@ int main() {
 
     freeTable(t);
     freeQueries(queries);*/
-        int relr_size = RELR_SIZE;
+    int relr_size = RELR_SIZE;
     int rels_size = RELS_SIZE;
 
     relation* relation_R = get_relation((char *) relR_name, relr_size);  // Gets the relation from the file DataRelationR.txt
