@@ -198,13 +198,13 @@ void insertResultToIntermediateResults(IntermediateResults **inResAddr, result *
 		//IF IT EXISTS, THEN ??
 
 		//check for each relation if it exists in the previous results
-		int const relationApos = relationExistsInIntermediateResults(inRes, relationA);
-    	int const relationBpos = relationExistsInIntermediateResults(inRes, relationA);
+		int const relationApos = relationInIntermediateResults(inRes, relationA);
+    	int const relationBpos = relationInIntermediateResults(inRes, relationA);
 
     	if((relationApos == -1)&&(relationBpos == -1))
     	{
     		fprintf(stderr, "Relations %d and %d don't exist in IntermediateResults\n", relationA, relationB);
-    		return NULL;
+    		return;
     	}
 		//create a histogram of all the tuple keys 'i'
 		int tupleIDhist[inRes->tupleAmount];
