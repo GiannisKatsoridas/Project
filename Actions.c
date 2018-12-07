@@ -10,7 +10,7 @@ void executeQuery(table **t, Query *q)
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
 	Comparison *cmp = NULL;
-	IntermediateResults** inRes;
+	IntermediateResultsList* inRes;
 	for (int i = 0; i < actions; i++)
 	{
 		cmp = &(q->comparison_set->comparisons[i]);
@@ -26,10 +26,10 @@ void executeQuery(table **t, Query *q)
 			}
 			else
 			{
-				joinRelationsRadix(&inRes, t, rels[cmp->relationA], rels[cmp->relationB], cmp->columnA, cmp->columnB);
+				inRes = joinRelationsRadix(inRes, t, rels[cmp->relationA], rels[cmp->relationB], cmp->columnA, cmp->columnB);
 				if(i==1) {
 					printf("RUN\n");
-					printf("%d\n", inRes[1]->relAmount);
+					//printf("%d\n", inRes[1]->relAmount);
 					printf("RUN\n");
 				}
 			}
@@ -42,15 +42,17 @@ void executeQuery(table **t, Query *q)
 		setResultsAmount(0);
 	}
 
+	inRes = inRes->next;
 
-	printf("%d - %d\n", inRes[0]->relationIDs[0], inRes[0]->relationIDs[1]);
-	for(int j=0; j<inRes[0]->tupleAmount; j++){
-		printf("%d\t%d\n", inRes[0]->keys[0][j], inRes[0]->keys[1][j]);
+	printf("%d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1]);
+	for(int j=0; j<inRes->table->tupleAmount; j++){
+		printf("%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j]);
 	}
-	printf("NEW TABLE: %d\n", inRes[1]->relAmount);
-	printf("%d - %d\n", inRes[1]->relationIDs[0], inRes[1]->relationIDs[1]);
-	for(int j=0; j<inRes[1]->tupleAmount; j++){
-		printf("%d\t%d\n", inRes[1]->keys[0][j], inRes[1]->keys[1][j]);
+	inRes = inRes->next;
+	printf("NEW TABLE: %d\n", inRes->table->relAmount);
+	printf("%d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1]);
+	for(int j=0; j<inRes->table->tupleAmount; j++){
+		printf("%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j]);
 	}
 
 }
@@ -246,40 +248,44 @@ void joinSameRelation(table *t, int columnA, int columnB) {
 }
 
 
-void joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, int relationB, int columnA, int columnB){
+IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table **t, int relationA, int relationB, int columnA, int columnB){
 
-	int cat = getQueryCategory(*inRes, relationA, relationB);
+	IntermediateResultsList* node;
+
+	if(intermediateResultsAmount == 0)
+		head = createList();
+
+	int cat = getQueryCategory(head, relationA, relationB);
 	int index = 0;
 
 	if(cat == 0){											//	No intermediate results table has any of the two
 															// 	relations
+		//node = addNodeToList(head, createIntermediateResult());
 
-		addIntermediateResultsTable(inRes);						// Creates a new inRes table and adds it to the end of
-		index = intermediateResultsAmount-1;					// the array containing all the IntermediateResults
-																// tables
+		index = intermediateResultsAmount;
 
 	}
 	else if(cat == 3){
 
-		mergeIntermediateResults(inRes, t, relationA, relationB, columnA, columnB);
-		return;
+		//mergeIntermediateResults(inRes, t, relationA, relationB, columnA, columnB);
+		return head;
 
 	}
 	else {
-		index = getIntermediateResultsIndex(*inRes, relationA, relationB);
+		index = getIntermediateResultsIndex(head, relationA, relationB);
 	}
 
 	IntermediateResults* r;										//	Create and initialize the new IntermediateResults
 	IntermediateResultsInit(&r);								// 	table.
 
-	printf("%d\n", (*inRes[index])->relAmount);
-
 	/**
 	 * If both relations exist in a single IntermediateResults table then act accordingly.
 	 */
-	if(existsInIntermediateResults(*inRes[index], relationA) && existsInIntermediateResults(*inRes[index], relationB)) {
-		*inRes[index] = addResultsSameIntermediateResultsSize(t, *inRes[index], r, relationA, columnA, relationB, columnB);
-		return;
+	if(existsInIntermediateResults(getNodeFromList(head, index), relationA) && existsInIntermediateResults(getNodeFromList(head, index), relationB)) {
+		IntermediateResults *temp = addResultsSameIntermediateResultsSize(t, getNodeFromList(head, index), relationA, columnA, relationB, columnB);
+		deleteNodeFromList(head, index);
+		addNodeToList(head, temp);
+		return head;
 	}
 
 	relation *relA, *relB;
@@ -295,8 +301,8 @@ void joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, 
 		/**
 		 * Form the relations given as arguments to the Radix algorithm through the inRes table.
 		 */
-		relA = createRelationFromIntermediateResults(*inRes[index], t[relationA], relationA, columnA);
-		relB = createRelationFromIntermediateResults(*inRes[index], t[relationB], relationB, columnB);
+		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnA);
+		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationB], relationB, columnB);
 
 		if(relA == NULL)
             relA = createRelationFromTable(t[relationA], columnA);
@@ -309,18 +315,24 @@ void joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, 
 	/**
 	 * If any relations exist in any intermediate results tables then add a new column to the intermediate results table
 	 */
-	if(existsInIntermediateResults(*inRes[index], relationA) || existsInIntermediateResults(*inRes[index], relationB)) {
-		*inRes[index] = addResultsWithNewColumn(results, *inRes[index], r, relationA, relationB);
-		return;
+	if(existsInIntermediateResults(getNodeFromList(head, index), relationA) || existsInIntermediateResults(getNodeFromList(head, index), relationB)) {
+		IntermediateResults* temp = addResultsWithNewColumn(results, getNodeFromList(head, index), relationA, relationB);
+		deleteNodeFromList(head, index);
+		addNodeToList(head, temp);
+		return head;
 	}
 
 	/**
 	 * Fill the newly created empty IntermediateResults table.
 	 */
-	addResultToNewIntermediateResult(results, *inRes[index], relationA, relationB);
+	IntermediateResults* temp = addResultToNewIntermediateResult(results, createIntermediateResult(), relationA, relationB);
 
-	if(index == 1)
-		printf("-----%d-----\n", (*inRes[1])->relAmount);
+	addNodeToList(head, temp);
+
+	return head;
+
+	//if(index == 1)
+		//printf("-----%d-----\n", (*inRes[1])->relAmount);
 }
 
 
@@ -390,7 +402,7 @@ void mergeIntermediateResults(IntermediateResults ***inRes, table** t, int relat
 }
 
 
-void addResultToNewIntermediateResult(result *results, IntermediateResults *inRes, int relationA, int relationB) {
+IntermediateResults* addResultToNewIntermediateResult(result *results, IntermediateResults *inRes, int relationA, int relationB) {
 
 	inRes->relAmount = 2;
 	inRes->relationIDs = malloc(2*sizeof(int32_t));
@@ -411,10 +423,15 @@ void addResultToNewIntermediateResult(result *results, IntermediateResults *inRe
 			results = results->next;
 	}
 
+	return inRes;
+
 }
 
 
 int existsInIntermediateResults(IntermediateResults *inRes, int rel) {
+
+	if(inRes == NULL)
+		return 0;
 
 	for(int i=0; i<inRes->relAmount; i++){
 
@@ -427,19 +444,19 @@ int existsInIntermediateResults(IntermediateResults *inRes, int rel) {
 }
 
 
-int getIntermediateResultsIndex(IntermediateResults **inRes, int relationA, int relationB) {
+int getIntermediateResultsIndex(IntermediateResultsList* inRes, int relationA, int relationB) {
 
 	for(int i=0; i<intermediateResultsAmount; i++)
-		if(existsInIntermediateResults(inRes[i], relationA)){
+		if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(inRes[j], relationB) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB) && i != j)
 					return -2;
 			}
 			return i;
 		}
-		else if(existsInIntermediateResults(inRes[i], relationB)){
+		else if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(inRes[j], relationA) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA) && i != j)
 					return -2;
 			}
 			return i;
@@ -450,7 +467,9 @@ int getIntermediateResultsIndex(IntermediateResults **inRes, int relationA, int 
 }
 
 
-IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, IntermediateResults* r, int relationA, int columnA, int relationB, int columnB){
+IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, int relationA, int columnA, int relationB, int columnB){
+
+	IntermediateResults* r = createIntermediateResult();
 
 	r->relAmount = inRes->relAmount;
 	r->relationIDs = malloc(sizeof(int)*inRes->relAmount);
@@ -507,9 +526,11 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
 }
 
 
-IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResults* inRes, IntermediateResults* r, int relationA, int relationB){
+IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResults* inRes, int relationA, int relationB){
 
 	int relIndex;
+
+	IntermediateResults* r = createIntermediateResult();
 
 	if(existsInIntermediateResults(inRes, relationA))
 		relIndex = relationA;
@@ -548,7 +569,7 @@ IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResult
 
 
 void addIntermediateResultsTable(IntermediateResults*** inRes){
-	
+
 	IntermediateResults** temp = malloc((intermediateResultsAmount)* sizeof(IntermediateResults*));
 
 	for(int i=0; i<intermediateResultsAmount; i++)
@@ -560,6 +581,8 @@ void addIntermediateResultsTable(IntermediateResults*** inRes){
 
 	IntermediateResultsInit(inRes[intermediateResultsAmount]);
 
+	printf("%d\n", intermediateResultsAmount);
+
 	intermediateResultsAmount++;
 }
 
@@ -569,16 +592,16 @@ void addIntermediateResultsTable(IntermediateResults*** inRes){
  * Category 2: Both relations exist in the same intermediate table
  * Category 3: Both relations exist in different intermediate tables
  */
-int getQueryCategory(IntermediateResults** inRes, int relationA, int relationB){
+int getQueryCategory(IntermediateResultsList* inRes, int relationA, int relationB){
 
 	int flag = 0;
 
 	for(int i=0; i<intermediateResultsAmount; i++){
 
-		if(existsInIntermediateResults(inRes[i], relationA) && existsInIntermediateResults(inRes[i], relationB))
+		if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA) && existsInIntermediateResults(getNodeFromList(inRes, i), relationB))
 			return 2;
 
-		if(existsInIntermediateResults(inRes[i], relationA) || existsInIntermediateResults(inRes[i], relationB))
+		if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA) || existsInIntermediateResults(getNodeFromList(inRes, i), relationB))
 			if(!flag) {
 				flag = 1;
 			}
@@ -594,4 +617,77 @@ int getQueryCategory(IntermediateResults** inRes, int relationA, int relationB){
 
 }
 
+
+IntermediateResultsList* createList(){
+
+	IntermediateResultsList* list = malloc(sizeof(IntermediateResultsList));
+	list->next = NULL;
+	list->table = malloc(sizeof(IntermediateResults));
+
+	intermediateResultsAmount = 0;
+
+	return list;
+}
+
+
+IntermediateResults* getNodeFromList(IntermediateResultsList* list, int index){
+
+	IntermediateResultsList* curr = list->next;
+
+	while(index > 0){
+
+		curr = curr->next;
+		index--;
+
+	}
+
+	return curr == NULL ? NULL : curr->table;
+}
+
+
+IntermediateResultsList* addNodeToList(IntermediateResultsList* list, IntermediateResults* table){
+
+	IntermediateResultsList* curr = list;
+
+	while(curr->next != NULL)
+		curr = curr->next;
+
+	curr->next = malloc(sizeof(IntermediateResultsList));
+	curr->next->next = NULL;
+	curr->next->table = table;
+
+	intermediateResultsAmount++;
+
+	return curr->next;
+}
+
+
+void deleteNodeFromList(IntermediateResultsList* list, int index) {
+
+	if (list->next->next == NULL){
+		list->next = NULL;
+		return;
+	}
+
+	IntermediateResultsList* curr = list->next;
+
+	while(index > 1) {
+		curr = curr->next;
+		index--;
+	}
+
+	if(curr->next == NULL)
+		curr = NULL;
+	else
+		curr->next = curr->next->next;
+}
+
+
+IntermediateResults* createIntermediateResult(){
+
+	IntermediateResults* table;
+	IntermediateResultsInit(&table);
+
+	return table;
+}
 
