@@ -10,13 +10,16 @@ add_executable(Caramel
         Results.c
         Tables.c
         Index.c
-        Query.c)
+        Query.c
+        Actions.c
+        Actions.h)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests
         UnitTests.c
-        DataParse.h
         DataParse.c
+        Index.c
+        Results.c
         CUnit/Sources/Basic/Basic.c
         CUnit/Sources/Framework/CUError.c
         CUnit/Sources/Framework/MyMem.c
