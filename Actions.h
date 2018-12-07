@@ -92,7 +92,7 @@ IntermediateResults* addResultToNewIntermediateResult(result *results, Intermedi
 void addIntermediateResultsTable(IntermediateResults*** inRes);
 
 
-void mergeIntermediateResults(IntermediateResults ***inRes, table** t, int relationA, int relationB, int columnA, int columnB);
+IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int relationA, int relationB, int columnA, int columnB);
 
 
 int getQueryCategory(IntermediateResultsList* inRes, int relationA, int relationB);
@@ -111,5 +111,7 @@ void deleteNodeFromList(IntermediateResultsList* list, int index);
 
 
 IntermediateResults* createIntermediateResult();
+
+int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relationA);
 
 #endif

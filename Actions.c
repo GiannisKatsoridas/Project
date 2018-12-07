@@ -44,16 +44,16 @@ void executeQuery(table **t, Query *q)
 
 	inRes = inRes->next;
 
-	printf("%d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1]);
+	printf("%d - %d - %d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1], inRes->table->relationIDs[2], inRes->table->relationIDs[3]);
 	for(int j=0; j<inRes->table->tupleAmount; j++){
-		printf("%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j]);
+		printf("%d\t%d\t%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j], inRes->table->keys[2][j], inRes->table->keys[3][j]);
 	}
-	inRes = inRes->next;
+/*	inRes = inRes->next;
 	printf("NEW TABLE: %d\n", inRes->table->relAmount);
 	printf("%d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1]);
 	for(int j=0; j<inRes->table->tupleAmount; j++){
 		printf("%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j]);
-	}
+	}*/
 
 }
 
@@ -267,7 +267,12 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	}
 	else if(cat == 3){
 
-		//mergeIntermediateResults(inRes, t, relationA, relationB, columnA, columnB);
+		IntermediateResults* temp = mergeIntermediateResults(head, t, relationA, relationB, columnA, columnB);
+		int indexA = getIntermediateResultsSingleIndex(head, relationA);
+		int indexB = getIntermediateResultsSingleIndex(head, relationB);
+		deleteNodeFromList(head, indexA);
+		deleteNodeFromList(head, indexB);
+		addNodeToList(head, temp);
 		return head;
 
 	}
@@ -336,69 +341,48 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 }
 
 
-void mergeIntermediateResults(IntermediateResults ***inRes, table** t, int relationA, int relationB, int columnA, int columnB) {
+IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int relationA, int relationB, int columnA, int columnB) {
 
     int indexA = 0, indexB = 0;
 
     for (int i = 0; i < intermediateResultsAmount; i++) {
-        if (existsInIntermediateResults(*inRes[i], relationA))
+        if (existsInIntermediateResults(getNodeFromList(inRes, i), relationA))
             indexA = i;
-        if (existsInIntermediateResults(*inRes[i], relationB))
+        if (existsInIntermediateResults(getNodeFromList(inRes, i), relationB))
             indexB = i;
     }
 
-    relation* relA = createRelationFromIntermediateResults(*inRes[indexA], t[relationA], relationA, columnA);
-    relation* relB = createRelationFromIntermediateResults(*inRes[indexB], t[relationB], relationB, columnB);
+    relation* relA = createRelationFromIntermediateResults(getNodeFromList(inRes, indexA), t[relationA], relationA, columnA);
+    relation* relB = createRelationFromIntermediateResults(getNodeFromList(inRes, indexB), t[relationB], relationB, columnB);
 
     result* results = RadixHashJoin(relA, relB);
 
-    IntermediateResults* r;
-    IntermediateResultsInit(&r);
+    IntermediateResults* r = createIntermediateResult();
 
-    r->relAmount = (*inRes[indexA])->relAmount + (*inRes[indexB])->relAmount;
-    for(int i=0; i<(*inRes[indexA])->relAmount; i++)
-    	r->relationIDs[i] = (*inRes[indexA])->relationIDs[i];
-    for(int i=(*inRes[indexA])->relAmount; i<r->relAmount; i++)
-    	r->relationIDs[i] = (*inRes[indexB])->relationIDs[i - (*inRes[indexA])->relAmount];
+    r->relAmount = getNodeFromList(inRes, indexA)->relAmount + getNodeFromList(inRes, indexB)->relAmount;
+    r->relationIDs = malloc(r->relAmount*sizeof(int32_t));
+    for(int i=0; i<getNodeFromList(inRes, indexA)->relAmount; i++)
+    	r->relationIDs[i] = getNodeFromList(inRes, indexA)->relationIDs[i];
+    for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
+    	r->relationIDs[i] = getNodeFromList(inRes, indexB)->relationIDs[i - getNodeFromList(inRes, indexA)->relAmount];
     r->tupleAmount = (uint64_t) getResultsAmount();
+
+    r->keys = malloc(r->relAmount*sizeof(int32_t*));
+    for(int i=0; i<r->relAmount; i++)
+    	r->keys[i] = malloc(r->tupleAmount*sizeof(int32_t));
 
     for(int j=0; j<r->tupleAmount; j++){
 
-		for(int i=0; i<(*inRes[indexA])->relAmount; i++)
-			r->keys[i][j] = (*inRes[indexA])->keys[i][results->results[j%getResultTuplesPerPage()].relation_R];
-		for(int i=(*inRes[indexA])->relAmount; i<r->relAmount; i++)
-			r->keys[i][j] = (*inRes[indexB])->keys[i - (*inRes[indexA])->relAmount][results->results[j%getResultTuplesPerPage()].relation_S];
+		for(int i=0; i<getNodeFromList(inRes, indexA)->relAmount; i++)
+			r->keys[i][j] = getNodeFromList(inRes, indexA)->keys[i][results->results[j%getResultTuplesPerPage()].relation_R];
+		for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
+			r->keys[i][j] = getNodeFromList(inRes, indexB)->keys[i - getNodeFromList(inRes, indexA)->relAmount][results->results[j%getResultTuplesPerPage()].relation_S];
 
     }
 
     intermediateResultsAmount--;
-    int flag = 0;
 
-    IntermediateResults** newInRes;
-    newInRes = malloc(intermediateResultsAmount*sizeof(IntermediateResults*));
-	int k = 0;
-
-    for(int i=0; i<intermediateResultsAmount; i++){
-
-    	if(i == indexA || i == indexB){
-    		if(flag == 0) {
-				newInRes[i] = r;
-				flag = 1;
-    		}
-    	}
-    	else {
-			newInRes[i] = *inRes[k];
-		}
-    	k++;
-
-    }
-
-	for(int i=0; i<intermediateResultsAmount; i++)
-		IntermediateResultsDel(*inRes[i]);
-
-	free(inRes);
-
-	*inRes = newInRes;
+	return r;
 }
 
 
@@ -461,6 +445,23 @@ int getIntermediateResultsIndex(IntermediateResultsList* inRes, int relationA, i
 			}
 			return i;
 		}
+
+	return -1;
+
+}
+
+int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relationA){
+
+	IntermediateResultsList* curr = inRes->next;
+
+	int index = 0;
+
+	while(curr != NULL){
+
+		if(existsInIntermediateResults(curr->table, relationA))
+			return index;
+		curr = curr->next;
+	}
 
 	return -1;
 
