@@ -43,7 +43,7 @@ void joinSameRelation(table *t, int columnA, int columnB);
  * any intermediate results, they are taken into consideration. Otherwise, the initial relations' values are
  * inserted into the algorithm.
  */
-IntermediateResults** joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, int relationB, int columnA, int columnB);
+void joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, int relationB, int columnA, int columnB);
 
 /**
  * There may be more than one different intermediate results tables, so this functions returns the index of the
