@@ -28,4 +28,6 @@ int getResultsAmount();
 
 int getResultTuplesPerPage();
 
+void setResultsAmount(int s);
+
 #endif

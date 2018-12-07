@@ -5,7 +5,7 @@
 #include "Tables.h"
 #include "Query.h"
 
-int intermediateResultsAmount = 0;
+static int intermediateResultsAmount = 0;
 
 typedef struct IntermediateResults
 {//struct for saving results between joins or comparisons
@@ -43,7 +43,7 @@ void joinSameRelation(table *t, int columnA, int columnB);
  * any intermediate results, they are taken into consideration. Otherwise, the initial relations' values are
  * inserted into the algorithm.
  */
-void joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, int relationB, int columnA, int columnB);
+IntermediateResults** joinRelationsRadix(IntermediateResults*** inRes, table **t, int relationA, int relationB, int columnA, int columnB);
 
 /**
  * There may be more than one different intermediate results tables, so this functions returns the index of the
@@ -84,4 +84,9 @@ void addResultToNewIntermediateResult(result *results, IntermediateResults *inRe
  */
 void addIntermediateResultsTable(IntermediateResults*** inRes);
 
+
+void mergeIntermediateResults(IntermediateResults ***inRes, table** t, int relationA, int relationB, int columnA, int columnB);
+
+
+int getQueryCategory(IntermediateResults** inRes, int relationA, int relationB);
 #endif

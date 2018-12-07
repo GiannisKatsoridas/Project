@@ -19,8 +19,9 @@ int add_result(result* res, int32_t value_R, int32_t value_S){
     //static int results_num = 0;
 
     result* pointer = res;
-    int bucket = results_amount / tuples_per_page;
-    int pos = results_amount % tuples_per_page;
+
+    int bucket = getResultsAmount() / getResultTuplesPerPage();
+    int pos = getResultsAmount() % getResultTuplesPerPage();
 
     if(pos == 0)
         bucket--;
@@ -123,4 +124,8 @@ int getResultsAmount()
 int getResultTuplesPerPage()
 {
     return tuples_per_page;
+}
+
+void setResultsAmount(int s){
+    results_amount = s;
 }
