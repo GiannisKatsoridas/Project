@@ -432,8 +432,6 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 
 	if(cat == 0){											//	No intermediate results table has any of the two
 															// 	relations
-		//node = addNodeToList(head, createIntermediateResult());
-
 		index = intermediateResultsAmount;
 
 	}
@@ -466,9 +464,6 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	}
 
 	relation *relA, *relB;
-
-	printf("Relation B: %d\n",relationB);
-	printf("Relation B Key: %d\n", getNodeFromList(head, getIntermediateResultsSingleIndex(head, relationB))->keys[0][0]);
 
 	/**
 	 * If no relations exist in any intermediate results tables, then take all values from the table t.
@@ -553,11 +548,11 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 		for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
 			r->keys[i][j] = getNodeFromList(inRes, indexB)->keys[i - getNodeFromList(inRes, indexA)->relAmount][results->results[j%getResultTuplesPerPage()].relation_S];
 
+		if(j%getResultTuplesPerPage() == 0 && j!=0)
+		    results = results->next;
     }
 
-
-    //intermediateResultsAmount--;
-
+    
 	return r;
 }
 
