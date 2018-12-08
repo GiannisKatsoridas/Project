@@ -16,7 +16,7 @@ void executeQuery(table **t, Query *q)
 		cmp = &(q->comparison_set->comparisons[i]);
 		if(cmp->action != JOIN)
 		{
-			compareColumn(t[rels[cmp->relationA]] , cmp->columnA , cmp->relationB , cmp->action);
+			inRes = compareColumn(inRes, t[rels[cmp->relationA]] , cmp->relationA, cmp->columnA , cmp->relationB , cmp->action);
 		}
 		else if(cmp->action == JOIN)
 		{
@@ -42,18 +42,27 @@ void executeQuery(table **t, Query *q)
 		setResultsAmount(0);
 	}
 
-	inRes = inRes->next;
+	//inRes = inRes->next;
+	IntermediateResultsList* l = inRes;
+	while(l != NULL)
+	{
+		for (int j = 0; j < l->table->relAmount; j++)
+		{
+			printf("(%5d)\t", l->table->relationIDs[j]);
+		}
+		printf("\n");
 
-	printf("%d - %d - %d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1], inRes->table->relationIDs[2], inRes->table->relationIDs[3]);
-	for(int j=0; j<inRes->table->tupleAmount; j++){
-		printf("%d\t%d\t%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j], inRes->table->keys[2][j], inRes->table->keys[3][j]);
+		for (int i = 0; i < l->table->tupleAmount; i++)
+		{
+			for (int j = 0; j < l->table->relAmount; j++)
+			{
+				printf("(%5d)\t", l->table->keys[j][i]);
+			}
+			printf("\n");
+		}
+		printf("---------------------------------------\n");
+		l = l->next;		
 	}
-/*	inRes = inRes->next;
-	printf("NEW TABLE: %d\n", inRes->table->relAmount);
-	printf("%d - %d\n", inRes->table->relationIDs[0], inRes->table->relationIDs[1]);
-	for(int j=0; j<inRes->table->tupleAmount; j++){
-		printf("%d\t%d\n", inRes->table->keys[0][j], inRes->table->keys[1][j]);
-	}*/
 
 }
 
@@ -151,71 +160,156 @@ void IntermediateResultsDel(IntermediateResults *inRes)
 		inRes = NULL;
 }
 
-void compareColumn(table *t , int colA , int value , int action)
+int comparePayloadToValue(int32_t payload, int value, int action)
 {
-	//fprintf(stdout, "%d %d %d\n", colA, value, action);
-	/*int counter = 0;
-	int32_t keytemp;
-	for (int i = 0; i < t->inRes->amount; i++)
-	{
-		keytemp = t->inRes->keys[i];
-		switch(action)
-		{
-			case(EQUAL):
-				if (t->columns[colA][keytemp] == value)
-					counter ++;
-				break;
-			case(LESS_THAN):
-				if (t->columns[colA][keytemp] < value)
-					counter ++;
-				break;
-			case(GREATER_THAN):
-				if (t->columns[colA][keytemp] > value)
-					counter ++;
-				break;
-			default:
-				fprintf(stderr, "wut\n");
-		}
+	switch(action){
+		case(EQUAL):
+			return (payload == value);
+		case(LESS_THAN):
+			return(payload < value);
+		case(GREATER_THAN):
+			return(payload > value);
+		default:
+			fprintf(stderr, "comparePayloadToValue(): invalid action\n");
+			return (-1);
 	}
-
-	int32_t *keys = malloc(counter * sizeof(int32_t));
-	int k = 0;
-	for (int i = 0; (i < t->inRes->amount) && (k < counter); i++)
-	{
-		keytemp = t->inRes->keys[i];
-		switch(action)
-		{
-			case(EQUAL):
-				if (t->columns[colA][keytemp] == value)
-				{
-					keys[k] = i;
-					k++;
-				}
-				break;
-			case(LESS_THAN):
-				if (t->columns[colA][keytemp] < value)
-				{
-					keys[k] = i;
-					k++;
-				}
-				break;
-			case(GREATER_THAN):
-				if (t->columns[colA][keytemp] > value)
-				{
-					keys[k] = i;
-					k++;
-				}
-				break;
-			default:
-				fprintf(stderr, "wut\n");
-		}
-	}
-
-	free(t->inRes->keys);
-
-	t->inRes->keys = keys;
-	t->inRes->amount = counter;*/
 }
+
+int calculateActionResultAmount(relation *rel, int value, int action)
+{
+	int counter = 0;
+	for (int i = 0; i < rel->num_tuples; i++)
+	{
+		if(comparePayloadToValue(rel->tuples[i].payload, value, action))
+			counter++;
+	}
+	return counter;
+}
+
+IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action)
+{
+	if ((list == NULL) || (t == NULL) || (relationID<0) || (columnID < 0) )
+	{
+		fprintf(stderr, "compareColumn(): invalid argument(s)\n");
+		return list;
+	}
+
+	if ((action != EQUAL) && (action != LESS_THAN) && (action != GREATER_THAN))
+	{
+		fprintf(stderr, "compareColumn(): invalid action\n");
+		return list;
+	}
+	printf("%d.%d (%d) %d\n", relationID, columnID, action, value);
+
+	IntermediateResultsList* templist = list;
+	int cnt = intermediateResultsAmount;
+	while((templist != NULL)&&(cnt))
+	{
+		if(existsInIntermediateResults(templist->table, relationID))
+			break;
+		templist = templist -> next;
+		cnt--;
+	}
+
+	if(templist != NULL)//relation exists in an intermediate results table
+	{//we need to remove the tuples that do not match the comparison result
+		printf("Relation exists!\n");
+		//first, create a relation from the existing results
+		//each key of the relation will be the tupleID of the intermediate result tuple
+		relation *rel = createRelationFromIntermediateResults(templist->table, t, relationID, columnID);
+
+		//then, count how many of the rows meet the action requirement
+		int newSize = calculateActionResultAmount(rel, value, action);
+
+		//then, create a new Intermediate Results table with newSize tuples
+		IntermediateResults *inResNew = createIntermediateResult();
+
+		inResNew -> tupleAmount = newSize;
+		inResNew -> relAmount = templist -> table -> relAmount;
+
+		inResNew -> tupleIDs = malloc((inResNew -> tupleAmount)*sizeof(uint64_t));
+		inResNew -> relationIDs = malloc((inResNew -> relAmount)*sizeof(int));
+		inResNew -> keys = malloc((inResNew -> relAmount)*sizeof(int32_t*));
+		for (int i = 0; i < inResNew -> relAmount; i++)
+		{
+			inResNew -> keys[i] = malloc((inResNew -> tupleAmount)*sizeof(int32_t));
+		}
+
+		for (int i = 0; i < inResNew -> relAmount; i++)
+		{
+			inResNew -> relationIDs[i] = templist -> table -> relationIDs[i];
+		}
+
+		//then for each relation rowID that has a payload that matches the action
+		//copy that rowID from the old inres table to the new one 
+		int oldTup = 0;
+		int newTup = 0;
+		for (oldTup = 0; oldTup < rel->num_tuples ; oldTup++)
+		{
+			if (comparePayloadToValue(rel->tuples[oldTup].payload, value, action))
+			{
+				for (int relID = 0; relID < inResNew->relAmount ; relID++)
+				{
+					inResNew -> keys[relID][newTup] = templist -> table -> keys[relID][oldTup];
+				}
+				newTup++;
+			}
+		}
+
+		//last, delete the old result table and assign the new one to the list node
+		IntermediateResultsDel(templist->table);
+		templist->table = inResNew;
+	}
+	else//relation doesn't exist in an intermediate results table
+	{//a new one has to be created and will be filled with a single column
+		//the column values will be the result of the comparison
+		printf("Relation doesn't exist!\n");
+
+		//first, create relation from table
+		relation *rel = createRelationFromTable(t, columnID);
+
+		//then, count how many of the rows meet the action requirement
+		int newSize = calculateActionResultAmount(rel, value, action);
+
+		//then, allocate memory for a new intermediate results table
+		IntermediateResults *inResNew = createIntermediateResult();
+
+		inResNew -> tupleAmount = newSize;
+		inResNew -> relAmount = 1;
+
+		inResNew -> tupleIDs = malloc((newSize)*sizeof(uint64_t));
+		inResNew -> relationIDs = malloc((1)*sizeof(int));
+		inResNew -> keys = malloc((inResNew -> relAmount)*sizeof(int32_t*));
+
+		for (int i = 0; i < inResNew -> relAmount; i++)
+		{
+			inResNew -> keys[i] = malloc((inResNew -> tupleAmount)*sizeof(int32_t));
+		}
+
+		inResNew -> relationIDs[0] = relationID;
+
+		//then for each relation rowID that has a payload that matches the action
+		//copy that rowID from the relation struct to the intermediate result table 
+		int relSize = 0;
+		int newTup = 0;
+		for (relSize = 0; relSize < rel->num_tuples ; relSize++)
+		{
+			if (comparePayloadToValue(rel->tuples[relSize].payload, value, action))
+			{
+				//for (int relID = 0; relID < inResNew->relAmount ; relID++)
+					inResNew -> keys[0][newTup] = rel->tuples[relSize].key;
+				newTup++;
+			}
+		}
+
+		//last, add the new intermediate result table to the list
+		list = addNodeToList(list, inResNew);
+	}
+
+	return list;
+}
+
+
 
 
 void joinSameRelation(table *t, int columnA, int columnB) {

@@ -348,6 +348,7 @@ void freeQueries(Query *queries) {
     }
 
     free(queries);
+    queries_num --;
 }
 
 int getQueriesNum()

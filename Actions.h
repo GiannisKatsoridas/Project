@@ -41,7 +41,7 @@ void IntermediateResultsDel(IntermediateResults *inRes);
 
 void executeQuery(table **t, Query *q);
 
-void compareColumn(table *t , int colA , int value , int action);
+IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action);
 
 void joinSameRelation(table *t, int columnA, int columnB);
 
