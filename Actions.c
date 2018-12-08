@@ -56,7 +56,7 @@ void executeQuery(table **t, Query *q)
 	{
 		if(cmp[i].action != JOIN)
 		{
-			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , rels[cmp[i].relationB] , cmp[i].action);
+			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , cmp[i].relationB , cmp[i].action);
 		}
 		else if(cmp[i].action == JOIN)
 		{
