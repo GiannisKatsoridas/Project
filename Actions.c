@@ -51,7 +51,7 @@ void executeQuery(table **t, Query *q)
 	}
 
 	//execute actions in query
-	IntermediateResultsList* inRes;
+	IntermediateResultsList* inRes = createList();
 	for (int i = 0; i < actions; i++)
 	{
 		if(cmp[i].action != JOIN)
@@ -250,8 +250,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 	IntermediateResultsList* templist = list->next;
 	int cnt = intermediateResultsAmount;
 
-	if(cnt == 0)
-		list = createList();
 
 	while((templist != NULL)&&(cnt))
 	{
@@ -364,9 +362,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB) {
 
-	if(intermediateResultsAmount == 0)
-		head = createList();
-
 	int index = getIntermediateResultsSingleIndex(head, relationA);
 
 	relation* relA, *relB;
@@ -431,9 +426,6 @@ IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table *
 IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table **t, int relationA, int relationB, int columnA, int columnB){
 
 	IntermediateResultsList* node;
-
-	if(intermediateResultsAmount == 0)
-		head = createList();
 
 	int cat = getQueryCategory(head, relationA, relationB);
 	int index = 0;
