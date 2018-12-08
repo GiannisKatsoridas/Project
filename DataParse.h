@@ -22,5 +22,6 @@ int* create_psum(int* histogram, int size);       // Create the accumulative his
 
 relation* create_relation_new(relation* relation, int* psum, int buckets);  // Create the new hashed relation.
 
+void freeRelation(relation *rel);
 
 #endif

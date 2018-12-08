@@ -138,4 +138,8 @@ relation *create_relation_new(relation *rel, int *psum, int buckets) {
     return  relation_new;
 }
 
-
+void freeRelation(relation *rel)
+{
+    free(rel->tuples);
+    free(rel);
+}

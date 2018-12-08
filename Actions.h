@@ -4,7 +4,7 @@
 #include "Results.h"
 #include "Tables.h"
 #include "Query.h"
-
+#include "DataParse.h"
 static int intermediateResultsAmount = 0;
 
 typedef struct IntermediateResults
@@ -113,6 +113,9 @@ IntermediateResultsList* addNodeToList(IntermediateResultsList* list, Intermedia
 
 
 void deleteNodeFromList(IntermediateResultsList* list, int index);
+
+
+void deleteList(IntermediateResultsList** headaddr);
 
 
 IntermediateResults* createIntermediateResult();

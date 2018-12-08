@@ -99,6 +99,8 @@ void executeQuery(table **t, Query *q)
 		printf("---------------------------------------\n");
 		l = l->next;		
 	}
+
+	//deleteList(&l);
 }
 
 
@@ -692,7 +694,7 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
 
 	}
 
-	IntermediateResultsDel(inRes);
+	//IntermediateResultsDel(inRes);
 
 	return r;
 
@@ -735,7 +737,7 @@ IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResult
 			results = results->next;
 	}
 
-	IntermediateResultsDel(inRes);
+	//IntermediateResultsDel(inRes);
 
 	return r;
 }
@@ -818,8 +820,37 @@ IntermediateResultsList* addNodeToList(IntermediateResultsList* list, Intermedia
 	return curr->next;
 }
 
+void deleteNodeFromList(IntermediateResultsList* head, int index) {
 
-void deleteNodeFromList(IntermediateResultsList* list, int index) {
+	if ((head->next == NULL) || (index<0) ||(intermediateResultsAmount<=0))
+	{
+		fprintf(stderr, "deleteNodeFromList(): invalid arguments\n");
+		return;
+	}
+
+	IntermediateResultsList* curr = head->next;
+	IntermediateResultsList* prev = head;
+
+	while(index) {
+		if(curr==NULL)
+		{
+			fprintf(stderr, "deleteNodeFromList(): invalid index\n");
+			return;
+		}
+		prev = curr;
+		curr = curr->next;
+		index--;
+	}
+
+	prev->next = curr->next;
+	IntermediateResultsDel(curr->table);
+	free(curr);
+	intermediateResultsAmount--;
+}
+
+
+
+/*void deleteNodeFromList(IntermediateResultsList* list, int index) {
 
 	if (list->next->next == NULL){
 		list->next = NULL;
@@ -840,8 +871,26 @@ void deleteNodeFromList(IntermediateResultsList* list, int index) {
 		curr->next = curr->next->next;
 
 	intermediateResultsAmount--;
-}
+}*/
 
+void deleteList(IntermediateResultsList** headaddr)
+{
+	IntermediateResultsList* head = *headaddr;
+	IntermediateResultsList* temp = NULL;
+
+	while(head->next!=NULL)
+	{
+		temp = head->next;
+		head->next = temp->next;
+		IntermediateResultsDel(temp->table);
+		free(temp);
+		intermediateResultsAmount--;
+	}
+
+	//IntermediateResultsDel(&(head->table));
+	free(head);
+	(*headaddr) = NULL;
+}
 
 IntermediateResults* createIntermediateResult(){
 
