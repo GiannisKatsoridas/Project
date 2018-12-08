@@ -32,18 +32,23 @@ typedef struct IntermediateResultsList{
 
 void IntermediateResultsInit(IntermediateResults **inRes);
 
+
 relation *createRelationFromIntermediateResults(IntermediateResults* inRes, table *t, int relationID, int columnID);
 
+
 void insertResultToIntermediateResults(IntermediateResults **inResAddr, result *results, int relationA, int relationB, int column);
+
 
 void IntermediateResultsDel(IntermediateResults *inRes);
 
 
 void executeQuery(table **t, Query *q);
 
+
 IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action);
 
-IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relation, int columnA, int columnB);
+
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB);
 
 /**
  * Two different relations are joined and therefore the Radix algorithm must me called. If there are already
@@ -112,6 +117,10 @@ void deleteNodeFromList(IntermediateResultsList* list, int index);
 
 IntermediateResults* createIntermediateResult();
 
+
 int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relationA);
+
+
+int calculateSameJoinResultsAmount(relation* relA, relation* relB);
 
 #endif

@@ -22,16 +22,11 @@ void executeQuery(table **t, Query *q)
 		{
 			if (cmp->relationA == cmp->relationB)
 			{
-				inRes = joinSameRelation(inRes, t, cmp->relationA, cmp->columnA, cmp->columnB);
+				inRes = joinSameRelation(inRes, t, rels[cmp->relationA], cmp->columnA, cmp->columnB);
 			}
 			else
 			{
 				inRes = joinRelationsRadix(inRes, t, rels[cmp->relationA], rels[cmp->relationB], cmp->columnA, cmp->columnB);
-				if(i==1) {
-					printf("RUN\n");
-					//printf("%d\n", inRes[1]->relAmount);
-					printf("RUN\n");
-				}
 			}
 		}
 		else
@@ -186,6 +181,17 @@ int calculateActionResultAmount(relation *rel, int value, int action)
 	return counter;
 }
 
+int calculateSameJoinResultsAmount(relation* relA, relation* relB){
+
+	int counter = 0;
+	for(int i=0; i<relA->num_tuples; i++)
+		if(relA->tuples[i].payload == relB->tuples[i].payload) {
+			printf("%d - %d\n", relA->tuples[i].key, relA->tuples[i].payload);
+			counter++;
+		}
+	return counter;
+}
+
 IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action)
 {
 	if ((list == NULL) || (t == NULL) || (relationID<0) || (columnID < 0) )
@@ -316,33 +322,69 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 
 
-IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relation, int columnA, int columnB) {
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB) {
 
-    /*int counter = 0;
-    int32_t keytemp;
-    for (int i = 0; i < t->inRes->amount; i++)
-    {
-        keytemp = t->inRes->keys[i];
-        if(t->columns[columnA][keytemp] == t->columns[columnB][keytemp])
-            counter++;
-    }
+	if(intermediateResultsAmount == 0)
+		head = createList();
 
-    int32_t* keys = malloc(counter * sizeof(int32_t));
+	int index = getIntermediateResultsSingleIndex(head, relationA);
 
-    int k = 0;
-    for (int i = 0; (i < t->inRes->amount) && (k < counter); i++)
-    {
-        keytemp = t->inRes->keys[i];
-        if(t->columns[columnA][keytemp] == t->columns[columnB][keytemp]){
-            keys[k] = keytemp;
-            k++;
-        }
-    }
+	relation* relA, *relB;
 
-    free(t->inRes->keys);
+	if(index != -1){
 
-    t->inRes->keys = keys;
-    t->inRes->amount = counter;*/
+		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnA);
+		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnB);
+
+	}
+	else{
+
+		relA = createRelationFromTable(t[relationA], columnA);
+		relB = createRelationFromTable(t[relationA], columnB);
+
+	}
+
+	int count = calculateSameJoinResultsAmount(relA, relB);
+
+	IntermediateResults* inRes = createIntermediateResult();
+
+	inRes->tupleAmount = (uint64_t) count;
+	inRes->relAmount = index == -1 ? 1 : getNodeFromList(head, index)->relAmount;
+	inRes->relationIDs = malloc(inRes->relAmount*sizeof(int32_t));
+	if(index == -1)
+		inRes->relationIDs[0] = relationA;
+	else
+		for(int i=0; i<inRes->relAmount; i++)
+			inRes->relationIDs[i] = getNodeFromList(head, index)->relationIDs[i];
+
+	inRes->keys = malloc(inRes->relAmount*sizeof(int32_t*));
+	for(int i=0; i<inRes->relAmount; i++)
+		inRes->keys[i] = malloc(inRes->tupleAmount*sizeof(int32_t));
+
+	int tupleCounter = 0;
+	for(int i=0; i<relA->num_tuples; i++){
+
+		if(relA->tuples[i].payload != relB->tuples[i].payload)
+			continue;
+
+		for(int j=0; j<inRes->relAmount; j++){
+
+			if(index == -1)
+				inRes->keys[j][tupleCounter] = relA->tuples[i].key;
+			else
+				inRes->keys[j][tupleCounter] = getNodeFromList(head, index)->keys[j][i];
+
+		}
+
+		tupleCounter++;
+	}
+
+	if(index != -1)
+		deleteNodeFromList(head, index);
+
+	addNodeToList(head, inRes);
+
+	return head;
 }
 
 
