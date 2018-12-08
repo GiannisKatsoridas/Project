@@ -22,7 +22,7 @@ void executeQuery(table **t, Query *q)
 		{
 			if (cmp->relationA == cmp->relationB)
 			{
-				joinSameRelation(t[rels[cmp->relationA]], cmp->columnA, cmp->columnB);
+				inRes = joinSameRelation(inRes, t, cmp->relationA, cmp->columnA, cmp->columnB);
 			}
 			else
 			{
@@ -203,6 +203,10 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 	IntermediateResultsList* templist = list;
 	int cnt = intermediateResultsAmount;
+
+	if(cnt == 0)
+		list = createList();
+
 	while((templist != NULL)&&(cnt))
 	{
 		if(existsInIntermediateResults(templist->table, relationID))
@@ -211,7 +215,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		cnt--;
 	}
 
-	if(templist != NULL)//relation exists in an intermediate results table
+	if(templist != NULL && cnt > 0)//relation exists in an intermediate results table
 	{//we need to remove the tuples that do not match the comparison result
 		printf("Relation exists!\n");
 		//first, create a relation from the existing results
@@ -224,7 +228,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		//then, create a new Intermediate Results table with newSize tuples
 		IntermediateResults *inResNew = createIntermediateResult();
 
-		inResNew -> tupleAmount = newSize;
+		inResNew -> tupleAmount = (uint64_t) newSize;
 		inResNew -> relAmount = templist -> table -> relAmount;
 
 		inResNew -> tupleIDs = malloc((inResNew -> tupleAmount)*sizeof(uint64_t));
@@ -274,7 +278,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		//then, allocate memory for a new intermediate results table
 		IntermediateResults *inResNew = createIntermediateResult();
 
-		inResNew -> tupleAmount = newSize;
+		inResNew -> tupleAmount = (uint64_t) newSize;
 		inResNew -> relAmount = 1;
 
 		inResNew -> tupleIDs = malloc((newSize)*sizeof(uint64_t));
@@ -303,7 +307,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		}
 
 		//last, add the new intermediate result table to the list
-		list = addNodeToList(list, inResNew);
+		addNodeToList(list, inResNew);
 	}
 
 	return list;
@@ -312,7 +316,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 
 
-void joinSameRelation(table *t, int columnA, int columnB) {
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relation, int columnA, int columnB) {
 
     /*int counter = 0;
     int32_t keytemp;
@@ -543,6 +547,7 @@ int getIntermediateResultsIndex(IntermediateResultsList* inRes, int relationA, i
 	return -1;
 
 }
+
 
 int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relationA){
 

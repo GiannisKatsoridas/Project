@@ -43,7 +43,7 @@ void executeQuery(table **t, Query *q);
 
 IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action);
 
-void joinSameRelation(table *t, int columnA, int columnB);
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relation, int columnA, int columnB);
 
 /**
  * Two different relations are joined and therefore the Radix algorithm must me called. If there are already
