@@ -232,6 +232,8 @@ int calculateSameJoinResultsAmount(relation* relA, relation* relB){
 	return counter;
 }
 
+
+
 IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t, int relationID, int columnID , int value , int action)
 {
 	if ((list == NULL) || (t == NULL) || (relationID<0) || (columnID < 0) )
@@ -358,8 +360,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 }
 
 
-
-
 IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB) {
 
 	int index = getIntermediateResultsSingleIndex(head, relationA);
@@ -467,6 +467,9 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 
 	relation *relA, *relB;
 
+	printf("Relation B: %d\n",relationB);
+	printf("Relation B Key: %d\n", getNodeFromList(head, getIntermediateResultsSingleIndex(head, relationB))->keys[0][0]);
+
 	/**
 	 * If no relations exist in any intermediate results tables, then take all values from the table t.
 	 */
@@ -508,8 +511,6 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 
 	return head;
 
-	//if(index == 1)
-		//printf("-----%d-----\n", (*inRes[1])->relAmount);
 }
 
 
@@ -531,6 +532,7 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 
     IntermediateResults* r = createIntermediateResult();
 
+
     r->relAmount = getNodeFromList(inRes, indexA)->relAmount + getNodeFromList(inRes, indexB)->relAmount;
     r->relationIDs = malloc(r->relAmount*sizeof(int32_t));
     for(int i=0; i<getNodeFromList(inRes, indexA)->relAmount; i++)
@@ -538,6 +540,7 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
     for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
     	r->relationIDs[i] = getNodeFromList(inRes, indexB)->relationIDs[i - getNodeFromList(inRes, indexA)->relAmount];
     r->tupleAmount = (uint64_t) getResultsAmount();
+
 
     r->keys = malloc(r->relAmount*sizeof(int32_t*));
     for(int i=0; i<r->relAmount; i++)
@@ -552,7 +555,8 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 
     }
 
-    intermediateResultsAmount--;
+
+    //intermediateResultsAmount--;
 
 	return r;
 }
@@ -741,25 +745,6 @@ IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResult
 	return r;
 }
 
-
-void addIntermediateResultsTable(IntermediateResults*** inRes){
-
-	IntermediateResults** temp = malloc((intermediateResultsAmount)* sizeof(IntermediateResults*));
-
-	for(int i=0; i<intermediateResultsAmount; i++)
-		temp[i] = *inRes[i];
-
-	*inRes = malloc((intermediateResultsAmount+1)* sizeof(IntermediateResults*));
-	for(int i=0; i<intermediateResultsAmount; i++)
-		*inRes[i] = temp[i];
-
-	IntermediateResultsInit(inRes[intermediateResultsAmount]);
-
-	printf("%d\n", intermediateResultsAmount);
-
-	intermediateResultsAmount++;
-}
-
 /**
  * Category 0: No relation exists in any intermediate table
  * Category 1: One relation exists in one intermediate table and the other exists in none
@@ -806,6 +791,9 @@ IntermediateResultsList* createList(){
 
 IntermediateResults* getNodeFromList(IntermediateResultsList* list, int index){
 
+    if(index >= intermediateResultsAmount)
+        return NULL;
+
 	IntermediateResultsList* curr = list->next;
 
 	while(index > 0){
@@ -840,6 +828,7 @@ void deleteNodeFromList(IntermediateResultsList* list, int index) {
 
 	if (list->next->next == NULL){
 		list->next = NULL;
+		intermediateResultsAmount--;
 		return;
 	}
 
@@ -854,6 +843,8 @@ void deleteNodeFromList(IntermediateResultsList* list, int index) {
 		curr = NULL;
 	else
 		curr->next = curr->next->next;
+
+	intermediateResultsAmount--;
 }
 
 
