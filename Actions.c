@@ -16,7 +16,7 @@ void executeQuery(table **t, Query *q)
 		cmp = &(q->comparison_set->comparisons[i]);
 		if(cmp->action != JOIN)
 		{
-			inRes = compareColumn(inRes, t[rels[cmp->relationA]] , cmp->relationA, cmp->columnA , cmp->relationB , cmp->action);
+			inRes = compareColumn(inRes, t[rels[cmp->relationA]] , rels[cmp->relationA], cmp->columnA , rels[cmp->relationB] , cmp->action);
 		}
 		else if(cmp->action == JOIN)
 		{
@@ -207,7 +207,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 	}
 	printf("%d.%d (%d) %d\n", relationID, columnID, action, value);
 
-	IntermediateResultsList* templist = list;
+	IntermediateResultsList* templist = list->next;
 	int cnt = intermediateResultsAmount;
 
 	if(cnt == 0)
