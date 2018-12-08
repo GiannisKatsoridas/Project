@@ -12,6 +12,12 @@
 #define GREATER_THAN 2
 #define EQUAL 3
 
+//action priorities defined; the lower the better
+#define EQ_PRIORITY 0               //priority of equal comparison is 0
+#define JOIN_SAME_REL_PRIORITY 1    //priority of join between columns of the same relation is 1
+#define DIFF_THAN_PRIORITY 2        //priority of less-than or greater-than comparisons is 2
+#define JOIN_PRIORITY 3             //priority of radix-join is 3
+
 int queries_num;
 
 typedef struct column {
@@ -29,6 +35,7 @@ typedef struct comparison {
     int columnB;    // If the action is not = then 'relationB' holds the comparison value and columnB is -1
     int action;     // 0 = Equals, 1 = Less than, 2 = Greater than
 
+    int priority;   //the lower the priority number, the quicker the action will perform
 } Comparison;
 
 typedef struct query_relations_t {

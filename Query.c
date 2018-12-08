@@ -214,11 +214,20 @@ Comparison getComparisonFromQuery(char *line) {
     for(int i=0; i<strlen(line_copy); i++){
 
         if(line_copy[i] == '=')
+        {
             result.action = EQUAL;
+            result.priority = EQ_PRIORITY;
+        }
         else if(line_copy[i] == '<')
+        {
             result.action = LESS_THAN;
+            result.priority = DIFF_THAN_PRIORITY;
+        }
         else if(line_copy[i] == '>')
+        {
             result.action = GREATER_THAN;
+            result.priority = DIFF_THAN_PRIORITY;
+        }
         else{
             continue;
         }
@@ -238,6 +247,10 @@ Comparison getComparisonFromQuery(char *line) {
         {
             result.columnB = atoi(num);
             result.action = JOIN;
+            if(result.relationA == result.relationB)
+                result.priority = JOIN_SAME_REL_PRIORITY;
+            else
+                result.priority = JOIN_PRIORITY;
         }
         else
             result.columnB = -1;

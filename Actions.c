@@ -9,24 +9,64 @@ void executeQuery(table **t, Query *q)
 {
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
-	Comparison *cmp = NULL;
+	printf("%d\n", actions);
+
+	//save comparisons in an array, cmp
+	Comparison cmp[actions];
+	Comparison temp;
+	for (int i = 0; i < actions; i++)
+		cmp[i] = q->comparison_set->comparisons[i];
+
+	//sort comparisons according to their priority
+	for (int i = 0; i < actions-1; i++)
+	{
+		for (int j = 0; j < actions -i-1; j++)
+		{
+			if(cmp[j].priority > cmp[j+1].priority)
+			{
+				temp = cmp[j];
+				cmp[j] = cmp[j+1];
+				cmp[j+1] = temp;
+			}
+		}
+	}
+
+	//print actions in increasing priority order
+	for (int i = 0; i < actions; i++)
+	{
+		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
+		if(cmp[i].action == LESS_THAN)
+			printf(" < ");
+		else if(cmp[i].action == GREATER_THAN)
+			printf(" > ");
+		else
+			printf(" = ");
+
+		if(cmp[i].action == JOIN)
+			printf("%d.%d ", cmp[i].relationB , cmp[i].columnB);
+		else
+			printf("%d ", cmp[i].relationB);
+
+		printf("(pr: %d)\n", cmp[i].priority);
+	}
+
+	//execute actions in query
 	IntermediateResultsList* inRes;
 	for (int i = 0; i < actions; i++)
 	{
-		cmp = &(q->comparison_set->comparisons[i]);
-		if(cmp->action != JOIN)
+		if(cmp[i].action != JOIN)
 		{
-			inRes = compareColumn(inRes, t[rels[cmp->relationA]] , rels[cmp->relationA], cmp->columnA , rels[cmp->relationB] , cmp->action);
+			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , rels[cmp[i].relationB] , cmp[i].action);
 		}
-		else if(cmp->action == JOIN)
+		else if(cmp[i].action == JOIN)
 		{
-			if (cmp->relationA == cmp->relationB)
+			if (cmp[i].relationA == cmp[i].relationB)
 			{
-				inRes = joinSameRelation(inRes, t, rels[cmp->relationA], cmp->columnA, cmp->columnB);
+				inRes = joinSameRelation(inRes, t, rels[cmp[i].relationA], cmp[i].columnA, cmp[i].columnB);
 			}
 			else
 			{
-				inRes = joinRelationsRadix(inRes, t, rels[cmp->relationA], rels[cmp->relationB], cmp->columnA, cmp->columnB);
+				inRes = joinRelationsRadix(inRes, t, rels[cmp[i].relationA], rels[cmp[i].relationB], cmp[i].columnA, cmp[i].columnB);
 			}
 		}
 		else
@@ -37,8 +77,9 @@ void executeQuery(table **t, Query *q)
 		setResultsAmount(0);
 	}
 
+	//print results
 	//inRes = inRes->next;
-	IntermediateResultsList* l = inRes;
+	IntermediateResultsList* l = inRes->next;
 	while(l != NULL)
 	{
 		for (int j = 0; j < l->table->relAmount; j++)
@@ -58,7 +99,6 @@ void executeQuery(table **t, Query *q)
 		printf("---------------------------------------\n");
 		l = l->next;		
 	}
-
 }
 
 
@@ -205,7 +245,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		fprintf(stderr, "compareColumn(): invalid action\n");
 		return list;
 	}
-	printf("%d.%d (%d) %d\n", relationID, columnID, action, value);
+	//printf("%d.%d (%d) %d\n", relationID, columnID, action, value);
 
 	IntermediateResultsList* templist = list->next;
 	int cnt = intermediateResultsAmount;
@@ -223,7 +263,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 	if(templist != NULL && cnt > 0)//relation exists in an intermediate results table
 	{//we need to remove the tuples that do not match the comparison result
-		printf("Relation exists!\n");
+		//printf("Relation exists!\n");
 		//first, create a relation from the existing results
 		//each key of the relation will be the tupleID of the intermediate result tuple
 		relation *rel = createRelationFromIntermediateResults(templist->table, t, relationID, columnID);
@@ -273,7 +313,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 	else//relation doesn't exist in an intermediate results table
 	{//a new one has to be created and will be filled with a single column
 		//the column values will be the result of the comparison
-		printf("Relation doesn't exist!\n");
+		//printf("Relation doesn't exist!\n");
 
 		//first, create relation from table
 		relation *rel = createRelationFromTable(t, columnID);
