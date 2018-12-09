@@ -253,19 +253,6 @@ relation* createRelationFromTable(table *t, int columnID)
     return rel;
 }
 
-int relationInIntermediateResults(IntermediateResults* inRes, int relationID)
-{
-	int pos = -1;
-	for (int i = 0; i < inRes->relAmount; i++)
-	{
-		if(inRes->relationIDs[i] == relationID)
-		{
-			pos = i;
-			break;
-		}
-	}
-	return pos;
-}
 
 relation *createRelationFromIntermediateResults(IntermediateResults* inRes, table *t, int relationID, int columnID)
 {
@@ -968,6 +955,8 @@ IntermediateResults* createIntermediateResultFromTable(table* t, int relation){
 
     IntermediateResults* result = createIntermediateResult();
     IntermediateResultsAlloc(&result, t->size, 1);
+
+    result->relationIDs[0] = relation;
 
     for(int i=0; i<result->tupleAmount; i++)
         result->keys[0][i] = i;

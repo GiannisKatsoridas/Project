@@ -61,27 +61,6 @@ void testPOWEROFTWO(void){
 
 }
 
-
-/**
- * Test for the "create_relation" function
- * Can't run because of multiple main methods both here and in DataGenerator.c
- */
-/*void testCREATERELATION(void){
-
-    relation* relR = create_relation_R();
-    relation* relS = create_relation_S();
-
-    int rsize = RELR_SIZE;
-    int ssize = RELS_SIZE;
-
-    CU_ASSERT(rsize == relR->num_tuples);
-    CU_ASSERT(ssize == relS->num_tuples);
-    CU_ASSERT(NULL != relR->tuples);
-    CU_ASSERT(NULL != relS->tuples);
-
-}*/
-
-
 /**
  * Test for the "get_relation" function
  */
