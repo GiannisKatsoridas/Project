@@ -126,4 +126,18 @@ int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relati
 
 int calculateSameJoinResultsAmount(relation* relA, relation* relB);
 
+
+void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels);
+
+
+IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels);
+
+
+IntermediateResults *crossProductIntermediateResults(IntermediateResults *inResA, IntermediateResults *inResB);
+
+
+IntermediateResults* createIntermediateResultFromTable(table* t, int relation);
+
+
+int getColumnIntermediateResultsIndex(IntermediateResults* inRes, int relation);
 #endif

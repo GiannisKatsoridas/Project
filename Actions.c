@@ -4,12 +4,10 @@
 
 #include "Actions.h"
 
-
 void executeQuery(table **t, Query *q)
 {
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
-	printf("%d\n", actions);
 
 	//save comparisons in an array, cmp
 	Comparison cmp[actions];
@@ -77,30 +75,98 @@ void executeQuery(table **t, Query *q)
 		setResultsAmount(0);
 	}
 
-	//print results
-	//inRes = inRes->next;
-	IntermediateResultsList* l = inRes->next;
-	while(l != NULL)
-	{
-		for (int j = 0; j < l->table->relAmount; j++)
-		{
-			printf("(%5d)\t", l->table->relationIDs[j]);
-		}
-		printf("\n");
+	printActionResults(t, inRes, q->column_set, rels);
 
-		for (int i = 0; i < l->table->tupleAmount; i++)
-		{
-			for (int j = 0; j < l->table->relAmount; j++)
-			{
-				printf("(%5d)\t", l->table->keys[j][i]);
-			}
-			printf("\n");
-		}
-		printf("---------------------------------------\n");
-		l = l->next;		
-	}
+	deleteList(&inRes);
+}
 
-	//deleteList(&l);
+void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels) {
+
+    IntermediateResults* result = getIntermediateResultFromColumns(t, inRes, columns, rels);
+    int index;
+
+    for(int i=0; i<columns->columns_num; i++)
+        printf("(%d.%d)\t", rels[columns->columns[i].relation], columns->columns[i].column);
+    printf("\n\n");
+
+    for(int j=0; j<result->tupleAmount; j++){
+
+        for(int i=0; i<columns->columns_num; i++) {
+
+            index = getColumnIntermediateResultsIndex(result, rels[columns->columns[i].relation]);
+            printf("%5lu\t", t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]]);
+
+        }
+        printf("\n");
+
+    }
+
+}
+
+IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels) {
+
+    if(columns->columns_num == 0)
+        return NULL;
+
+    int index = getIntermediateResultsSingleIndex(inRes, rels[columns->columns[0].relation]);
+    IntermediateResults* result;
+
+    if(index != -1)
+        result = getNodeFromList(inRes, index);
+    else
+        result = createIntermediateResultFromTable(t[rels[columns->columns[0].relation]], rels[columns->columns[0].relation]);
+
+
+    for(int i=1; i<columns->columns_num; i++){
+
+        if(existsInIntermediateResults(result, rels[columns->columns[i].relation]))
+            continue;
+
+        index = getIntermediateResultsSingleIndex(inRes, rels[columns->columns[i].relation]);
+
+        if(index != -1)
+            result = crossProductIntermediateResults(result, getNodeFromList(inRes, index));
+        else {
+            IntermediateResults *temp = createIntermediateResultFromTable(t[rels[columns->columns[i].relation]], rels[columns->columns[i].relation]);
+            result = crossProductIntermediateResults(result, temp);
+            IntermediateResultsDel(temp);
+        }
+    }
+
+    return result;
+}
+
+IntermediateResults *crossProductIntermediateResults(IntermediateResults *inResA, IntermediateResults *inResB) {
+
+    IntermediateResults* result = createIntermediateResult();
+
+    result->relAmount = inResA->relAmount + inResB->relAmount;
+    result->relationIDs = malloc(result->relAmount*sizeof(int32_t));
+    for(int i=0; i<inResA->relAmount; i++)
+        result->relationIDs[i] = inResA->relationIDs[i];
+    for(int i=0; i<inResB->relAmount; i++)
+        result->relationIDs[inResA->relAmount + i] = inResB->relationIDs[i];
+    result->tupleAmount = inResA->tupleAmount *  inResB->tupleAmount;
+    result->keys = malloc(result->relAmount*sizeof(int32_t*));
+    for(int i=0; i<result->relAmount; i++)
+        result->keys[i] = malloc(result->tupleAmount*sizeof(int32_t));
+
+    for(int i=0; i<inResA->tupleAmount; i++){
+
+        for(int j=0; j<inResB->tupleAmount; j++){
+
+            for(int k=0; k<inResA->relAmount; k++)
+                result->keys[k][(i*inResB->tupleAmount) + j] = inResA->keys[k][i];
+            for(int k=0; k<inResB->relAmount; k++)
+                result->keys[k+inResA->relAmount][(i*inResB->tupleAmount) + j] = inResB->keys[k][j];
+
+        }
+
+    }
+
+    IntermediateResultsDel(inResA);
+
+    return result;
 }
 
 
@@ -190,11 +256,13 @@ relation *createRelationFromIntermediateResults(IntermediateResults* inRes, tabl
 
 void IntermediateResultsDel(IntermediateResults *inRes)
 {
-		free(inRes->tupleIDs);
-		free(inRes->relationIDs);
-		free(inRes->keys);
-		free(inRes);
-		inRes = NULL;
+    for(int i=0; i<inRes->relAmount; i++)
+        free(inRes->keys[i]);
+    free(inRes->tupleIDs);
+    free(inRes->relationIDs);
+    free(inRes->keys);
+    free(inRes);
+    inRes = NULL;
 }
 
 int comparePayloadToValue(int32_t payload, int value, int action)
@@ -356,6 +424,8 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 		//last, add the new intermediate result table to the list
 		addNodeToList(list, inResNew);
+
+		freeRelation(rel);
 	}
 
 	return list;
@@ -452,9 +522,6 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 		index = getIntermediateResultsIndex(head, relationA, relationB);
 	}
 
-	IntermediateResults* r;										//	Create and initialize the new IntermediateResults
-	IntermediateResultsInit(&r);								// 	table.
-
 	/**
 	 * If both relations exist in a single IntermediateResults table then act accordingly.
 	 */
@@ -496,6 +563,9 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 		IntermediateResults* temp = addResultsWithNewColumn(results, getNodeFromList(head, index), relationA, relationB);
 		deleteNodeFromList(head, index);
 		addNodeToList(head, temp);
+		freeRelation(relA);
+		freeRelation(relB);
+		freeResults(results);
 		return head;
 	}
 
@@ -505,6 +575,10 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	IntermediateResults* temp = addResultToNewIntermediateResult(results, createIntermediateResult(), relationA, relationB);
 
 	addNodeToList(head, temp);
+
+	freeResults(results);
+    freeRelation(relA);
+    freeRelation(relB);
 
 	return head;
 
@@ -554,6 +628,9 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 		    results = results->next;
     }
 
+    freeResults(results);
+    freeRelation(relA);
+    freeRelation(relB);
     
 	return r;
 }
@@ -849,30 +926,6 @@ void deleteNodeFromList(IntermediateResultsList* head, int index) {
 }
 
 
-
-/*void deleteNodeFromList(IntermediateResultsList* list, int index) {
-
-	if (list->next->next == NULL){
-		list->next = NULL;
-		intermediateResultsAmount--;
-		return;
-	}
-
-	IntermediateResultsList* curr = list->next;
-
-	while(index > 1) {
-		curr = curr->next;
-		index--;
-	}
-
-	if(curr->next == NULL)
-		curr = NULL;
-	else
-		curr->next = curr->next->next;
-
-	intermediateResultsAmount--;
-}*/
-
 void deleteList(IntermediateResultsList** headaddr)
 {
 	IntermediateResultsList* head = *headaddr;
@@ -888,6 +941,7 @@ void deleteList(IntermediateResultsList** headaddr)
 	}
 
 	//IntermediateResultsDel(&(head->table));
+	free(head->table);
 	free(head);
 	(*headaddr) = NULL;
 }
@@ -898,5 +952,33 @@ IntermediateResults* createIntermediateResult(){
 	IntermediateResultsInit(&table);
 
 	return table;
+}
+
+
+IntermediateResults* createIntermediateResultFromTable(table* t, int relation){
+
+    IntermediateResults* result = createIntermediateResult();
+    result->relAmount = 1;
+    result->relationIDs = malloc(sizeof(int32_t));
+    result->relationIDs[0] = relation;
+    result->tupleAmount = t->size;
+    result->keys = malloc(sizeof(int32_t*));
+    result->keys[0] = malloc(result->tupleAmount*sizeof(int32_t));
+    for(int i=0; i<result->tupleAmount; i++)
+        result->keys[0][i] = i;
+
+    return result;
+
+}
+
+
+int getColumnIntermediateResultsIndex(IntermediateResults* inRes, int relation){
+
+    for(int i=0; i<inRes->relAmount; i++)
+        if(inRes->relationIDs[i] == relation)
+            return i;
+
+    return -1;
+
 }
 
