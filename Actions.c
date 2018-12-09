@@ -121,7 +121,10 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
 
     for (int i = 0; i < columns->columns_num; i++)
     {
-    	printf("%lu ", sums[i]);
+    	if(result->tupleAmount == 0)
+    		printf("NULL ");
+    	else
+    		printf("%lu ", sums[i]);
     }
     printf("\n");
 

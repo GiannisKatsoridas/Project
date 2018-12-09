@@ -57,7 +57,7 @@ table* loadRelation(const char* fileName){
 
 table **createTablesArray() {
 
-    freopen("input","r",stdin);
+    //freopen("input","r",stdin);
 
     relationsNum = 0;
     int i;
@@ -70,7 +70,7 @@ table **createTablesArray() {
 
     size = (size_t) getline(&file, &length, stdin);
 
-    while((strcmp(file, "Done")!=0)&&((int) size > 0)){
+    while((strncmp(file, "Done", 4)!=0)&&((int) size > 0)){
         if(file[strlen(file)-1]=='\n'){
             file[strlen(file) - 1] = '\0';
         }

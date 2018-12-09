@@ -13,7 +13,7 @@ int main() {
 
     printf("Done\n");
 
-    freopen("queries.txt","r",stdin);
+    //freopen("queries.txt","r",stdin);
 
     Query* queries = getQueries();
     int queries_num;
