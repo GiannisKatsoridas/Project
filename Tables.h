@@ -4,7 +4,6 @@
 #ifndef _TABLES_H_
 #define _TABLES_H_
 
-//#include <stdint.h>
 #include "Query.h"
 #include "Results.h"
 

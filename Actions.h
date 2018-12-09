@@ -36,6 +36,23 @@ void IntermediateResultsInit(IntermediateResults **inRes);
 relation *createRelationFromIntermediateResults(IntermediateResults* inRes, table *t, int relationID, int columnID);
 
 /**
+ * Given a column of the table, creates a relation based on its rowIDs.
+ */
+relation* createRelationFromTable(table *t, int columnID);
+
+/**
+ * Given a payload and the value to be compared to, returns 1 for true or 0 for false, depending on the action
+ * being performed on that payload.
+ */
+int comparePayloadToValue(int32_t payload, int value, int action);
+
+/**
+ * Given a relation, a value and an action (comparison) to be performed on that relation, calculates the results
+ * returned from that action.
+ */
+int calculateActionResultAmount(relation *rel, int value, int action);
+
+/**
  * Allocates the necessary space for an intermediate results structure.
  */
 void IntermediateResultsAlloc(IntermediateResults** inRes, uint64_t tupleAmount, int relAmount);

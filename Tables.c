@@ -113,7 +113,6 @@ void parseTableData(table** t){
             u_int64_t range = t[i]->metadata[j].max - t[i]->metadata[j].min + 1;
 
             if(range > MAX_TABLE_RANGE){
-                //t[i]->metadata[j].distincts = findSampleDistincts(t, i, j);
                 t[i]->metadata[j].distincts = -1;
                 continue;
             }
@@ -124,14 +123,6 @@ void parseTableData(table** t){
 
         t[i]->tableID = i;
 
-        /*t[i]->inRes = malloc(sizeof(IntermediateResults));
-
-        t[i]->inRes->amount = (int32_t) t[i]->size;
-        t[i]->inRes->keys = malloc((t[i]->size) * sizeof(int32_t));
-        for (int32_t k = 0; k < t[i]->inRes->amount; k++)
-        {
-            t[i]->inRes->keys[k] = k;
-        }*/
 
     }
 
@@ -193,44 +184,3 @@ void freeTable(table** t){
     free(t);
 }
 
-
-/*void saveTableKeysFromResult(table *t, result *res, int resultColumn)
-{
-    if ((t==NULL) || ((resultColumn !=1 ) && (resultColumn != 2)))
-    {
-        fprintf(stderr, "getTableKeysFromResult(): invalid arguments\n");
-        return;
-    }
-
-    //key flag index; 
-    //if keyFlags[key] == 1, the key is in the result
-    //if keyFlags[key] == 0, the key is NOT in the result
-    short keyFlags[t->size];
-    for (uint64_t i = 0; i < t->size; i++)
-    {
-        keyFlags[i] = 0;
-    }
-
-    int const result_num = getResultsAmount();
-    int const tuples_per_page = getResultTuplesPerPage();
-    int counter = 0;
-
-
-}
-
-void saveResult(table *t1, table *t2, result *results)
-{
-    if ((t1==NULL) || (t2==NULL) || (results==NULL))
-    {
-        fprintf(stderr, "saveResult(): NULL argument(s)\n");
-        return;
-    }
-
-    saveTableKeysFromResult(t1, results, 1);
-    saveTableKeysFromResult(t2, results, 2);
-}
-
-relation *constructRelationForNextJoin(table *t, int columnID)
-{
-    
-}*/
