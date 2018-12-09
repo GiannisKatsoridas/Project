@@ -52,6 +52,13 @@ int comparePayloadToValue(int32_t payload, int value, int action);
  */
 int calculateActionResultAmount(relation *rel, int value, int action);
 
+
+/**
+ * Given all relation tables and queries in batch, the function below calculates the priority
+ * for each action to be executed.
+ */
+void calculateActionPriorities(table **t, Query *q);
+
 /**
  * Allocates the necessary space for an intermediate results structure.
  */

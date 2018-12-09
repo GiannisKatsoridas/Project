@@ -9,6 +9,9 @@ void executeQuery(table **t, Query *q)
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
 
+	//calculate action priorities
+	calculateActionPriorities(t, q);
+
 	//save comparisons in an array, cmp
 	Comparison cmp[actions];
 	Comparison temp;
@@ -65,7 +68,7 @@ void executeQuery(table **t, Query *q)
 		else
 			printf("%d ", cmp[i].relationB);
 
-		printf("(pr: %d)\n", cmp[i].priority);
+		printf("(pr: %f)\n", cmp[i].priority);
 		
 		if(cmp[i].action != JOIN)
 		{
@@ -127,8 +130,90 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
     	else
     		printf("%lu ", sums[i]);
     }
-    printf("\n------------------------------------------------------------\n");
+    printf("\nTotal: %lu\n", result->tupleAmount);
+    printf("------------------------------------------------------------\n");
 
+}
+
+
+void calculateActionPriorities(table **t, Query *q)
+{
+	Comparison *cmp =NULL;
+	uint64_t distinctsA, distinctsB, min, max, tuples, tuplesA, tuplesB;
+	for (int action = 0; action < q->comparison_set->comparisons_num; action++)
+	{
+		cmp =& (q->comparison_set->comparisons[action]);
+
+		min = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].min;
+		max = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].max;
+		distinctsA = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].distincts;
+		tuples = t[q->query_relation_set->query_relations[cmp->relationA]] -> size;
+		tuplesA = tuples;
+
+		if(cmp->action == JOIN)
+		{
+			distinctsB = t[q->query_relation_set->query_relations[cmp->relationB]]->metadata[cmp->columnB].distincts;
+			tuplesB = t[q->query_relation_set->query_relations[cmp->relationB]] -> size;
+
+			if(cmp->relationA == cmp->relationB)//same relation
+			{
+				cmp->priority = 1.0;
+			}
+			else if(q->query_relation_set->query_relations[cmp->relationA] == q->query_relation_set->query_relations[cmp->relationB])
+			{//self join!
+				if(cmp->columnA == cmp->columnB)
+					cmp->priority = (float) ((tuples -distinctsA) * (tuples -distinctsA) + distinctsA);
+				else if(distinctsA < distinctsB)
+					cmp->priority = (float) (tuplesA);
+				else
+					cmp->priority = (float) (tuplesB);
+
+			}
+			else
+			{	
+				distinctsA = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].distincts;
+				distinctsB = t[q->query_relation_set->query_relations[cmp->relationB]]->metadata[cmp->columnB].distincts;
+				if(distinctsA < distinctsB)
+					cmp->priority = (float) tuplesA;
+				else
+					cmp->priority = (float) tuplesB;
+				//cmp->priority = distinctsA + distinctsB;
+			}
+		}
+		else if(cmp->action == EQUAL)
+		{
+			//distinctsA = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].distincts;
+			cmp->priority = 0.0;//(float) distinctsA;
+		}
+		else if (cmp->action == LESS_THAN)
+		{
+			int value = cmp->relationB;
+			if (value < min)//no value less than minimum
+				cmp->priority = 0.0;//do first and return NULL
+			else if(value >= max)
+				cmp->priority = (float) tuples;
+			else
+			{
+				float percentage = ((float) (value - min)) / ((float) (max - min));
+				cmp->priority = (float) tuples * percentage;
+			}
+		}
+		else if (cmp->action == GREATER_THAN)
+		{
+			int value = cmp->relationB;
+
+			if (value > max)//no value greater than max
+				cmp->priority = 0.0;//do first
+			else if (value <= min)
+				cmp->priority = (float) tuples;
+			else
+			{
+				float percentage = ((float) (max - value)) / ((float) (max - min));
+				cmp->priority = (float) tuples * percentage;
+			}
+			
+		}
+	}
 }
 
 IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels) {

@@ -216,17 +216,17 @@ Comparison getComparisonFromQuery(char *line) {
         if(line_copy[i] == '=')
         {
             result.action = EQUAL;
-            result.priority = EQ_PRIORITY;
+            result.priority = -1;
         }
         else if(line_copy[i] == '<')
         {
             result.action = LESS_THAN;
-            result.priority = DIFF_THAN_PRIORITY;
+            result.priority = -1;
         }
         else if(line_copy[i] == '>')
         {
             result.action = GREATER_THAN;
-            result.priority = DIFF_THAN_PRIORITY;
+            result.priority = -1;
         }
         else{
             continue;
@@ -248,9 +248,9 @@ Comparison getComparisonFromQuery(char *line) {
             result.columnB = atoi(num);
             result.action = JOIN;
             if(result.relationA == result.relationB)
-                result.priority = JOIN_SAME_REL_PRIORITY;
+                result.priority = -1;
             else
-                result.priority = JOIN_PRIORITY;
+                result.priority = -1;
         }
         else
             result.columnB = -1;
