@@ -66,6 +66,7 @@ void executeQuery(table **t, Query *q)
 			printf("%d ", cmp[i].relationB);
 
 		printf("(pr: %d)\n", cmp[i].priority);
+		
 		if(cmp[i].action != JOIN)
 		{
 			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , cmp[i].relationB , cmp[i].action);
@@ -126,7 +127,7 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
     	else
     		printf("%lu ", sums[i]);
     }
-    printf("\n");
+    printf("\n------------------------------------------------------------\n");
 
 }
 
@@ -166,17 +167,12 @@ IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateRes
 IntermediateResults *crossProductIntermediateResults(IntermediateResults *inResA, IntermediateResults *inResB) {
 
     IntermediateResults* result = createIntermediateResult();
+    IntermediateResultsAlloc(&result, (inResA->tupleAmount *  inResB->tupleAmount) , (inResA->relAmount + inResB->relAmount));
 
-    result->relAmount = inResA->relAmount + inResB->relAmount;
-    result->relationIDs = malloc(result->relAmount*sizeof(int32_t));
     for(int i=0; i<inResA->relAmount; i++)
         result->relationIDs[i] = inResA->relationIDs[i];
     for(int i=0; i<inResB->relAmount; i++)
         result->relationIDs[inResA->relAmount + i] = inResB->relationIDs[i];
-    result->tupleAmount = inResA->tupleAmount *  inResB->tupleAmount;
-    result->keys = malloc(result->relAmount*sizeof(int32_t*));
-    for(int i=0; i<result->relAmount; i++)
-        result->keys[i] = malloc(result->tupleAmount*sizeof(int32_t));
 
     for(int i=0; i<inResA->tupleAmount; i++){
 
@@ -208,6 +204,25 @@ void IntermediateResultsInit(IntermediateResults **inRes)
 	(*inRes) -> relAmount = 0;
 }
 
+void IntermediateResultsAlloc(IntermediateResults **inResaddr, uint64_t tupleAmount, int relAmount)
+{
+	if((*inResaddr) == NULL)
+		IntermediateResultsInit(inResaddr);
+
+	IntermediateResults *inRes = *inResaddr;
+
+	inRes -> tupleAmount = tupleAmount;
+	inRes -> relAmount = relAmount;
+
+	inRes -> tupleIDs = malloc(tupleAmount*sizeof(uint64_t));
+	inRes -> relationIDs = malloc(relAmount*sizeof(int));
+
+	inRes -> keys = malloc(relAmount * sizeof(int32_t*));
+	for (int i = 0; i < relAmount; i++)
+	{
+		inRes -> keys[i] = malloc(tupleAmount * sizeof(int32_t));
+	}
+}
 
 relation* createRelationFromTable(table *t, int columnID)
 {
@@ -370,17 +385,8 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 		//then, create a new Intermediate Results table with newSize tuples
 		IntermediateResults *inResNew = createIntermediateResult();
+		IntermediateResultsAlloc(&inResNew, newSize, templist->table->relAmount);
 
-		inResNew -> tupleAmount = (uint64_t) newSize;
-		inResNew -> relAmount = templist -> table -> relAmount;
-
-		inResNew -> tupleIDs = malloc((inResNew -> tupleAmount)*sizeof(uint64_t));
-		inResNew -> relationIDs = malloc((inResNew -> relAmount)*sizeof(int));
-		inResNew -> keys = malloc((inResNew -> relAmount)*sizeof(int32_t*));
-		for (int i = 0; i < inResNew -> relAmount; i++)
-		{
-			inResNew -> keys[i] = malloc((inResNew -> tupleAmount)*sizeof(int32_t));
-		}
 
 		for (int i = 0; i < inResNew -> relAmount; i++)
 		{
@@ -420,18 +426,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 		//then, allocate memory for a new intermediate results table
 		IntermediateResults *inResNew = createIntermediateResult();
-
-		inResNew -> tupleAmount = (uint64_t) newSize;
-		inResNew -> relAmount = 1;
-
-		inResNew -> tupleIDs = malloc((newSize)*sizeof(uint64_t));
-		inResNew -> relationIDs = malloc((1)*sizeof(int));
-		inResNew -> keys = malloc((inResNew -> relAmount)*sizeof(int32_t*));
-
-		for (int i = 0; i < inResNew -> relAmount; i++)
-		{
-			inResNew -> keys[i] = malloc((inResNew -> tupleAmount)*sizeof(int32_t));
-		}
+		IntermediateResultsAlloc(&inResNew, newSize, 1);
 
 		inResNew -> relationIDs[0] = relationID;
 
@@ -629,20 +624,13 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
     result* results = RadixHashJoin(relA, relB);
 
     IntermediateResults* r = createIntermediateResult();
+	IntermediateResultsAlloc(&r, (uint64_t) getResultsAmount(), (getNodeFromList(inRes,indexA)->relAmount + getNodeFromList(inRes,indexB)->relAmount) );
 
-
-    r->relAmount = getNodeFromList(inRes, indexA)->relAmount + getNodeFromList(inRes, indexB)->relAmount;
-    r->relationIDs = malloc(r->relAmount*sizeof(int32_t));
     for(int i=0; i<getNodeFromList(inRes, indexA)->relAmount; i++)
     	r->relationIDs[i] = getNodeFromList(inRes, indexA)->relationIDs[i];
     for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
     	r->relationIDs[i] = getNodeFromList(inRes, indexB)->relationIDs[i - getNodeFromList(inRes, indexA)->relAmount];
-    r->tupleAmount = (uint64_t) getResultsAmount();
-
-
-    r->keys = malloc(r->relAmount*sizeof(int32_t*));
-    for(int i=0; i<r->relAmount; i++)
-    	r->keys[i] = malloc(r->tupleAmount*sizeof(int32_t));
+    
 
     for(int j=0; j<r->tupleAmount; j++){
 
@@ -665,16 +653,10 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 
 IntermediateResults* addResultToNewIntermediateResult(result *results, IntermediateResults *inRes, int relationA, int relationB) {
 
-	inRes->relAmount = 2;
-	inRes->relationIDs = malloc(2*sizeof(int32_t));
+	IntermediateResultsAlloc(&inRes, (uint64_t) getResultsAmount(), 2);
+
 	inRes->relationIDs[0] = relationA;
 	inRes->relationIDs[1] = relationB;
-	inRes->tupleAmount = (uint64_t) getResultsAmount();
-
-	inRes->keys = malloc(2*sizeof(int32_t*));
-	inRes->keys[0] = malloc(inRes->tupleAmount * sizeof(int32_t));
-	inRes->keys[1] = malloc(inRes->tupleAmount * sizeof(int32_t));
-
 	for(int i=0; i<inRes->tupleAmount; i++){
 
 		inRes->keys[0][i] = results->results[i%getResultTuplesPerPage()].relation_R;
@@ -985,12 +967,8 @@ IntermediateResults* createIntermediateResult(){
 IntermediateResults* createIntermediateResultFromTable(table* t, int relation){
 
     IntermediateResults* result = createIntermediateResult();
-    result->relAmount = 1;
-    result->relationIDs = malloc(sizeof(int32_t));
-    result->relationIDs[0] = relation;
-    result->tupleAmount = t->size;
-    result->keys = malloc(sizeof(int32_t*));
-    result->keys[0] = malloc(result->tupleAmount*sizeof(int32_t));
+    IntermediateResultsAlloc(&result, t->size, 1);
+
     for(int i=0; i<result->tupleAmount; i++)
         result->keys[0][i] = i;
 
