@@ -30,6 +30,26 @@ void executeQuery(table **t, Query *q)
 	}
 
 	//print actions in increasing priority order
+	/*for (int i = 0; i < actions; i++)
+	{
+		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
+		if(cmp[i].action == LESS_THAN)
+			printf(" < ");
+		else if(cmp[i].action == GREATER_THAN)
+			printf(" > ");
+		else
+			printf(" = ");
+
+		if(cmp[i].action == JOIN)
+			printf("%d.%d ", cmp[i].relationB , cmp[i].columnB);
+		else
+			printf("%d ", cmp[i].relationB);
+
+		printf("(pr: %d)\n", cmp[i].priority);
+	}*/
+
+	//execute actions in query
+	IntermediateResultsList* inRes = createList();
 	for (int i = 0; i < actions; i++)
 	{
 		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
@@ -46,12 +66,6 @@ void executeQuery(table **t, Query *q)
 			printf("%d ", cmp[i].relationB);
 
 		printf("(pr: %d)\n", cmp[i].priority);
-	}
-
-	//execute actions in query
-	IntermediateResultsList* inRes = createList();
-	for (int i = 0; i < actions; i++)
-	{
 		if(cmp[i].action != JOIN)
 		{
 			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , cmp[i].relationB , cmp[i].action);
@@ -85,8 +99,12 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
     IntermediateResults* result = getIntermediateResultFromColumns(t, inRes, columns, rels);
     int index;
 
+    uint64_t sums[columns->columns_num];
     for(int i=0; i<columns->columns_num; i++)
+    {
         printf("(%d.%d)\t", rels[columns->columns[i].relation], columns->columns[i].column);
+		sums[i] = 0;    
+    }
     printf("\n\n");
 
     for(int j=0; j<result->tupleAmount; j++){
@@ -94,12 +112,18 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
         for(int i=0; i<columns->columns_num; i++) {
 
             index = getColumnIntermediateResultsIndex(result, rels[columns->columns[i].relation]);
-            printf("%5lu\t", t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]]);
+            //printf("%5lu\t", t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]]);
+            sums[i] += t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]];
 
         }
-        printf("\n");
-
+        //printf("\n");
     }
+
+    for (int i = 0; i < columns->columns_num; i++)
+    {
+    	printf("%lu ", sums[i]);
+    }
+    printf("\n");
 
 }
 
@@ -296,7 +320,7 @@ int calculateSameJoinResultsAmount(relation* relA, relation* relB){
 	int counter = 0;
 	for(int i=0; i<relA->num_tuples; i++)
 		if(relA->tuples[i].payload == relB->tuples[i].payload) {
-			printf("%d - %d\n", relA->tuples[i].key, relA->tuples[i].payload);
+			//printf("%d - %d\n", relA->tuples[i].key, relA->tuples[i].payload);
 			counter++;
 		}
 	return counter;
