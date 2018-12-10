@@ -84,7 +84,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
  * Two columns of the same relation are joined and therefore there is no need to call the Radix algorithm. We must
  * simply compare the values of the two columns of the relation to find those that are equal.
  */
-IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB);
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int* rels, int relationA, int columnA, int columnB);
 
 /**
  * Two different relations are joined and therefore the Radix algorithm must me called. If there are already
@@ -112,7 +112,7 @@ int existsInIntermediateResults(IntermediateResults *inRes, int rel);
  * algorithm. We simply need to traverse the intermediate results one by one and keep only those whose value in both
  * joined columns is the same.
  */
-IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, int relationA, int columnA, int relationB, int columnB);
+IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, int* rels, int relationA, int columnA, int relationB, int columnB);
 
 /**
  * If only one of the two relations being joined exists in one intermediate results table, then a new table must be

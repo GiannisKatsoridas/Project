@@ -78,7 +78,7 @@ void executeQuery(table **t, Query *q)
 		{
 			if (cmp[i].relationA == cmp[i].relationB)
 			{
-				inRes = joinSameRelation(inRes, t, rels[cmp[i].relationA], cmp[i].columnA, cmp[i].columnB);
+				inRes = joinSameRelation(inRes, t, rels, cmp[i].relationA, cmp[i].columnA, cmp[i].columnB);
 			}
 			else
 			{
@@ -525,7 +525,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 }
 
 
-IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int relationA, int columnA, int columnB) {
+IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table **t, int* rels, int relationA, int columnA, int columnB) {
 
 	int index = getIntermediateResultsSingleIndex(head, relationA);
 
@@ -533,14 +533,14 @@ IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table *
 
 	if(index != -1){
 
-		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnA);
-		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnB);
+		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[rels[relationA]], relationA, columnA);
+		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[rels[relationA]], relationA, columnB);
 
 	}
 	else{
 
-		relA = createRelationFromTable(t[relationA], columnA);
-		relB = createRelationFromTable(t[relationA], columnB);
+		relA = createRelationFromTable(t[rels[relationA]], columnA);
+		relB = createRelationFromTable(t[rels[relationA]], columnB);
 
 	}
 
@@ -617,7 +617,7 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	 * If both relations exist in a single IntermediateResults table then act accordingly.
 	 */
 	if(existsInIntermediateResults(getNodeFromList(head, index), relationA) && existsInIntermediateResults(getNodeFromList(head, index), relationB)) {
-		IntermediateResults *temp = addResultsSameIntermediateResultsSize(t, getNodeFromList(head, index), relationA, columnA, relationB, columnB);
+		IntermediateResults *temp = addResultsSameIntermediateResultsSize(t, getNodeFromList(head, index), rels, relationA, columnA, relationB, columnB);
 		deleteNodeFromList(head, index);
 		addNodeToList(head, temp);
 		return head;
@@ -797,7 +797,7 @@ int getIntermediateResultsSingleIndex(IntermediateResultsList* inRes, int relati
 }
 
 
-IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, int relationA, int columnA, int relationB, int columnB){
+IntermediateResults* addResultsSameIntermediateResultsSize(table** t, IntermediateResults* inRes, int* rels, int relationA, int columnA, int relationB, int columnB){
 
 	IntermediateResults* r = createIntermediateResult();
 
@@ -820,7 +820,7 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
 
 	for(int i=0; i<inRes->tupleAmount; i++){
 
-		if(t[relationA]->columns[columnA][inRes->keys[relAIndex][i]] == t[relationB]->columns[columnB][inRes->keys[relBIndex][i]])
+		if(t[rels[relationA]]->columns[columnA][inRes->keys[relAIndex][i]] == t[rels[relationB]]->columns[columnB][inRes->keys[relBIndex][i]])
 			count++;
 
 
@@ -836,7 +836,7 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
 	int newInResIndex = 0;
 	for(int i=0; i<inRes->tupleAmount; i++){
 
-		if(t[relationA]->columns[columnA][inRes->keys[relAIndex][i]] == t[relationB]->columns[columnB][inRes->keys[relBIndex][i]]){
+		if(t[rels[relationA]]->columns[columnA][inRes->keys[relAIndex][i]] == t[rels[relationB]]->columns[columnB][inRes->keys[relBIndex][i]]){
 
 			for(int j=0; j<r->relAmount; j++)
 				r->keys[j][newInResIndex] = inRes->keys[j][i];
