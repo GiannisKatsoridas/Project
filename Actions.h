@@ -91,7 +91,7 @@ IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table *
  * any intermediate results, they are taken into consideration. Otherwise, the initial relations' values are
  * inserted into the algorithm.
  */
-IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* inRes, table **t, int relationA, int relationB, int columnA, int columnB);
+IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* inRes, table **t, int* rels, int relationA, int relationB, int columnA, int columnB);
 
 /**
  * There may be more than one different intermediate results tables, so this functions returns the index of the
@@ -131,7 +131,7 @@ IntermediateResults* addResultToNewIntermediateResult(result *results, Intermedi
  * If the 2 relations currently being joined are in different intermediate results tables, then those two tables need
  * to merge into one, so all the relations are connected to each other.
  */
-IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int relationA, int relationB, int columnA, int columnB);
+IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int* rels, int relationA, int relationB, int columnA, int columnB);
 
 /**
  * Given a join query and the current list of intermediate results, returns:

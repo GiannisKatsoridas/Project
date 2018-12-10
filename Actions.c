@@ -72,7 +72,7 @@ void executeQuery(table **t, Query *q)
 		
 		if(cmp[i].action != JOIN)
 		{
-			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , rels[cmp[i].relationA], cmp[i].columnA , cmp[i].relationB , cmp[i].action);
+			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , cmp[i].relationA, cmp[i].columnA , cmp[i].relationB , cmp[i].action);
 		}
 		else if(cmp[i].action == JOIN)
 		{
@@ -82,7 +82,7 @@ void executeQuery(table **t, Query *q)
 			}
 			else
 			{
-				inRes = joinRelationsRadix(inRes, t, rels[cmp[i].relationA], rels[cmp[i].relationB], cmp[i].columnA, cmp[i].columnB);
+				inRes = joinRelationsRadix(inRes, t, rels, cmp[i].relationA, cmp[i].relationB, cmp[i].columnA, cmp[i].columnB);
 			}
 		}
 		else
@@ -115,12 +115,10 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
 
         for(int i=0; i<columns->columns_num; i++) {
 
-            index = getColumnIntermediateResultsIndex(result, rels[columns->columns[i].relation]);
-            //printf("%5lu\t", t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]]);
-            sums[i] += t[result->relationIDs[index]]->columns[columns->columns[i].column][result->keys[index][j]];
+            index = getColumnIntermediateResultsIndex(result, columns->columns[i].relation);
+            sums[i] += t[rels[result->relationIDs[index]]]->columns[columns->columns[i].column][result->keys[index][j]];
 
         }
-        //printf("\n");
     }
 
     for (int i = 0; i < columns->columns_num; i++)
@@ -221,7 +219,7 @@ IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateRes
     if(columns->columns_num == 0)
         return NULL;
 
-    int index = getIntermediateResultsSingleIndex(inRes, rels[columns->columns[0].relation]);
+    int index = getIntermediateResultsSingleIndex(inRes, columns->columns[0].relation);
     IntermediateResults* result;
 
     if(index != -1)
@@ -232,15 +230,15 @@ IntermediateResults *getIntermediateResultFromColumns(table** t, IntermediateRes
 
     for(int i=1; i<columns->columns_num; i++){
 
-        if(existsInIntermediateResults(result, rels[columns->columns[i].relation]))
+        if(existsInIntermediateResults(result, columns->columns[i].relation))
             continue;
 
-        index = getIntermediateResultsSingleIndex(inRes, rels[columns->columns[i].relation]);
+        index = getIntermediateResultsSingleIndex(inRes, columns->columns[i].relation);
 
         if(index != -1)
             result = crossProductIntermediateResults(result, getNodeFromList(inRes, index));
         else {
-            IntermediateResults *temp = createIntermediateResultFromTable(t[rels[columns->columns[i].relation]], rels[columns->columns[i].relation]);
+            IntermediateResults *temp = createIntermediateResultFromTable(t[rels[columns->columns[i].relation]], columns->columns[i].relation);
             result = crossProductIntermediateResults(result, temp);
             IntermediateResultsDel(temp);
         }
@@ -362,6 +360,7 @@ relation *createRelationFromIntermediateResults(IntermediateResults* inRes, tabl
 	for (i = 0; i < rel->num_tuples; i++)
 	{
 		rel->tuples[i].key = i;
+		int a = inRes->keys[index][i];
 		rel->tuples[i].payload = (int32_t) t->columns[columnID][inRes->keys[index][i]];
 	}
 
@@ -589,9 +588,7 @@ IntermediateResultsList* joinSameRelation(IntermediateResultsList* head, table *
 }
 
 
-IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table **t, int relationA, int relationB, int columnA, int columnB){
-
-	IntermediateResultsList* node;
+IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table **t, int* rels, int relationA, int relationB, int columnA, int columnB){
 
 	int cat = getQueryCategory(head, relationA, relationB);
 	int index = 0;
@@ -603,7 +600,7 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	}
 	else if(cat == 3){
 
-		IntermediateResults* temp = mergeIntermediateResults(head, t, relationA, relationB, columnA, columnB);
+		IntermediateResults* temp = mergeIntermediateResults(head, t, rels, relationA, relationB, columnA, columnB);
 		int indexA = getIntermediateResultsSingleIndex(head, relationA);
 		int indexB = getIntermediateResultsSingleIndex(head, relationB);
 		deleteNodeFromList(head, indexA);
@@ -632,20 +629,20 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 	 * If no relations exist in any intermediate results tables, then take all values from the table t.
 	 */
 	if(cat == 0){
-		relA = createRelationFromTable(t[relationA], columnA);
-		relB = createRelationFromTable(t[relationB], columnB);
+		relA = createRelationFromTable(t[rels[relationA]], columnA);
+		relB = createRelationFromTable(t[rels[relationB]], columnB);
 	}
 	else {
 		/**
 		 * Form the relations given as arguments to the Radix algorithm through the inRes table.
 		 */
-		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationA], relationA, columnA);
-		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[relationB], relationB, columnB);
+		relA = createRelationFromIntermediateResults(getNodeFromList(head, index), t[rels[relationA]], relationA, columnA);
+		relB = createRelationFromIntermediateResults(getNodeFromList(head, index), t[rels[relationB]], relationB, columnB);
 
 		if(relA == NULL)
-            relA = createRelationFromTable(t[relationA], columnA);
+            relA = createRelationFromTable(t[rels[relationA]], columnA);
 		else if(relB == NULL)
-		    relB = createRelationFromTable(t[relationB], columnB);
+		    relB = createRelationFromTable(t[rels[relationB]], columnB);
 	}
 
 	result* results = RadixHashJoin(relA, relB);
@@ -679,7 +676,7 @@ IntermediateResultsList* joinRelationsRadix(IntermediateResultsList* head, table
 }
 
 
-IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int relationA, int relationB, int columnA, int columnB) {
+IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, table** t, int* rels, int relationA, int relationB, int columnA, int columnB) {
 
     int indexA = 0, indexB = 0;
 
@@ -690,8 +687,8 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
             indexB = i;
     }
 
-    relation* relA = createRelationFromIntermediateResults(getNodeFromList(inRes, indexA), t[relationA], relationA, columnA);
-    relation* relB = createRelationFromIntermediateResults(getNodeFromList(inRes, indexB), t[relationB], relationB, columnB);
+    relation* relA = createRelationFromIntermediateResults(getNodeFromList(inRes, indexA), t[rels[relationA]], relationA, columnA);
+    relation* relB = createRelationFromIntermediateResults(getNodeFromList(inRes, indexB), t[rels[relationB]], relationB, columnB);
 
     result* results = RadixHashJoin(relA, relB);
 
