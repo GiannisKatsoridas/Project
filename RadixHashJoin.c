@@ -75,7 +75,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
     //for each relation bucket
     for (int i = 0; i < power_of_2(suffix); i++)
     {
-       // printf("BUCKET #%d\n", i);
+        //printf("BUCKET #%d\n", i);
         //compare size of bucket i of the relations R and S
         if (histogramR[i] > histogramS[i])
         {//bucket i of relation S is smaller; S will be hashed

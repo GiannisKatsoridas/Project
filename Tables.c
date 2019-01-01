@@ -123,7 +123,6 @@ void parseTableData(table** t){
 
         t[i]->tableID = i;
 
-
     }
 
 }
