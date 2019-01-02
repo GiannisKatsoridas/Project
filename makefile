@@ -1,8 +1,9 @@
 CC = gcc
 FLAGS = -g
+THREADS = -lpthread
 
-OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o
-HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h
+OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o Jobs.o JobQueue.o
+HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h Jobs.h JobQueue.h
 OUT1 = Caramel
 
 OBJ2 = DataGenerator.o
@@ -20,11 +21,11 @@ OUT3 = UnitTests
 TXT = DataRelationR.txt DataRelationS.txt
 
 
-all: $(OUT1) $(OUT2) $(OUT3)
+all: $(OUT1) $(OUT2) #$(OUT3)
 
 
 Caramel: $(OBJ1) $(HEAD1)
-	$(CC) $(OBJ1) -o $(OUT1)
+	$(CC) $(OBJ1) -o $(OUT1) $(THREADS)
 
 DataGenerator: $(OBJ2) $(HEAD2)
 	$(CC) $(OBJ2) -o $(OUT2)
@@ -55,6 +56,12 @@ Query.o: Query.c Query.h
 
 Actions.o: Actions.c Actions.h
 	$(CC) -c Actions.c $(FLAGS)
+
+JobQueue.o: JobQueue.c JobQueue.h Globals.h
+	$(CC) -c JobQueue.c $(FLAGS) $(THREADS)
+
+Jobs.o: Jobs.c Jobs.h JobQueue.h Globals.h
+	$(CC) -c Jobs.c $(FLAGS) $(THREADS)
 
 DataGenerator.o: DataGenerator.c DataGenerator.h Globals.h
 	$(CC) -c DataGenerator.c $(FLAGS)
