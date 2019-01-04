@@ -119,13 +119,13 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
  * constructed, contaning one more column, the one for the new relation. Then each result from the radix algorithm is
  * placed accordingly into the new IntermediateResults table.
  */
-IntermediateResults* addResultsWithNewColumn(result* results, IntermediateResults* inRes, int relationA, int relationB);
+IntermediateResults* addResultsWithNewColumn(resultsWithNum* results, IntermediateResults* inRes, int relationA, int relationB);
 
 /**
  * If none of the two relations exists in any of the intermediate results tables, then a new must be created, that
  * contains nothing but the two relations currently being joined.
  */
-IntermediateResults* addResultToNewIntermediateResult(result *results, IntermediateResults *inRes, int relationA, int relationB);
+IntermediateResults* addResultToNewIntermediateResult(resultsWithNum *results, IntermediateResults *inRes, int relationA, int relationB);
 
 /**
  * If the 2 relations currently being joined are in different intermediate results tables, then those two tables need

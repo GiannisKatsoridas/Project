@@ -94,12 +94,11 @@ void index_destroy(hash_index **indx)
 	*indx = NULL;
 }
 
-int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, result* results)
+int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, result* results, int results_num)
 {//search all instances equal to payload in the current index bucket of rel
 	//rel is the relation whose bucket is currently indexed
 	//bucket_start is the first index of the current bucket in rel
 	//the key and payload arguments belong to the other relation and will be compared to the contents of rel
-	int results_num = 0;
 
 	int n = hash2(payload);
 
@@ -116,9 +115,9 @@ int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, i
         {
             //fprintf(stdout, "equals!\n");
             if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-            	results_num = add_result(results, key, rel->tuples[real_pos].key);
+            	results_num = add_result(results, key, rel->tuples[real_pos].key, results_num);
             else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-            	results_num = add_result(results, rel->tuples[real_pos].key, key);
+            	results_num = add_result(results, rel->tuples[real_pos].key, key, results_num);
         }
         while(indx -> chain[curr_pos] != -1)
         {
@@ -133,9 +132,9 @@ int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, i
 		    {
 		        //fprintf(stdout, "equals!\n");
 		        if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-		        	results_num = add_result(results, key, rel->tuples[real_pos].key);
+		        	results_num = add_result(results, key, rel->tuples[real_pos].key, results_num);
 		        else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-		        	results_num = add_result(results, rel->tuples[real_pos].key, key);
+		        	results_num = add_result(results, rel->tuples[real_pos].key, key, results_num);
 		    }
         }
 	}

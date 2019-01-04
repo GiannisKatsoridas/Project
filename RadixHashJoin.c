@@ -3,7 +3,7 @@
 #include "Index.h"
 
 
-result* RadixHashJoin(relation* relR, relation* relS){
+resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     suffix = RADIX_N;
     /*printf("Relation R before hashing:\n");
@@ -130,7 +130,7 @@ result* RadixHashJoin(relation* relR, relation* relS){
             key = x->tuples[pos].key;
             payload = x->tuples[pos].payload;
 
-            results_num = search_val(y, bucket_start, indx, key, payload, column_id, results);
+            results_num = search_val(y, bucket_start, indx, key, payload, column_id, results, results_num);
             
             pos--;
         }
@@ -151,6 +151,9 @@ result* RadixHashJoin(relation* relR, relation* relS){
     free(psumR);
     free(psumS);
 
+    resultsWithNum* res = malloc(sizeof(resultsWithNum));
+    res->results = results;
+    res->results_amount = results_num;
 
-    return results;
+    return res;
 }

@@ -47,7 +47,18 @@ typedef struct result {
  * It consists of the list of results and the link the next block.
  */
 
+
+/**
+ * Type definition of the results list, along with its size.
+ */
+typedef struct resultsWithNum {
+
+    int results_amount;
+    result* results;
+
+} resultsWithNum;
+
 /** Radix Hash Join**/
-result* RadixHashJoin(relation *relR, relation *relS);
+resultsWithNum* RadixHashJoin(relation *relR, relation *relS);
 
 #endif

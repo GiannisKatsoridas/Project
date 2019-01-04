@@ -12,17 +12,25 @@ add_executable(Caramel
         Index.c
         Query.c
         Actions.c
-        Actions.h)
+        Actions.h
+        JobQueue.c
+        Jobs.c)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests
         UnitTests.c
         DataParse.c
-        Index.c
+        RadixHashJoin.c
         Results.c
+        Tables.c
+        Index.c
+        Query.c
+        Actions.c
         CUnit/Sources/Basic/Basic.c
         CUnit/Sources/Framework/CUError.c
         CUnit/Sources/Framework/MyMem.c
         CUnit/Sources/Framework/TestDB.c
         CUnit/Sources/Framework/TestRun.c
         CUnit/Sources/Framework/Util.c)
+
+target_link_libraries(Caramel pthread)

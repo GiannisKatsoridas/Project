@@ -14,14 +14,14 @@ result* create_results_page(){
     return res;
 }
 
-int add_result(result* res, int32_t value_R, int32_t value_S){
+int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount){
 
     //static int results_num = 0;
 
     result* pointer = res;
 
-    int bucket = getResultsAmount() / getResultTuplesPerPage();
-    int pos = getResultsAmount() % getResultTuplesPerPage();
+    int bucket = resAmount / getResultTuplesPerPage();
+    int pos = resAmount % getResultTuplesPerPage();
 
     if(pos == 0)
         bucket--;
@@ -33,7 +33,7 @@ int add_result(result* res, int32_t value_R, int32_t value_S){
 
     }
 
-    if(pos == 0 && results_amount != 0){
+    if(pos == 0 && resAmount != 0){
 
         pointer->next = create_results_page();
         pointer = pointer->next;
@@ -43,14 +43,15 @@ int add_result(result* res, int32_t value_R, int32_t value_S){
     pointer->results[pos].relation_R = value_R;
     pointer->results[pos].relation_S = value_S;
 
-    results_amount++;
+    resAmount++;
 
-    return results_amount;
+    return resAmount;
 }
 
+/*
 void print_results(result *res) {
 
-    int res_am = results_amount;
+    int res_am = ;
 
     if ((res==NULL) || (res_am==0))
     {
@@ -77,6 +78,7 @@ void print_results(result *res) {
     }
 
 }
+*/
 
 
 unsigned int int_to_int(unsigned int k) {
@@ -101,6 +103,13 @@ void print_relation(relation *rel, FILE *fp)
     fprintf(fp, "\n");
 }
 
+void freeResultsWithNum(resultsWithNum* results){
+
+    freeResults(results->results);
+
+    free(results);
+
+}
 
 void freeResults(result *results) {
 
@@ -112,20 +121,44 @@ void freeResults(result *results) {
 
     free(results);
 
-    results_amount = 0;
 }
 
-
-int getResultsAmount()
-{
-    return results_amount;
-}
 
 int getResultTuplesPerPage()
 {
     return tuples_per_page;
 }
 
-void setResultsAmount(int s){
-    results_amount = s;
-}
+/*
+void joinResults(result *res1, result *res2) {
+
+    result* pointer = res1;
+
+    int bucket = getResultsAmount() / getResultTuplesPerPage();
+    int pos = getResultsAmount() % getResultTuplesPerPage();
+
+    if(pos == 0)
+        bucket--;
+
+    while(bucket > 0){
+
+        pointer = pointer->next;
+        bucket--;
+
+    }
+
+    if(pos == 0 && results_amount != 0){
+
+        pointer->next = create_results_page();
+        pointer = pointer->next;
+
+    }
+
+    pointer->results[pos].relation_R = value_R;
+    pointer->results[pos].relation_S = value_S;
+
+    setResultsAmount(getResultsAmount()+1);
+
+
+
+}*/
