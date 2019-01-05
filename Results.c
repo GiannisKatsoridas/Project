@@ -180,12 +180,14 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 
 
 	//STEP 2:
-	//put (the head of) the 2nd list right after the pre-last node of the 1st list
+	//put (the head of) the 2nd list right after :
+	//(a)the pre-last node of the 1st list OR
+	//(b) the last node of the 1st list, in case that node has EXACTLTY tuples_per_page tuples
 	//(to the prelast1->next pointer)
 	//update the listnode amount of the first list
 	//and discard the second list
 
-	int remaining_tuples = 0;
+	int remaining_tuples = 0;//keeps the tuple amount of the last non-full page in the result list
 	if((prelast1 == NULL) && (last1==NULL))
 	{//if result list 1 is empty, just save data from list 2 to list 1
 		res1->results = res2->results;
@@ -199,8 +201,17 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 	else if(prelast1==NULL)
 	{//else if result list 1 has 1 node
 		remaining_tuples = res1->results_amount % getResultTuplesPerPage();
-		res1->results = res2->results;
-		res1->results_amount = res2->results_amount;
+		if (remaining_tuples == 0)
+		{//if last (and only) node in result list 1 has EXACTLY tuples_per_page tuples
+			last1->next = res2->results;
+			res1->results_amount += res2->results_amount;
+			last1 = NULL;
+		}
+		else
+		{
+			res1->results = res2->results;
+			res1->results_amount = res2->results_amount;
+		}
 
 		res2->results = NULL;
 		res2->results_amount = 0;
@@ -209,9 +220,18 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 	else
 	{//else if result list 1 has more than 1 nodes
 		remaining_tuples = res1->results_amount % getResultTuplesPerPage();
-		prelast1->next = res2->results;
-		res1->results_amount = res1->results_amount - (res1->results_amount)%getResultTuplesPerPage() + res2->results_amount;
-		
+		if (remaining_tuples == 0)
+		{//if last node in result list 1 has EXACTLY tuples_per_page tuples
+			last1->next = res2->results;
+			res1->results_amount += res2->results_amount;
+			last1 = NULL;
+		}
+		else
+		{
+			prelast1->next = res2->results;
+			res1->results_amount = res1->results_amount - remaining_tuples + res2->results_amount;
+		}
+
 		res2->results = NULL;
 		res2->results_amount = 0;
 		freeResultsWithNum(res2);
