@@ -105,6 +105,9 @@ void print_relation(relation *rel, FILE *fp)
 
 void freeResultsWithNum(resultsWithNum* results){
 
+	if(results==NULL)
+		return;
+
     freeResults(results->results);
 
     free(results);
@@ -112,6 +115,9 @@ void freeResultsWithNum(resultsWithNum* results){
 }
 
 void freeResults(result *results) {
+
+	if(results==NULL)
+		return;
 
     if(results->next!=NULL){
         freeResults(results->next);
@@ -138,5 +144,87 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 		return;
 	}
 
+	if((res2->results_amount == 0) || (res2->results == NULL))
+		return;
 
+	//STEP 1: 
+	//keep address of last and prelast node of results list 1
+	//keep address of last node of results list 2
+
+	result *prelast1 = NULL;
+	result *last1 = res1->results;
+	result *last2 = res2->results;
+
+	while(last1 != NULL)
+	{
+		if (last1->next != NULL)
+		{
+			prelast1 = last1;
+			last1 = last1->next;
+		}
+		else
+			break;
+	}
+
+	while(last2 != NULL)
+	{
+		if (last2->next != NULL)
+			last2 = last2->next;
+		else
+			break;
+	}
+	//(pre1, l1, l2) = 
+	//(NULL, NULL, val)	(result list 1 hasn't got any nodes)
+	//or (NULL, val, val)	(result list 1 has only 1 node)
+	//or (val, val, val)	(lesult list 1 has more than 1 node)
+
+
+	//STEP 2:
+	//put (the head of) the 2nd list right after the pre-last node of the 1st list
+	//(to the prelast1->next pointer)
+	//update the listnode amount of the first list
+	//and discard the second list
+
+	int remaining_tuples = 0;
+	if((prelast1 == NULL) && (last1==NULL))
+	{//if result list 1 is empty, just save data from list 2 to list 1
+		res1->results = res2->results;
+		res1->results_amount = res2->results_amount;
+
+		res2->results = NULL;
+		res2->results_amount = 0;
+		freeResultsWithNum(res2);
+		return;
+	}
+	else if(prelast1==NULL)
+	{//else if result list 1 has 1 node
+		remaining_tuples = res1->results_amount % getResultTuplesPerPage();
+		res1->results = res2->results;
+		res1->results_amount = res2->results_amount;
+
+		res2->results = NULL;
+		res2->results_amount = 0;
+		freeResultsWithNum(res2);
+	}
+	else
+	{//else if result list 1 has more than 1 nodes
+		remaining_tuples = res1->results_amount % getResultTuplesPerPage();
+		prelast1->next = res2->results;
+		res1->results_amount = res1->results_amount - (res1->results_amount)%getResultTuplesPerPage() + res2->results_amount;
+		
+		res2->results = NULL;
+		res2->results_amount = 0;
+		freeResultsWithNum(res2);
+	}
+
+	//STEP 3:
+	//add result tuples from last1 node to the end of last2 node
+	//(remember: the last2 node is now at the end of the 1st list)
+	//and discard the last1 node after it is copied
+	for (int i = 0; i < remaining_tuples; i++)
+	{
+		res1->results_amount = add_result(res1->results, last1->results[i].relation_R, last1->results[i].relation_S, res1->results_amount);
+	}
+
+	freeResults(last1);
 }
