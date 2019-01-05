@@ -20,16 +20,16 @@ int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount){
 
     result* pointer = res;
 
-    int bucket = resAmount / getResultTuplesPerPage();
+    int resultnode = resAmount / getResultTuplesPerPage();
     int pos = resAmount % getResultTuplesPerPage();
 
     if(pos == 0)
-        bucket--;
+        resultnode--;
 
-    while(bucket > 0){
+    while(resultnode > 0){
 
         pointer = pointer->next;
-        bucket--;
+        resultnode--;
 
     }
 
@@ -129,36 +129,14 @@ int getResultTuplesPerPage()
     return tuples_per_page;
 }
 
-/*
-void joinResults(result *res1, result *res2) {
 
-    result* pointer = res1;
-
-    int bucket = getResultsAmount() / getResultTuplesPerPage();
-    int pos = getResultsAmount() % getResultTuplesPerPage();
-
-    if(pos == 0)
-        bucket--;
-
-    while(bucket > 0){
-
-        pointer = pointer->next;
-        bucket--;
-
-    }
-
-    if(pos == 0 && results_amount != 0){
-
-        pointer->next = create_results_page();
-        pointer = pointer->next;
-
-    }
-
-    pointer->results[pos].relation_R = value_R;
-    pointer->results[pos].relation_S = value_S;
-
-    setResultsAmount(getResultsAmount()+1);
+void concatResults(resultsWithNum *res1, resultsWithNum *res2) 
+{
+	if ((res1==NULL) || (res2==NULL))
+	{
+		fprintf(stderr, "concatResults(): NULL arguments\n");
+		return;
+	}
 
 
-
-}*/
+}

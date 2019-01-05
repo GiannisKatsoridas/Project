@@ -26,6 +26,6 @@ void freeResults(result* results);
 
 int getResultTuplesPerPage();
 
-void joinResults(result* res1, result* res2);       // Add all results from res2 to res1.
+void concatResults(resultsWithNum* res1, resultsWithNum* res2);       // Add all results from res2 to res1.
 
 #endif

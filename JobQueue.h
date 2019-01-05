@@ -22,7 +22,7 @@ typedef struct{
     //JoinJob
     int bucket_id;
 
-    result *res;
+    resultsWithNum *res;
     sem_t *res_mtx;
 }JobQueueElem;
 
@@ -45,7 +45,7 @@ typedef struct{
 JobQueueElem * JobCreate(int JobID, relation *rels[2], int hash1_value, int start[2], int end[2], 
                         int *hist[2], int *psum[2], sem_t *hist_mtx, 
                         relation *newrels[2],
-                        int bucket_id, result *res, sem_t *res_mtx);
+                        int bucket_id, resultsWithNum *res, sem_t *res_mtx);
 
 
 void JobQueueInit(JobQueue** qaddr, int size);
