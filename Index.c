@@ -94,7 +94,7 @@ void index_destroy(hash_index **indx)
 	*indx = NULL;
 }
 
-int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, result* results, int results_num)
+void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, resultsWithNum* res)
 {//search all instances equal to payload in the current index bucket of rel
 	//rel is the relation whose bucket is currently indexed
 	//bucket_start is the first index of the current bucket in rel
@@ -115,9 +115,9 @@ int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, i
         {
             //fprintf(stdout, "equals!\n");
             if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-            	results_num = add_result(results, key, rel->tuples[real_pos].key, results_num);
+            	add_result(res, key, rel->tuples[real_pos].key);
             else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-            	results_num = add_result(results, rel->tuples[real_pos].key, key, results_num);
+            	add_result(res, rel->tuples[real_pos].key, key);
         }
         while(indx -> chain[curr_pos] != -1)
         {
@@ -132,13 +132,12 @@ int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, i
 		    {
 		        //fprintf(stdout, "equals!\n");
 		        if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-		        	results_num = add_result(results, key, rel->tuples[real_pos].key, results_num);
+		        	add_result(res, key, rel->tuples[real_pos].key);
 		        else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-		        	results_num = add_result(results, rel->tuples[real_pos].key, key, results_num);
+		        	add_result(res, rel->tuples[real_pos].key, key);
 		    }
         }
 	}
-	return results_num;
 }
 
 /*int search_all_val(relation *x, int* x_hist, int *x_psum, relation *y, int* y_hist, int* y_psum, int bucket_id, index * indx, int column_id, result* results)

@@ -2,10 +2,19 @@
 #include <stdlib.h>
 #include "Results.h"
 
-result* create_results_page(){
 
-    tuples_per_page = page_size / sizeof(s_tuple);
+void setTuplesPerPage()
+{
+	tuples_per_page = page_size / sizeof(s_tuple);
+}
 
+int getResultTuplesPerPage()
+{
+    return tuples_per_page;
+}
+
+result* create_results_page()
+{
     result* res = malloc(sizeof(result));
 
     res->next = NULL;
@@ -14,14 +23,26 @@ result* create_results_page(){
     return res;
 }
 
-int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount){
+resultsWithNum* create_resultsWithNum(){
+	resultsWithNum* x = malloc(sizeof(resultsWithNum));
+	x->results_amount = 0;
+	x->results = NULL;
+
+	return x;
+}
+
+void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S){
 
     //static int results_num = 0;
 
-    result* pointer = res;
+    result* pointer = NULL;
 
-    int resultnode = resAmount / getResultTuplesPerPage();
-    int pos = resAmount % getResultTuplesPerPage();
+    if(res->results == NULL)
+    	res->results = create_results_page();
+    pointer = res->results;
+
+    int resultnode = res->results_amount / getResultTuplesPerPage();
+    int pos = res->results_amount % getResultTuplesPerPage();
 
     if(pos == 0)
         resultnode--;
@@ -33,7 +54,7 @@ int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount){
 
     }
 
-    if(pos == 0 && resAmount != 0){
+    if(pos == 0 && res->results_amount != 0){
 
         pointer->next = create_results_page();
         pointer = pointer->next;
@@ -43,9 +64,7 @@ int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount){
     pointer->results[pos].relation_R = value_R;
     pointer->results[pos].relation_S = value_S;
 
-    resAmount++;
-
-    return resAmount;
+    res->results_amount++;
 }
 
 /*
@@ -130,12 +149,6 @@ void freeResults(result *results) {
 }
 
 
-int getResultTuplesPerPage()
-{
-    return tuples_per_page;
-}
-
-
 void concatResults(resultsWithNum *res1, resultsWithNum *res2) 
 {
 	if ((res1==NULL) || (res2==NULL))
@@ -166,12 +179,9 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 			break;
 	}
 
-	while(last2 != NULL)
+	while(last2->next != NULL)
 	{
-		if (last2->next != NULL)
-			last2 = last2->next;
-		else
-			break;
+		last2 = last2->next;
 	}
 	//(pre1, l1, l2) = 
 	//(NULL, NULL, val)	(result list 1 hasn't got any nodes)
@@ -243,7 +253,7 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 	//and discard the last1 node after it is copied
 	for (int i = 0; i < remaining_tuples; i++)
 	{
-		res1->results_amount = add_result(res1->results, last1->results[i].relation_R, last1->results[i].relation_S, res1->results_amount);
+		add_result(res1, last1->results[i].relation_R, last1->results[i].relation_S);
 	}
 
 	freeResults(last1);

@@ -3,6 +3,7 @@
 #include <semaphore.h>
 
 #include "Jobs.h"
+#include "Index.h"
 
 
 
@@ -70,4 +71,52 @@ void JoinJob(JobQueueElem *argv)
 	//WAIT UNTIL BOTH NEW RELATIONS ARE FULLY CREATED
 
 	fprintf(stderr, "JoinJob(): Under Construction\n");
+
+/*	if (argv==NULL)
+	{
+		fprintf(stderr, "JoinJob(): NULL arguments\n");
+		return;
+	}
+
+	relation *x = NULL;
+    int *x_histogram = NULL;
+    int *x_psum = NULL;
+
+    relation *y = NULL;
+    int *y_histogram = NULL;
+    int *y_psum = NULL;
+
+	int column_id;
+	if (histogram[0][argv->bucket_id] > histogram[1][argv->bucket_id])
+    {//bucket i of relation S is smaller; S will be hashed
+        x = argv->newrels[0];
+        x_histogram = argv->histogram[0];
+        x_psum = argv->psum[0];
+
+        y = argv->newrels[1];
+        y_histogram = argv->histogram[1];
+        y_psum = argv->psum[1];
+
+        column_id = 1;
+    }
+    else
+    {//bucket i of relation R is smaller; R will be hashed
+        y = argv->newrels[1];
+        y_histogram = argv->histogram[0];
+        y_psum = argv->psum[0];
+
+        x = argv->newrels[1];
+        x_histogram = argv->histogram[1];
+        x_psum = argv->psum[1];
+
+        column_id = 2;
+    }
+
+    if(y_histogram[argv->bucket_id] == 0)
+        continue;
+
+
+    //create local resultsWithNum
+    resultsWithNum* localres = malloc(sizeof(resultsWithNum));
+*/
 }

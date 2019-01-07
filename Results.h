@@ -5,12 +5,19 @@
 
 //static int const page_size = 1048576;
 static int const page_size = 500;
-static int tuples_per_page = 0;
+static int tuples_per_page = 10;
 
-result* create_results_page();      // Creates a new results page to add new results tuples, if the one already
+
+void setTuplesPerPage();
+
+int getResultTuplesPerPage();
+
+//result* create_results_page();      // Creates a new results page to add new results tuples, if the one already
                                     // there is already full.
 
-int add_result(result* res, int32_t value_R, int32_t value_S, int resAmount);     // Adds the values given into the results list.
+resultsWithNum* create_resultsWithNum();
+
+void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S);     // Adds the values given into the results list.
                                                                    // Returns the current number of results.
 
 void print_results(result *res);   // Prints the results from the given list.
@@ -24,7 +31,7 @@ void freeResultsWithNum(resultsWithNum* results);
 
 void freeResults(result* results);
 
-int getResultTuplesPerPage();
+
 
 void concatResults(resultsWithNum* res1, resultsWithNum* res2);       // Add all results from res2 to res1.
 

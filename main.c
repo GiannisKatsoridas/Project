@@ -5,6 +5,7 @@
 
 int main() {
 
+    setTuplesPerPage();
     //table* t = loadRelation("r1");
 
     //freopen("input", "r", stdin);

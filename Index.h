@@ -30,7 +30,7 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
 void index_destroy(hash_index **indx);
 
 //given a tuple <(key, payload)>, search <payload> in the bucket pointed by <indx> of <rel>, and if equal payloads found, add <(key1, key2)> to <results>  
-int search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, result* results, int results_num);
+void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, resultsWithNum* results);
 
 //int search_all_val(relation *x, int* x_hist, int *x_psum, relation *y, int* y_hist, int* y_psum, int bucket_id, index * indx, int column_id, result* results);
 

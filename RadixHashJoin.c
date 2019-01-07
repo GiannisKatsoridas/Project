@@ -29,8 +29,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     print_relation(relation_S_new, stdout);*/
 
 
-    result* results = create_results_page();
-    int results_num=0;
+    resultsWithNum* res = create_resultsWithNum();
 
     //start of payload comparison between buckets of R and S
 
@@ -130,7 +129,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             key = x->tuples[pos].key;
             payload = x->tuples[pos].payload;
 
-            results_num = search_val(y, bucket_start, indx, key, payload, column_id, results, results_num);
+            search_val(y, bucket_start, indx, key, payload, column_id, res);
             
             pos--;
         }
@@ -150,10 +149,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     free(relation_S_new);
     free(psumR);
     free(psumS);
-
-    resultsWithNum* res = malloc(sizeof(resultsWithNum));
-    res->results = results;
-    res->results_amount = results_num;
 
     return res;
 }
