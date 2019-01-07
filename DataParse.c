@@ -143,3 +143,12 @@ void freeRelation(relation *rel)
     free(rel->tuples);
     free(rel);
 }
+
+int *initializeHistogram(int size) {
+
+    int* histogram = malloc(size * sizeof(int));
+    for(int i=0; i<size; i++)
+        histogram[i] = 0;
+
+    return histogram;
+}

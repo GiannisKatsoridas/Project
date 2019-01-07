@@ -1,22 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "Index.h"
-
+#include "JobScheduler.h"
 
 resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
+    int jobIDCounter = 0;
+    relation* rels[2];
+    rels[0] = relR;
+    rels[1] = relS;
+
+    JobScheduler* js = jobSchedulerCreate();
+
+    for(int i=0; i<(int) THREAD_NUM; i++)
+        pthread_create(&js->tp[i], NULL, thread_start, js);
+
     suffix = RADIX_N;
-    /*printf("Relation R before hashing:\n");
-    print_relation(relR, stdout);
-    printf("Relation S before hashing:\n");
-    print_relation(relS, stdout);*/
 
-    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
-    int* histogramS = create_histogram(relS);    // Creates the histogram of the relation S
+    int* indexesR = splitRelation(relR);
+    int* indexesS = splitRelation(relS);
+
+    int buckets = power_of_2(suffix);
+
+    int* histogramR = initializeHistogram(buckets);
+    int* histogramS = initializeHistogram(buckets);
+    int *histograms[2];
+    histograms[0] = histogramR;
+    histograms[1] = histogramS;
+    int* psumR = initializeHistogram(buckets);
+    int* psumS = initializeHistogram(buckets);
+    int *psums[2];
+    psums[0] = psumR;
+    psums[1] = psumS;
+
+    sem_t mtx;
+    semInit(&mtx, 1);
 
 
-    int* psumR = create_psum(histogramR, power_of_2(suffix));     // Creates the accumulative histogram of the relation R
-    int* psumS = create_psum(histogramS, power_of_2(suffix));     // Creates the accumulative histogram of the relation S
+    for(int i=0; i<(int) THREAD_NUM; i++){
+
+        int start[2], end[2];
+        start[0] = indexesR[i];
+        start[1] = indexesS[i];
+
+        if(i != ((int) THREAD_NUM - 1)){
+            end[0] = indexesR[i+1];
+            end[1] = indexesS[i+1];
+        }
+        else{
+            end[0] = relR->num_tuples;
+            end[1] = relS->num_tuples;
+        }
+
+        JobQueueElem* job = JobCreate(jobIDCounter++, 1, rels, power_of_2(suffix), start, end, histograms, psums, mtx, NULL, 0, NULL, NULL);
+
+        schedule(js, job);
+    }
+
+    barrier(js);
+
+    stop(js);
+
+    jobSchedulerDestroy(js);
+
+
+//    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
+//    int* histogramS = create_histogram(relS);    // Creates the histogram of the relation S
+
+//    int* psumR = create_psum(histogramR, power_of_2(suffix));     // Creates the accumulative histogram of the relation R
+//    int* psumS = create_psum(histogramS, power_of_2(suffix));     // Creates the accumulative histogram of the relation S
 
     relation* relation_R_new = create_relation_new(relR, psumR, power_of_2(suffix));    // Create the new relation
                                                                                           // used for the Join

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #include "Jobs.h"
 #include "Index.h"
@@ -30,14 +31,14 @@ void HistogramJob(JobQueueElem *argv)
 			localpsum[i+1] = localpsum[i] + localhist[i];
 
 		//add local histogram and psum amounts to the global ones
-		P(argv->hist_mtx);
+		P(&histogramsSem);
 		for (int i = 0; i < argv->hash1_value; i++)
 		{
 			if(localhist[i] != 0)
-				argv->histogram[r] += localhist[r];
-			argv->psum[r] += localpsum[r];
+				argv->histogram[r][i] += localhist[i];
+			argv->psum[r][i] += localpsum[i];
 		}
-		V(argv->hist_mtx);
+        V(&histogramsSem);
 	}
 }
 
@@ -57,10 +58,10 @@ void PartitionJob(JobQueueElem *argv)
 
 			//copy the tuple from relation[indx] to the new relation, 
 			//at the position shown by psum[h] 
-			P(argv->hist_mtx);
+            P(&argv->hist_mtx);
 			argv->newrels[r]->tuples[argv->psum[r][h]] = argv->rels[r]->tuples[indx];
 			argv->psum[h]++;
-			V(argv->hist_mtx);
+            V(&argv->hist_mtx);
 		}
 
 

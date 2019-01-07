@@ -3,6 +3,8 @@
 
 #include "JobQueue.h"
 
+sem_t histogramsSem;
+
 void HistogramJob(JobQueueElem *argv);
 void PartitionJob(JobQueueElem *argv);
 void JoinJob(JobQueueElem *argv);

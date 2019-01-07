@@ -24,4 +24,6 @@ relation* create_relation_new(relation* relation, int* psum, int buckets);  // C
 
 void freeRelation(relation *rel);
 
+int* initializeHistogram(int size);     // Initialize to 0 a size "size" histogram/psum.
+
 #endif

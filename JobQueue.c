@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #include "JobQueue.h"
 
 
-
-
-JobQueueElem * JobCreate(int JobID, relation *rels[2], int hash1_value, int start[2], int end[2], 
-                        int *hist[2], int *psum[2], sem_t *hist_mtx, 
+JobQueueElem * JobCreate(int JobID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
+                        int *hist[2], int *psum[2], sem_t hist_mtx,
                         relation *newrels[2],
                         int bucket_id, resultsWithNum *res, sem_t *res_mtx)
 {
 	JobQueueElem *elem = malloc(sizeof(JobQueueElem));
 
 	elem -> JobID = JobID;
+	elem -> jobType = jobType;
 	elem -> rels[0] = rels[0];
 	elem -> rels[1] = rels[1];
 	elem -> hash1_value = hash1_value;
@@ -24,18 +24,22 @@ JobQueueElem * JobCreate(int JobID, relation *rels[2], int hash1_value, int star
 	elem -> start[1] = start[1];
 	elem -> end[1] = end[1];
 
-	elem -> histogram[0] = hist[0];
-	elem -> psum[0] = psum[0];
-	elem -> histogram[1] = hist[1];
-	elem -> psum[1] = psum[1];
-	elem -> hist_mtx = hist_mtx;
-
-	elem -> newrels[0] = newrels[0];
-	elem -> newrels[1] = newrels[1];
-
-	elem -> bucket_id = bucket_id;
-	elem -> res = res;
-	elem -> res_mtx = res_mtx;
+	if(jobType == 1) {
+		elem->histogram[0] = hist[0];
+		elem->psum[0] = psum[0];
+		elem->histogram[1] = hist[1];
+		elem->psum[1] = psum[1];
+		elem->hist_mtx = hist_mtx;
+	}
+	else if (jobType == 2) {
+		elem->newrels[0] = newrels[0];
+		elem->newrels[1] = newrels[1];
+	}
+	else if (jobType == 3) {
+		elem->bucket_id = bucket_id;
+		elem->res = res;
+		elem->res_mtx = res_mtx;
+	}
 
 	return elem;
 }
@@ -60,8 +64,9 @@ void JobQueueInit(JobQueue** qaddr, int size)
 		q-> JobArray[i] = NULL;
 	}
 
-	semInit(q-> mtx, 1);
+	pthread_mutex_init(&q->mtx, NULL);
 	semInit(q-> full, 0);
+
 	semInit(q-> empty, q->size);
 
 	q->counter = 0;
@@ -78,13 +83,13 @@ void JobQueuePush(JobQueue* q, JobQueueElem *elem)
 	}
 
 	P(q->empty);
-	P(q->mtx);
+	pthread_mutex_lock(&q->mtx);
 
 	q->JobArray[q->in] = elem;
 	q->in = (q->in + 1)% q->size;
 	q->counter++;
 
-	V(q->mtx);
+	pthread_mutex_unlock(&q->mtx);
 	V(q->full);
 }
 
@@ -99,14 +104,12 @@ JobQueueElem *JobQueuePop(JobQueue* q)
 	JobQueueElem *elem = NULL;
 
 	P(q->full);
-	P(q->mtx);
 
 	elem = q->JobArray[q->out];
 	q->JobArray[q->out] = NULL;
 	q->out = (q->out + 1)% q->size;
 	q->counter--;
 
-	V(q->mtx);
 	V(q->empty);
 
 	if(elem==NULL)
@@ -126,7 +129,7 @@ void JobQueueDestroy(JobQueue** qaddr)
 	JobQueue *q = (*qaddr);
 	free(q->JobArray);
 
-	semDestroy(q->mtx);
+	pthread_mutex_destroy(&q->mtx);
 	semDestroy(q->full);
 	semDestroy(q->empty);
 
@@ -134,12 +137,6 @@ void JobQueueDestroy(JobQueue** qaddr)
 
 	(*qaddr) = NULL;
 }
-
-
-
-
-
-
 
 
 void semInit(sem_t *sem, int value)

@@ -14,7 +14,7 @@ add_executable(Caramel
         Actions.c
         Actions.h
         JobQueue.c
-        Jobs.c)
+        Jobs.c JobScheduler.c JobScheduler.h)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests

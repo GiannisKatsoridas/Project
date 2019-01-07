@@ -1,10 +1,12 @@
 #ifndef _JOB_QUEUE_H_
 #define _JOB_QUEUE_H_
 
+#include <semaphore.h>
 #include "Globals.h"
 
 typedef struct{
     int JobID;
+    int jobType;		// 1 for histogramJobs, 2 for partitionJobs, 3 for joinJobs
     relation *rels[2];//relations R and S
 
     int hash1_value;//number of buckets
@@ -14,7 +16,7 @@ typedef struct{
     //HistogramJob
     int *histogram[2];//histograms for relations R and S
     int *psum[2];//psums for relations R and S
-    sem_t *hist_mtx;
+    sem_t hist_mtx;
 
     //PartitionJob
     relation *newrels[2];
@@ -31,7 +33,7 @@ typedef struct{
 	JobQueueElem **JobArray;
     int size;
 
-	sem_t *mtx;    //mutex semaphore for accessing JobArray
+	pthread_mutex_t mtx;    //mutex semaphore for accessing JobArray
     sem_t *full;    //counting semaphore showing produced items in the buffer (initialized to 0)
 	sem_t *empty;     //counting semaphore showing remaining space in the buffer (initialized to size)
 	
@@ -42,8 +44,8 @@ typedef struct{
 
 
 
-JobQueueElem * JobCreate(int JobID, relation *rels[2], int hash1_value, int start[2], int end[2], 
-                        int *hist[2], int *psum[2], sem_t *hist_mtx, 
+JobQueueElem * JobCreate(int JobID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
+                        int *hist[2], int *psum[2], sem_t hist_mtx,
                         relation *newrels[2],
                         int bucket_id, resultsWithNum *res, sem_t *res_mtx);
 
