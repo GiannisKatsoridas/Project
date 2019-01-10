@@ -24,16 +24,16 @@ JobScheduler *jobSchedulerCreate() {
     return js;
 }
 
-void jobSchedulerDestroy(JobScheduler *jobScheduler) {
+void jobSchedulerDestroy(JobScheduler *js) {
 
-    JobQueueDestroy(&jobScheduler->queue);
-    free(jobScheduler->tp);
-    mtx_destroy(&jobScheduler->scheduler_mtx);
-    sem_destroy(&jobScheduler->barrier_sem);
+    JobQueueDestroy(&js->queue);
+    free(js->tp);
+    mtx_destroy(&js->scheduler_mtx);
+    sem_destroy(&js->barrier_sem);
 
 }
 
-int schedule(JobScheduler* js, JobQueueElem *job) {
+void schedule(JobScheduler* js, JobQueueElem *job) {
 
     P(js->queue->empty);
     mtx_lock(&js->queue->queue_mtx);
@@ -45,7 +45,7 @@ int schedule(JobScheduler* js, JobQueueElem *job) {
 
     //pthread_cond_signal(&threadCond);
 
-    return job->JobID;
+    //return job->JobID;
 }
 
 void barrier(JobScheduler* js){
@@ -71,7 +71,9 @@ void stop(JobScheduler* js){
     //pthread_cond_broadcast(&threadCond);
 
     for(int i=0; i< (int) THREAD_NUM; i++){
+        mtx_lock(&js->scheduler_mtx);
         V(js->queue->full);
+        mtx_unlock(&js->scheduler_mtx);
         if(pthread_join(js->tp[i], NULL)!=0){
             perror("Thread no. %d failed to join.");
             return;
@@ -144,8 +146,6 @@ void* thread_start(void* argv){
             js->activeThreads--;*/
         }
 
-        mtx_unlock(&js->queue->queue_mtx);
-        V(js->queue->empty);
 
         mtx_lock(&js->scheduler_mtx);
         js->jobs_done++;

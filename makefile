@@ -63,7 +63,7 @@ JobQueue.o: JobQueue.c JobQueue.h Globals.h
 Jobs.o: Jobs.c Jobs.h JobQueue.h Globals.h Index.h
 	$(CC) -c Jobs.c $(FLAGS) $(THREADS)
 
-JobScheduler.o: JobScheduler.c JobScheduler.h
+JobScheduler.o: JobScheduler.c JobScheduler.h Globals.h
 	$(CC) -c JobScheduler.c $(FLAGS) $(THREADS)
 
 DataGenerator.o: DataGenerator.c DataGenerator.h Globals.h

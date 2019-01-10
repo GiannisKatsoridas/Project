@@ -26,7 +26,7 @@ JobScheduler* jobSchedulerCreate();
 
 void jobSchedulerDestroy(JobScheduler* jobScheduler);
 
-int schedule(JobScheduler* js, JobQueueElem* job);
+void schedule(JobScheduler* js, JobQueueElem* job);
 
 void barrier(JobScheduler* js);
 

@@ -17,7 +17,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     mtx_init(&hist_mtx);
     pthread_mutex_t res_mtx;
     mtx_init(&res_mtx);
-    
+
     for(int i=0; i<(int) THREAD_NUM; i++)
     {
         pthread_create(&js->tp[i], NULL, thread_start, js);
@@ -67,8 +67,11 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     barrier(js);
 
     stop(js);
+    
+    printf("1\n");
 
     jobSchedulerDestroy(js);
+
 
 
 //    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
