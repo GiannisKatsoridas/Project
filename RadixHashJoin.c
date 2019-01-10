@@ -13,8 +13,15 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     JobScheduler* js = jobSchedulerCreate();
 
+    pthread_mutex_t hist_mtx;
+    mtx_init(&hist_mtx);
+    pthread_mutex_t res_mtx;
+    mtx_init(&res_mtx);
+    
     for(int i=0; i<(int) THREAD_NUM; i++)
+    {
         pthread_create(&js->tp[i], NULL, thread_start, js);
+    }
 
     suffix = RADIX_N;
 
@@ -34,9 +41,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     psums[0] = psumR;
     psums[1] = psumS;
 
-    sem_t mtx;
-    semInit(&mtx, 1);
-
 
     for(int i=0; i<(int) THREAD_NUM; i++){
 
@@ -53,9 +57,11 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             end[1] = relS->num_tuples;
         }
 
-        JobQueueElem* job = JobCreate(jobIDCounter++, 1, rels, power_of_2(suffix), start, end, histograms, psums, mtx, NULL, 0, NULL, NULL);
+        JobQueueElem* job = JobCreate(jobIDCounter++, HIST_TYPE, rels, power_of_2(suffix), start, end, histograms, psums, &hist_mtx, NULL, 0, NULL, NULL);
 
         schedule(js, job);
+        printf("%d\n", i);
+
     }
 
     barrier(js);

@@ -14,49 +14,64 @@ JobScheduler *jobSchedulerCreate() {
     pthread_cond_init(&queueCond, NULL);
     pthread_cond_init(&threadCond, NULL);
 
-    semInit(&histogramsSem, 1);
-
     js->stage = 0;
+
+    js->jobs_done = 0;
+    mtx_init(&js->scheduler_mtx);
+    semInit(&js->barrier_sem, 0);
+    js->exitflag = 0;
 
     return js;
 }
 
 void jobSchedulerDestroy(JobScheduler *jobScheduler) {
 
-    free(jobScheduler->tp);
     JobQueueDestroy(&jobScheduler->queue);
+    free(jobScheduler->tp);
+    mtx_destroy(&jobScheduler->scheduler_mtx);
+    sem_destroy(&jobScheduler->barrier_sem);
 
 }
 
 int schedule(JobScheduler* js, JobQueueElem *job) {
 
+    P(js->queue->empty);
+    mtx_lock(&js->queue->queue_mtx);
+
     JobQueuePush(js->queue, job);
 
-    pthread_cond_signal(&threadCond);
+    mtx_unlock(&js->queue->queue_mtx);
+    V(js->queue->full);
+
+    //pthread_cond_signal(&threadCond);
 
     return job->JobID;
 }
 
 void barrier(JobScheduler* js){
 
-    pthread_mutex_lock(&js->queue->mtx);
+    /*mtx_lock(&js->queue->queue_mtx);
 
     js->stage++;
 
     while(js->queue->counter > 0 && js->activeThreads > 0){
-        pthread_cond_wait(&queueCond, &js->queue->mtx);
+        pthread_cond_wait(&queueCond, &js->queue->queue_mtx);
     }
 
-    pthread_mutex_unlock(&js->queue->mtx);
+    mtx_unlock(&js->queue->queue_mtx);*/
 
+    P(&js->barrier_sem);
+    mtx_lock(&js->scheduler_mtx);
+    js->exitflag = 1;
+    mtx_unlock(&js->scheduler_mtx);
 }
 
 void stop(JobScheduler* js){
 
-    pthread_cond_broadcast(&threadCond);
+    //pthread_cond_broadcast(&threadCond);
 
-    for(int i=0; i<js->queue->size; i++){
-
+    for(int i=0; i< (int) THREAD_NUM; i++){
+        V(js->queue->full);
         if(pthread_join(js->tp[i], NULL)!=0){
             perror("Thread no. %d failed to join.");
             return;
@@ -69,24 +84,39 @@ void stop(JobScheduler* js){
 
 void* thread_start(void* argv){
 
-    JobScheduler* js = (JobScheduler*) &argv[0];
+    JobScheduler* js = (JobScheduler*) &(argv[0]);
 
-    pthread_mutex_lock(&js->queue->mtx);
+    while(1)
+    {
+        P(js->queue->full);
 
-    while(js->queue->counter > 0 || js->stage < 1) {
-
-        while (js->queue->counter <= 0 && js->stage < 1) {
-            pthread_cond_wait(&threadCond, &js->queue->mtx);
-        }
-
-        if(js->stage >= 1 && js->queue->counter == 0)
+        mtx_lock(&js->scheduler_mtx);
+        if (js->exitflag==1)
+        {
+            mtx_unlock(&js->scheduler_mtx);
             break;
+        }
+        mtx_unlock(&js->scheduler_mtx);
 
-        js->activeThreads++;
+        mtx_lock(&js->queue->queue_mtx);
+
+        /*while(js->queue->counter > 0 || js->stage < 1) {
+
+            while (js->queue->counter <= 0 && js->stage < 1) {
+                V(js->queue->full);
+                pthread_cond_wait(&threadCond, &js->queue->queue_mtx);
+                P(js->queue->full);
+            }
+
+            if(js->stage >= 1 && js->queue->counter == 0)
+                break;
+
+            js->activeThreads++;*/
 
         JobQueueElem *job = JobQueuePop(js->queue);
 
-        pthread_mutex_unlock(&js->queue->mtx);
+        mtx_unlock(&js->queue->queue_mtx);
+        V(js->queue->empty);
 
         switch (job->jobType) {
 
@@ -106,18 +136,45 @@ void* thread_start(void* argv){
                 perror("Error. Wrong JobType.\n");
                 return NULL;
 
+            /*}
+
+            P(js->queue->full);
+            mtx_lock(&js->queue->queue_mtx);
+            pthread_cond_signal(&queueCond);
+            js->activeThreads--;*/
         }
 
-        pthread_mutex_lock(&js->queue->mtx);
-        pthread_cond_signal(&queueCond);
-        js->activeThreads--;
+        mtx_unlock(&js->queue->queue_mtx);
+        V(js->queue->empty);
+
+        mtx_lock(&js->scheduler_mtx);
+        js->jobs_done++;
+        if ((job->jobType == 1) && (js->jobs_done == THREAD_NUM))
+        {
+            js->jobs_done = 0;
+            V(&js->barrier_sem);
+            //mtx_unlock(&js->scheduler_mtx);
+            //js->exitflag = 1;
+        }
+        else if ((job->jobType == 2) && (js->jobs_done == THREAD_NUM))
+        {
+            js->jobs_done = 0;
+            V(&js->barrier_sem);
+            //mtx_unlock(&js->scheduler_mtx);
+            //js->exitflag = 1;
+        }
+        else if ((job->jobType == 3) && (js->jobs_done == job->hash1_value))
+        {
+            js->jobs_done = 0;
+            V(&js->barrier_sem);
+            //mtx_unlock(&js->scheduler_mtx);
+            //js->exitflag = 1;
+            
+        }
+        mtx_unlock(&js->scheduler_mtx);
     }
 
-    pthread_mutex_unlock(&js->queue->mtx);
-
     pthread_exit(NULL);
-
-    return NULL;
 }
 
 int *splitRelation(relation *rel) {

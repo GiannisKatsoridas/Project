@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Caramel"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Caramel">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Caramel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 Caramel"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Caramel/fast">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Caramel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 Caramel/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="DataGenerator">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/DataGenerator" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 DataGenerator"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="DataGenerator/fast">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/DataGenerator" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 DataGenerator/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="UnitTests">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/UnitTests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 UnitTests"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="UnitTests/fast">
+				<Option output="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/UnitTests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 UnitTests/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/george/Dropbox/ninth/Project/Project/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/george/Dropbox/ninth/Project/Project/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Actions.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Actions.h">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Basic/Basic.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Framework/CUError.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Framework/MyMem.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Framework/TestDB.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Framework/TestRun.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CUnit/Sources/Framework/Util.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/DataGenerator.c">
+			<Option target="DataGenerator"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/DataGenerator.h">
+			<Option target="DataGenerator"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/DataParse.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/DataParse.h">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Index.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Index.h">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/JobQueue.c">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/JobQueue.h">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/JobScheduler.c">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/JobScheduler.h">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Jobs.c">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Jobs.h">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Query.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Query.h">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/RadixHashJoin.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Results.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Results.h">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Tables.c">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/Tables.h">
+			<Option target="Caramel"/>
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/UnitTests.c">
+			<Option target="UnitTests"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/main.c">
+			<Option target="Caramel"/>
+		</Unit>
+		<Unit filename="/home/george/Dropbox/ninth/Project/Project/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <pthread.h>
 
 #include "JobQueue.h"
 
 
 JobQueueElem * JobCreate(int JobID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
-                        int *hist[2], int *psum[2], sem_t hist_mtx,
+                        int *hist[2], int *psum[2], pthread_mutex_t *hist_mtx,
                         relation *newrels[2],
-                        int bucket_id, resultsWithNum *res, sem_t *res_mtx)
+                        int bucket_id, resultsWithNum *res, pthread_mutex_t *res_mtx)
 {
 	JobQueueElem *elem = malloc(sizeof(JobQueueElem));
 
@@ -64,9 +63,12 @@ void JobQueueInit(JobQueue** qaddr, int size)
 		q-> JobArray[i] = NULL;
 	}
 
-	pthread_mutex_init(&q->mtx, NULL);
+	mtx_init(&q->queue_mtx);
+
+	q-> full = malloc(sizeof(sem_t));
 	semInit(q-> full, 0);
 
+	q->empty = malloc(sizeof(sem_t));
 	semInit(q-> empty, q->size);
 
 	q->counter = 0;
@@ -82,15 +84,11 @@ void JobQueuePush(JobQueue* q, JobQueueElem *elem)
 		return;
 	}
 
-	P(q->empty);
-	pthread_mutex_lock(&q->mtx);
-
 	q->JobArray[q->in] = elem;
 	q->in = (q->in + 1)% q->size;
 	q->counter++;
 
-	pthread_mutex_unlock(&q->mtx);
-	V(q->full);
+	fprintf(stderr, "JobQueuePush()\n");
 }
 
 JobQueueElem *JobQueuePop(JobQueue* q)
@@ -103,18 +101,15 @@ JobQueueElem *JobQueuePop(JobQueue* q)
 
 	JobQueueElem *elem = NULL;
 
-	P(q->full);
-
 	elem = q->JobArray[q->out];
 	q->JobArray[q->out] = NULL;
 	q->out = (q->out + 1)% q->size;
 	q->counter--;
 
-	V(q->empty);
-
 	if(elem==NULL)
 		fprintf(stderr, "WARNING: JobQueuePop(): Returning NULL element! \n");
 
+	fprintf(stderr, "JobQueuePop()\n");
 	return elem;
 }
 
@@ -129,15 +124,64 @@ void JobQueueDestroy(JobQueue** qaddr)
 	JobQueue *q = (*qaddr);
 	free(q->JobArray);
 
-	pthread_mutex_destroy(&q->mtx);
+	mtx_destroy(&q->queue_mtx);
+
 	semDestroy(q->full);
+	free(q->full);
+	
 	semDestroy(q->empty);
+	free(q->empty);
 
 	free(q);
 
 	(*qaddr) = NULL;
 }
 
+
+//////////////////////////////////////////////////////////////////////////
+/// PTHREAD MUTEX 
+
+void mtx_init(pthread_mutex_t *mtx)
+{
+	if ((pthread_mutex_init(mtx, NULL)) != 0)
+	{
+		perror("pthread_mutex_init()");
+		exit(-1);
+	}
+}
+
+void mtx_lock(pthread_mutex_t *mtx)
+{
+	if((pthread_mutex_lock(mtx))!= 0)
+	{
+		perror("pthread_mutex_lock()");
+		exit(-1);
+	}
+}
+
+void mtx_unlock(pthread_mutex_t *mtx)
+{
+	if((pthread_mutex_unlock(mtx))!= 0)
+	{
+		perror("pthread_mutex_unlock()");
+		exit(-1);
+	}
+}
+
+void mtx_destroy(pthread_mutex_t* mtx)
+{
+	if((pthread_mutex_destroy(mtx))!= 0)
+	{
+		perror("pthread_mutex_destroy()");
+		exit(-1);
+	}
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+///POSIX SEMAPHORES
 
 void semInit(sem_t *sem, int value)
 {

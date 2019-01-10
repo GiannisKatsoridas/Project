@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/DataGenerator.dir/DataGenerator.c.o  -o DataGenerator 

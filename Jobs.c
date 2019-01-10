@@ -31,14 +31,14 @@ void HistogramJob(JobQueueElem *argv)
 			localpsum[i+1] = localpsum[i] + localhist[i];
 
 		//add local histogram and psum amounts to the global ones
-		P(&histogramsSem);
+		mtx_lock(argv->hist_mtx);
 		for (int i = 0; i < argv->hash1_value; i++)
 		{
 			if(localhist[i] != 0)
 				argv->histogram[r][i] += localhist[i];
 			argv->psum[r][i] += localpsum[i];
 		}
-        V(&histogramsSem);
+		mtx_unlock(argv->hist_mtx);
 	}
 }
 
@@ -58,10 +58,10 @@ void PartitionJob(JobQueueElem *argv)
 
 			//copy the tuple from relation[indx] to the new relation, 
 			//at the position shown by psum[h] 
-            P(&argv->hist_mtx);
+            mtx_lock(argv->hist_mtx);
 			argv->newrels[r]->tuples[argv->psum[r][h]] = argv->rels[r]->tuples[indx];
 			argv->psum[h]++;
-            V(&argv->hist_mtx);
+            mtx_unlock(argv->hist_mtx);
 		}
 
 
