@@ -70,10 +70,8 @@ void stop(JobScheduler* js){
 
     //pthread_cond_broadcast(&threadCond);
 
+    V(js->queue->full);
     for(int i=0; i< (int) THREAD_NUM; i++){
-        mtx_lock(&js->scheduler_mtx);
-        V(js->queue->full);
-        mtx_unlock(&js->scheduler_mtx);
         if(pthread_join(js->tp[i], NULL)!=0){
             perror("Thread no. %d failed to join.");
             return;
@@ -86,7 +84,7 @@ void stop(JobScheduler* js){
 
 void* thread_start(void* argv){
 
-    JobScheduler* js = (JobScheduler*) &(argv[0]);
+    JobScheduler* js = (JobScheduler*) argv;
 
     while(1)
     {
@@ -95,6 +93,7 @@ void* thread_start(void* argv){
         mtx_lock(&js->scheduler_mtx);
         if (js->exitflag==1)
         {
+            V(js->queue->full);
             mtx_unlock(&js->scheduler_mtx);
             break;
         }

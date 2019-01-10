@@ -88,7 +88,7 @@ void JobQueuePush(JobQueue* q, JobQueueElem *elem)
 	q->in = (q->in + 1)% q->size;
 	q->counter++;
 
-	fprintf(stderr, "JobQueuePush()\n");
+	//fprintf(stderr, "JobQueuePush()\n");
 }
 
 JobQueueElem *JobQueuePop(JobQueue* q)
@@ -109,7 +109,7 @@ JobQueueElem *JobQueuePop(JobQueue* q)
 	if(elem==NULL)
 		fprintf(stderr, "WARNING: JobQueuePop(): Returning NULL element! \n");
 
-	fprintf(stderr, "JobQueuePop()\n");
+	//fprintf(stderr, "JobQueuePop()\n");
 	return elem;
 }
 

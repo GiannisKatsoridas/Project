@@ -60,7 +60,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         JobQueueElem* job = JobCreate(jobIDCounter++, HIST_TYPE, rels, power_of_2(suffix), start, end, histograms, psums, &hist_mtx, NULL, 0, NULL, NULL);
 
         schedule(js, job);
-        printf("%d\n", i);
+        //printf("%d\n", i);
 
     }
 
@@ -68,7 +68,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     stop(js);
     
-    printf("1\n");
+    //printf("1\n");
 
     jobSchedulerDestroy(js);
 
