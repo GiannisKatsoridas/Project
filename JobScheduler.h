@@ -18,6 +18,12 @@ typedef struct JobScheduler {
     pthread_mutex_t scheduler_mtx;
     sem_t barrier_sem;	//binary semaphore that is initialized to 0
     					//it suspends the main thread until all jobs of a type/stage are completed
+
+    int** thread_histograms_R;      // The histograms related to relationR created by each thread
+    int** thread_histograms_S;      // The histograms related to relationS created by each thread
+    int*** thread_psums;            // The psums of each thread of each relation. Usage: thread_psums[relation][threadID][bucket]
+
+
     int exitflag;		//initialized to 0;
 } JobScheduler;
 
@@ -35,5 +41,7 @@ void stop(JobScheduler* js);
 void* thread_start(void* argv);
 
 int* splitRelation(relation* rel);
+
+void makePsums(JobScheduler* js, int buckets);
 
 #endif //CARAMEL_JOBSCHEDULER_H

@@ -5,29 +5,31 @@
 #include "JobQueue.h"
 
 
-JobQueueElem * JobCreate(int JobID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
-                        int *hist[2], int *psum[2], pthread_mutex_t *hist_mtx,
+JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2], int hash1_value, int start[2],
+                        int end[2], int *hist[2], int *psum[2], pthread_mutex_t *hist_mtx,
                         relation *newrels[2],
                         int bucket_id, resultsWithNum *res, pthread_mutex_t *res_mtx)
 {
 	JobQueueElem *elem = malloc(sizeof(JobQueueElem));
 
 	elem -> JobID = JobID;
+	elem -> threadID = threadID;
 	elem -> jobType = jobType;
 	elem -> rels[0] = rels[0];
 	elem -> rels[1] = rels[1];
 	elem -> hash1_value = hash1_value;
 
-	elem -> start[0] = start[0];
-	elem -> end[0] = end[0];
-	elem -> start[1] = start[1];
-	elem -> end[1] = end[1];
+    elem -> start[0] = start[0];
+    elem -> end[0] = end[0];
+    elem -> start[1] = start[1];
+    elem -> end[1] = end[1];
+
+    elem -> psum[0] = psum[0];
+    elem -> psum[1] = psum[1];
 
 	if(jobType == 1) {
 		elem->histogram[0] = hist[0];
-		elem->psum[0] = psum[0];
 		elem->histogram[1] = hist[1];
-		elem->psum[1] = psum[1];
 		elem->hist_mtx = hist_mtx;
 	}
 	else if (jobType == 2) {

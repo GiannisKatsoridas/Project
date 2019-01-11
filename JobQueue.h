@@ -10,6 +10,8 @@
 
 typedef struct{
     int JobID;
+    int threadID;		// the unique id of the thread completing this job - this is to compute the space
+    					// that the thread will complete the partition job (the index of the histograms)
     int jobType;		// 1 for histogramJobs, 2 for partitionJobs, 3 for joinJobs
     relation *rels[2];//relations R and S
 
@@ -49,7 +51,7 @@ typedef struct{
 
 
 
-JobQueueElem * JobCreate(int JobID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
+JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2], int hash1_value, int start[2], int end[2],
                         int *hist[2], int *psum[2], pthread_mutex_t *hist_mtx,
                         relation *newrels[2],
                         int bucket_id, resultsWithNum *res, pthread_mutex_t *res_mtx);

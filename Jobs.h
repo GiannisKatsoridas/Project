@@ -2,10 +2,11 @@
 #define _JOBS_H_
 
 #include "JobQueue.h"
+#include "JobScheduler.h"
 
 
-void HistogramJob(JobQueueElem *argv);
-void PartitionJob(JobQueueElem *argv);
+void HistogramJob(JobScheduler* js, JobQueueElem *argv);
+void PartitionJob(JobScheduler* js, JobQueueElem *argv);
 void JoinJob(JobQueueElem *argv);
 
 

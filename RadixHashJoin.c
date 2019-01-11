@@ -37,9 +37,48 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     histograms[1] = histogramS;
     int* psumR = initializeHistogram(buckets);
     int* psumS = initializeHistogram(buckets);
-    int *psums[2];
+    int **psums = malloc(2* sizeof(int*));
     psums[0] = psumR;
     psums[1] = psumS;
+
+    for(int i=0; i<(int) THREAD_NUM; i++){
+
+        int start[2], end[2];
+        start[0] = indexesR[i];
+        start[1] = indexesS[i];
+
+        if(i != ((int) THREAD_NUM - 1)){
+            end[0] = indexesR[i+1];
+            end[1] = indexesS[i+1];
+        }
+        else{
+            end[0] = relR->num_tuples;
+            end[1] = relS->num_tuples;
+        }
+
+        JobQueueElem* job = JobCreate(jobIDCounter++, i, HIST_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, NULL, 0, NULL, NULL);
+
+        schedule(js, job);
+        //printf("%d\n", i);
+
+    }
+
+    barrier(js);
+
+    makePsums(js, buckets);
+
+    // Initialize the new relations.
+
+    relation* relation_R_new = malloc(sizeof(relation));
+    relation* relation_S_new = malloc(sizeof(relation));
+    relation_R_new->num_tuples = relR->num_tuples;
+    relation_R_new->tuples = malloc(relation_R_new->num_tuples*sizeof(tuple));
+    relation_S_new->num_tuples = relS->num_tuples;
+    relation_S_new->tuples = malloc(relation_S_new->num_tuples*sizeof(tuple));
+
+    relation** newRels = malloc(2*sizeof(relation*));
+    newRels[0] = relation_R_new;
+    newRels[1] = relation_S_new;
 
 
     for(int i=0; i<(int) THREAD_NUM; i++){
@@ -57,21 +96,16 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             end[1] = relS->num_tuples;
         }
 
-        JobQueueElem* job = JobCreate(jobIDCounter++, HIST_TYPE, rels, power_of_2(suffix), start, end, histograms, psums, &hist_mtx, NULL, 0, NULL, NULL);
+
+        JobQueueElem* job = JobCreate(jobIDCounter++, i, PART_TYPE, rels, buckets, start, end, NULL, psums, &hist_mtx, newRels, 0, NULL, NULL);
 
         schedule(js, job);
-        //printf("%d\n", i);
 
     }
 
     barrier(js);
 
     stop(js);
-    
-    //printf("1\n");
-
-    jobSchedulerDestroy(js);
-
 
 
 //    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
@@ -80,16 +114,18 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 //    int* psumR = create_psum(histogramR, power_of_2(suffix));     // Creates the accumulative histogram of the relation R
 //    int* psumS = create_psum(histogramS, power_of_2(suffix));     // Creates the accumulative histogram of the relation S
 
-    relation* relation_R_new = create_relation_new(relR, psumR, power_of_2(suffix));    // Create the new relation
+    /*relation* relation_R_new = create_relation_new(relR, psumR, power_of_2(suffix));    // Create the new relation
                                                                                           // used for the Join
     relation* relation_S_new = create_relation_new(relS, psumS, power_of_2(suffix));    // Create the new relation
-                                                                                          // used for the Join
+                                                                                          // used for the Join*/
 
     /*printf("Relation R after hashing:\n");
     print_relation(relation_R_new, stdout);
     printf("Relation S after hashing:\n");
     print_relation(relation_S_new, stdout);*/
 
+    psumR = js->thread_psums[0][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
+    psumS = js->thread_psums[1][THREAD_NUM-1];
 
     resultsWithNum* res = create_resultsWithNum();
 
@@ -132,7 +168,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
         fprintf(stdout, "psums[%2d] = %2d\n", j, psumS[j]);
     }*/
-    
+
     //for each relation bucket
     for (int i = 0; i < power_of_2(suffix); i++)
     {
@@ -211,6 +247,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     free(relation_S_new);
     free(psumR);
     free(psumS);
+
+    jobSchedulerDestroy(js);
 
     return res;
 }

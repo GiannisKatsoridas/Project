@@ -5,30 +5,23 @@
 
 #include "Jobs.h"
 #include "Index.h"
+#include "JobScheduler.h"
 
 
 
-void HistogramJob(JobQueueElem *argv)
+void HistogramJob(JobScheduler* js, JobQueueElem *argv)
 {
 	for (int r = 0; r < 2; r++)
 	{//for each relation (R and S)
 
 		//create a local histogram and initialize it
-		int localhist[argv -> hash1_value];
+		int *localhist = malloc(argv->hash1_value * sizeof(int));
 		for (int i = 0; i < (argv -> hash1_value); i++)
 			localhist[i] = 0;
-
-		//create a local psum
-		int localpsum[argv -> hash1_value];
-		localpsum[0] = 0;
 
 		//hash values in relation and save their amount to local histogram
 		for (int indx = argv->start[r]; indx < argv->end[r]; indx++)
 			localhist[(argv->rels[r]->tuples[indx].payload) % (argv->hash1_value)]++;
-
-		//construct local psum from local histogram
-		for (int i = 0; i < (argv->hash1_value -1); i++)
-			localpsum[i+1] = localpsum[i] + localhist[i];
 
 		//add local histogram and psum amounts to the global ones
 		mtx_lock(argv->hist_mtx);
@@ -36,37 +29,42 @@ void HistogramJob(JobQueueElem *argv)
 		{
 			if(localhist[i] != 0)
 				argv->histogram[r][i] += localhist[i];
-			argv->psum[r][i] += localpsum[i];
 		}
 		mtx_unlock(argv->hist_mtx);
+
+		if(r == 0){
+			js->thread_histograms_R[argv->threadID] = localhist;
+		}
+		else{
+			js->thread_histograms_S[argv->threadID] = localhist;
+		}
+
 	}
 }
 
-void PartitionJob(JobQueueElem *argv)
+/**
+ * Copies the values of the bucket asigned to the thread into their proper position in the new relation
+ */
+void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 {
-	int h = -1;
 	for (int r = 0; r < 2; r++)
 	{//for each relation (R and S)
-		
-		//WAIT UNTIL HISTOGRAMS AND PSUMS ARE FULLY CREATED
 
-		for (int indx = argv->start[r]; indx < argv->end[r]; indx++)
-		{//for each tuple within my search range in the relation
+		for(int indx=argv->start[r]; indx<argv->end[r]; indx++){
 
-			//hash the payload of tuple indx and find the position in psum
-			h = (argv->rels[r]->tuples[indx].payload) % (argv->hash1_value);
+			int bucket_index = (argv->rels[r]->tuples[indx].payload) % (argv->hash1_value);	// Find the bucket by hashing the value.
 
-			//copy the tuple from relation[indx] to the new relation, 
-			//at the position shown by psum[h] 
-            mtx_lock(argv->hist_mtx);
-			argv->newrels[r]->tuples[argv->psum[r][h]] = argv->rels[r]->tuples[indx];
-			argv->psum[h]++;
-            mtx_unlock(argv->hist_mtx);
+			int tuple_index = js->thread_psums[r][argv->threadID][bucket_index];	// Find the position of the tuple in the new relation from the psum table.
+
+			argv->newrels[r]->tuples[tuple_index] = argv->rels[r]->tuples[indx];	// Copy the value into the new relation.
+
+			js->thread_psums[r][argv->threadID][bucket_index]++;		// Increment the psum value.
 		}
 
 
 	}
 }
+
 void JoinJob(JobQueueElem *argv)
 {
 	//WAIT UNTIL BOTH NEW RELATIONS ARE FULLY CREATED

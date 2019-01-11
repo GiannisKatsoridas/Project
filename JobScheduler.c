@@ -9,7 +9,10 @@ JobScheduler *jobSchedulerCreate() {
     JobScheduler* js = malloc(sizeof(JobScheduler));
 
     js->tp = malloc((int) THREAD_NUM * sizeof(pthread_t));
-    JobQueueInit(&js->queue, (int) THREAD_NUM);
+    JobQueueInit(&js->queue, 10);
+
+    js->thread_histograms_R = malloc((int) THREAD_NUM * sizeof(int*));
+    js->thread_histograms_S = malloc((int) THREAD_NUM * sizeof(int*));
 
     pthread_cond_init(&queueCond, NULL);
     pthread_cond_init(&threadCond, NULL);
@@ -62,7 +65,7 @@ void barrier(JobScheduler* js){
 
     P(&js->barrier_sem);
     mtx_lock(&js->scheduler_mtx);
-    js->exitflag = 1;
+    js->exitflag++;
     mtx_unlock(&js->scheduler_mtx);
 }
 
@@ -91,7 +94,7 @@ void* thread_start(void* argv){
         P(js->queue->full);
 
         mtx_lock(&js->scheduler_mtx);
-        if (js->exitflag==1)
+        if (js->exitflag==2)
         {
             V(js->queue->full);
             mtx_unlock(&js->scheduler_mtx);
@@ -101,19 +104,6 @@ void* thread_start(void* argv){
 
         mtx_lock(&js->queue->queue_mtx);
 
-        /*while(js->queue->counter > 0 || js->stage < 1) {
-
-            while (js->queue->counter <= 0 && js->stage < 1) {
-                V(js->queue->full);
-                pthread_cond_wait(&threadCond, &js->queue->queue_mtx);
-                P(js->queue->full);
-            }
-
-            if(js->stage >= 1 && js->queue->counter == 0)
-                break;
-
-            js->activeThreads++;*/
-
         JobQueueElem *job = JobQueuePop(js->queue);
 
         mtx_unlock(&js->queue->queue_mtx);
@@ -122,11 +112,11 @@ void* thread_start(void* argv){
         switch (job->jobType) {
 
             case 1:
-                HistogramJob(job);
+                HistogramJob(js, job);
                 break;
 
             case 2:
-                PartitionJob(job);
+                PartitionJob(js, job);
                 break;
 
             case 3:
@@ -136,13 +126,6 @@ void* thread_start(void* argv){
             default:
                 perror("Error. Wrong JobType.\n");
                 return NULL;
-
-            /*}
-
-            P(js->queue->full);
-            mtx_lock(&js->queue->queue_mtx);
-            pthread_cond_signal(&queueCond);
-            js->activeThreads--;*/
         }
 
 
@@ -209,6 +192,51 @@ int *splitRelation(relation *rel) {
 
     }
 
+
     return ret;
+}
+
+/**
+ * Function to create the initial psums for each thread to use. Each thread copies their designated values
+ * from the initial relations to the new ones.
+ * @param js
+ * @param buckets
+ */
+void makePsums(JobScheduler *js, int buckets) {
+
+    js->thread_psums = malloc(2*sizeof(int**));         // Allocation. The size is 2 since 2 relations are being joined.
+    js->thread_psums[0] = malloc((int) THREAD_NUM * sizeof(int*));  // Allocation. The psum table of each thread for the first relation.
+    js->thread_psums[1] = malloc((int) THREAD_NUM * sizeof(int*));  // Allocation. The psum table of each thread for the second relation.
+
+    for(int t=0; t<(int) THREAD_NUM; t++) {     // Allocation of the psums themselves - for each thread for each relation.
+        js->thread_psums[0][t] = malloc(buckets*sizeof(int));
+        js->thread_psums[1][t] = malloc(buckets*sizeof(int));
+        for (int i = 0; i < buckets; i++) {
+            js->thread_psums[0][t][i] = 0;
+            js->thread_psums[1][t][i] = 0;
+        }
+    }
+
+
+    for(int b=0; b<buckets; b++) {
+
+        for (int t = 0; t < (int) THREAD_NUM; t++) {
+
+            if(b == 0 && t == 0)        // If it is the first bucket of the first thread then leave to 0 and continue.
+                continue;
+
+            if(t != 0) {   // If it is not the initial thread of the table, then take the previous thread's psum and add to it the histogram value of the given bucket of the thread
+                js->thread_psums[0][t][b] = js->thread_psums[0][t - 1][b] + js->thread_histograms_R[t-1][b];
+                js->thread_psums[1][t][b] = js->thread_psums[1][t - 1][b] + js->thread_histograms_S[t-1][b];
+            }
+            else {  // If it is the initial thread of the table, do the same procedure, only with the last thread of the previous bucket.
+                js->thread_psums[0][t][b] = js->thread_psums[0][THREAD_NUM-1][b - 1] + js->thread_histograms_R[THREAD_NUM-1][b-1];
+                js->thread_psums[1][t][b] = js->thread_psums[1][THREAD_NUM-1][b - 1] + js->thread_histograms_S[THREAD_NUM-1][b-1];
+            }
+
+        }
+    }
+
+
 }
 
