@@ -45,23 +45,9 @@ void schedule(JobScheduler* js, JobQueueElem *job) {
 
     mtx_unlock(&js->queue->queue_mtx);
     V(js->queue->full);
-
-    //pthread_cond_signal(&threadCond);
-
-    //return job->JobID;
 }
 
 void barrier(JobScheduler* js){
-
-    /*mtx_lock(&js->queue->queue_mtx);
-
-    js->stage++;
-
-    while(js->queue->counter > 0 && js->activeThreads > 0){
-        pthread_cond_wait(&queueCond, &js->queue->queue_mtx);
-    }
-
-    mtx_unlock(&js->queue->queue_mtx);*/
 
     P(&js->barrier_sem);
     mtx_lock(&js->scheduler_mtx);
@@ -94,7 +80,7 @@ void* thread_start(void* argv){
         P(js->queue->full);
 
         mtx_lock(&js->scheduler_mtx);
-        if (js->exitflag==2)
+        if (js->exitflag==3)
         {
             V(js->queue->full);
             mtx_unlock(&js->scheduler_mtx);
@@ -135,22 +121,16 @@ void* thread_start(void* argv){
         {
             js->jobs_done = 0;
             V(&js->barrier_sem);
-            //mtx_unlock(&js->scheduler_mtx);
-            //js->exitflag = 1;
         }
         else if ((job->jobType == 2) && (js->jobs_done == THREAD_NUM))
         {
             js->jobs_done = 0;
             V(&js->barrier_sem);
-            //mtx_unlock(&js->scheduler_mtx);
-            //js->exitflag = 1;
         }
         else if ((job->jobType == 3) && (js->jobs_done == job->hash1_value))
         {
             js->jobs_done = 0;
             V(&js->barrier_sem);
-            //mtx_unlock(&js->scheduler_mtx);
-            //js->exitflag = 1;
             
         }
         mtx_unlock(&js->scheduler_mtx);
@@ -222,7 +202,8 @@ void makePsums(JobScheduler *js, int buckets) {
 
         for (int t = 0; t < (int) THREAD_NUM; t++) {
 
-            if(b == 0 && t == 0)        // If it is the first bucket of the first thread then leave to 0 and continue.
+            // If it is the first bucket of the first thread then leave to 0 and continue.
+            if(b == 0 && t == 0)        
                 continue;
 
             if(t != 0) {   // If it is not the initial thread of the table, then take the previous thread's psum and add to it the histogram value of the given bucket of the thread
@@ -236,7 +217,5 @@ void makePsums(JobScheduler *js, int buckets) {
 
         }
     }
-
-
 }
 

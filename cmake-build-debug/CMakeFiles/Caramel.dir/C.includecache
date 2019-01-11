@@ -6,16 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/george/Dropbox/ninth/Project/Project/Actions.h
-Results.h
-/home/george/Dropbox/ninth/Project/Project/Results.h
-Tables.h
-/home/george/Dropbox/ninth/Project/Project/Tables.h
-Query.h
-/home/george/Dropbox/ninth/Project/Project/Query.h
-DataParse.h
-/home/george/Dropbox/ninth/Project/Project/DataParse.h
-
 /home/george/Dropbox/ninth/Project/Project/DataParse.h
 Tables.h
 /home/george/Dropbox/ninth/Project/Project/Tables.h
@@ -24,23 +14,15 @@ Tables.h
 stdint.h
 -
 
+/home/george/Dropbox/ninth/Project/Project/Index.h
+Results.h
+/home/george/Dropbox/ninth/Project/Project/Results.h
+
 /home/george/Dropbox/ninth/Project/Project/JobQueue.h
 semaphore.h
 -
 Globals.h
 /home/george/Dropbox/ninth/Project/Project/Globals.h
-
-/home/george/Dropbox/ninth/Project/Project/JobScheduler.c
-stdlib.h
--
-stdio.h
--
-JobScheduler.h
-/home/george/Dropbox/ninth/Project/Project/JobScheduler.h
-Globals.h
-/home/george/Dropbox/ninth/Project/Project/Globals.h
-Jobs.h
-/home/george/Dropbox/ninth/Project/Project/Jobs.h
 
 /home/george/Dropbox/ninth/Project/Project/JobScheduler.h
 pthread.h
@@ -48,13 +30,43 @@ pthread.h
 JobQueue.h
 /home/george/Dropbox/ninth/Project/Project/JobQueue.h
 
+/home/george/Dropbox/ninth/Project/Project/Jobs.c
+stdio.h
+-
+stdlib.h
+-
+semaphore.h
+-
+pthread.h
+-
+Jobs.h
+/home/george/Dropbox/ninth/Project/Project/Jobs.h
+Index.h
+/home/george/Dropbox/ninth/Project/Project/Index.h
+JobScheduler.h
+/home/george/Dropbox/ninth/Project/Project/JobScheduler.h
+
 /home/george/Dropbox/ninth/Project/Project/Jobs.h
 JobQueue.h
 /home/george/Dropbox/ninth/Project/Project/JobQueue.h
+JobScheduler.h
+/home/george/Dropbox/ninth/Project/Project/JobScheduler.h
 
 /home/george/Dropbox/ninth/Project/Project/Query.h
 Globals.h
 /home/george/Dropbox/ninth/Project/Project/Globals.h
+
+/home/george/Dropbox/ninth/Project/Project/RadixHashJoin.c
+stdio.h
+-
+stdlib.h
+-
+semaphore.h
+-
+Index.h
+/home/george/Dropbox/ninth/Project/Project/Index.h
+JobScheduler.h
+/home/george/Dropbox/ninth/Project/Project/JobScheduler.h
 
 /home/george/Dropbox/ninth/Project/Project/Results.h
 DataParse.h
@@ -65,14 +77,4 @@ Query.h
 /home/george/Dropbox/ninth/Project/Project/Query.h
 Results.h
 /home/george/Dropbox/ninth/Project/Project/Results.h
-
-/home/george/Dropbox/ninth/Project/Project/main.c
-stdio.h
--
-stdlib.h
--
-string.h
--
-Actions.h
-/home/george/Dropbox/ninth/Project/Project/Actions.h
 

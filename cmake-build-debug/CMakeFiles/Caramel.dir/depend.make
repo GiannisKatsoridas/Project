@@ -38,6 +38,7 @@ CMakeFiles/Caramel.dir/Jobs.c.o: ../DataParse.h
 CMakeFiles/Caramel.dir/Jobs.c.o: ../Globals.h
 CMakeFiles/Caramel.dir/Jobs.c.o: ../Index.h
 CMakeFiles/Caramel.dir/Jobs.c.o: ../JobQueue.h
+CMakeFiles/Caramel.dir/Jobs.c.o: ../JobScheduler.h
 CMakeFiles/Caramel.dir/Jobs.c.o: ../Jobs.c
 CMakeFiles/Caramel.dir/Jobs.c.o: ../Jobs.h
 CMakeFiles/Caramel.dir/Jobs.c.o: ../Query.h

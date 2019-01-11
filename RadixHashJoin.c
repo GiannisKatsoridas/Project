@@ -18,6 +18,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     pthread_mutex_t res_mtx;
     mtx_init(&res_mtx);
 
+    //create threadpool
     for(int i=0; i<(int) THREAD_NUM; i++)
     {
         pthread_create(&js->tp[i], NULL, thread_start, js);
@@ -25,11 +26,17 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     suffix = RADIX_N;
 
+    //PHASE 1 : creating histogram
+
+
+    //split relation into THREAD_NUM piece
+    //save start of each piece
     int* indexesR = splitRelation(relR);
     int* indexesS = splitRelation(relS);
 
     int buckets = power_of_2(suffix);
 
+    //initialize histograms and psums
     int* histogramR = initializeHistogram(buckets);
     int* histogramS = initializeHistogram(buckets);
     int *histograms[2];
@@ -42,7 +49,9 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     psums[1] = psumS;
 
     for(int i=0; i<(int) THREAD_NUM; i++){
+        //for each relation piece 
 
+        //save its bounds
         int start[2], end[2];
         start[0] = indexesR[i];
         start[1] = indexesS[i];
@@ -56,15 +65,19 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             end[1] = relS->num_tuples;
         }
 
+        //create a HistogramJob
         JobQueueElem* job = JobCreate(jobIDCounter++, i, HIST_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, NULL, 0, NULL, NULL);
 
+        //push the job in the Job Queue
         schedule(js, job);
         //printf("%d\n", i);
 
     }
 
+    //wait for all HistogramJobs to be completed
     barrier(js);
 
+    // PHASE 2: Partitioning
     makePsums(js, buckets);
 
     // Initialize the new relations.
@@ -100,13 +113,9 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         JobQueueElem* job = JobCreate(jobIDCounter++, i, PART_TYPE, rels, buckets, start, end, NULL, psums, &hist_mtx, newRels, 0, NULL, NULL);
 
         schedule(js, job);
-
     }
 
     barrier(js);
-
-    stop(js);
-
 
 //    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
 //    int* histogramS = create_histogram(relS);    // Creates the histogram of the relation S
@@ -127,8 +136,37 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     psumR = js->thread_psums[0][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
     psumS = js->thread_psums[1][THREAD_NUM-1];
 
+
+    //PHASE 3: Join
     resultsWithNum* res = create_resultsWithNum();
 
+    for (int bucket_id = 0; bucket_id < buckets; bucket_id++)
+    {
+        //save its bounds
+        int start[2], end[2];
+        if(bucket_id == 0)
+        {
+            start[0] = 0;
+            start[1] = 0;
+        }
+        else
+        {
+            start[0] = psumR[bucket_id-1];
+            start[1] = psumS[bucket_id-1];
+        }
+
+        end[0] = start[0] + histogramR[bucket_id];
+        end[1] = start[1] + histogramS[bucket_id];
+
+        JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
+
+        schedule(js, job);
+    }
+
+    barrier(js);
+
+    stop(js);
+/*
     //start of payload comparison between buckets of R and S
 
     //create index
@@ -154,20 +192,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     int first_pos = -1;
     int last_pos = -1;
 
-    /*fprintf(stdout, "\nHISTOGRAMS\n");
-    for (int j = 0; j < power_of_2(suffix); j++)
-    {
-        fprintf(stdout, "histR[%2d] = %2d\t", j, histogramR[j]);
 
-        fprintf(stdout, "histS[%2d] = %2d\n", j, histogramS[j]);
-    }
-    fprintf(stdout, "\nPSUMS\n");
-    for (int j = 0; j < power_of_2(suffix); j++)
-    {
-        fprintf(stdout, "psumR[%2d] = %2d\t", j, psumR[j]);
-
-        fprintf(stdout, "psums[%2d] = %2d\n", j, psumS[j]);
-    }*/
 
     //for each relation bucket
     for (int i = 0; i < power_of_2(suffix); i++)
@@ -235,7 +260,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     }
 
     index_destroy(&indx);
-    
+    */
 
     //print_results(results);
 

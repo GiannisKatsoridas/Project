@@ -12,8 +12,9 @@ typedef struct{
     int JobID;
     int threadID;		// the unique id of the thread completing this job - this is to compute the space
     					// that the thread will complete the partition job (the index of the histograms)
+    
     int jobType;		// 1 for histogramJobs, 2 for partitionJobs, 3 for joinJobs
-    relation *rels[2];//relations R and S
+    relation *rels[2];  //relations R and S
 
     int hash1_value;//number of buckets
     int start[2];   //current starting access index in relations R and S
