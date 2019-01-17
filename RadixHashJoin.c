@@ -136,6 +136,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     psumR = js->thread_psums[0][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
     psumS = js->thread_psums[1][THREAD_NUM-1];
 
+    psums[0] = psumR;
+    psums[1] = psumS;
 
     //PHASE 3: Join
     resultsWithNum* res = create_resultsWithNum();
@@ -155,8 +157,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             start[1] = psumS[bucket_id-1];
         }
 
-        end[0] = start[0] + histogramR[bucket_id];
-        end[1] = start[1] + histogramS[bucket_id];
+        end[0] = psumR[bucket_id] -1;
+        end[1] = psumS[bucket_id] -1;
 
         JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
 

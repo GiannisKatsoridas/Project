@@ -105,6 +105,10 @@ void JoinJob(JobQueueElem *argv)
         x_histogram = argv->histogram[R];
         x_psum = argv->psum[R];
 
+        first_pos = argv->start[R];
+        last_pos = argv->end[R];
+        pos = last_pos;
+
         y = argv->newrels[S];
         y_histogram = argv->histogram[S];
         y_psum = argv->psum[S];
@@ -116,6 +120,10 @@ void JoinJob(JobQueueElem *argv)
         y = argv->newrels[R];
         y_histogram = argv->histogram[R];
         y_psum = argv->psum[R];
+
+        first_pos = argv->start[S];
+        last_pos = argv->end[S];
+        pos = last_pos;
 
         x = argv->newrels[S];
         x_histogram = argv->histogram[S];
@@ -134,9 +142,9 @@ void JoinJob(JobQueueElem *argv)
     index_fill(indx, y, y_histogram[argv->bucket_id], y_psum[argv->bucket_id]);
 
     //assign boundaries of the bucket of relation x
-    first_pos = x_psum[argv->bucket_id] - x_histogram[argv->bucket_id]; //starting position of bucket i within relation x
-    last_pos = x_psum[argv->bucket_id] -1;  //ending position of bucket i within relation x
-    pos = last_pos;     //variable for current position
+    //first_pos = x_psum[argv->bucket_id] - x_histogram[argv->bucket_id]; //starting position of bucket i within relation x
+    //last_pos = x_psum[argv->bucket_id] -1;  //ending position of bucket i within relation x
+    //pos = last_pos;     //variable for current position
 
     int bucket_start;
     if(argv->bucket_id>0)
