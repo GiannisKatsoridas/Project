@@ -58,7 +58,9 @@ void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 
 			// Find the position of the tuple in the new relation from the psum table.
 			int tuple_index = js->thread_psums[r][argv->threadID][bucket_index];	
-			
+
+			if(tuple_index > argv->newrels[r]->num_tuples)
+			    printf("R: %d, Tuple Index: %d, Num Tuples: %d, Thread ID: %d, Size: %d, Start: %d, End: %d\n", r, tuple_index, argv->newrels[r]->num_tuples, argv->threadID, argv->rels[r]->num_tuples, argv->start[r], argv->end[r]);
 			// Copy the value into the new relation.
 			argv->newrels[r]->tuples[tuple_index] = argv->rels[r]->tuples[indx];	
 

@@ -42,8 +42,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     int *histograms[2];
     histograms[0] = histogramR;
     histograms[1] = histogramS;
-    int* psumR;
-    int* psumS;
+    int *psumR = NULL;
+    int *psumS = NULL;
     int **psums = malloc(2* sizeof(int*));
     psums[0] = psumR;
     psums[1] = psumS;
@@ -91,7 +91,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     relation** newRels = malloc(2*sizeof(relation*));
     newRels[0] = relation_R_new;
     newRels[1] = relation_S_new;
-
 
     for(int i=0; i<(int) THREAD_NUM; i++){
 
@@ -251,13 +250,16 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     //freeJobScheduler(js);
 
+    free(psums);
+    free(newRels);
+
     free(indexesR);
     free(indexesS);
     free(histogramR);
     free(histogramS);
     free(relation_R_new->tuples);
     free(relation_R_new);
-    free(relation_S_new->tuples);
+    //free(relation_S_new->tuples);
     free(relation_S_new);
 
     freeJobScheduler(js);

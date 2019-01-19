@@ -14,6 +14,8 @@ void executeQuery(table **t, Query *q)
 
 	int* order = JoinEnumeration(t, q);
 
+	free(order);
+
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
 

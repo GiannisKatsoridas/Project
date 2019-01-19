@@ -117,6 +117,8 @@ void PQDelete(PermutationsQueue* pq){
 
     }
 
+    free(pq);
+
 }
 
 int hashFunction(int *array, int length, int relationsLength) {
@@ -652,8 +654,10 @@ int *JoinEnumeration(table **t, Query *q) {
         JEStats* stats = copyJEStats(jes);
         stats->intermediateResults[0] = i;	// The array of connected (joined) relations contains only the given one.
         stats->results_num = (int) t[q->query_relation_set->query_relations[i]]->size;
-        Costs[hashFunction(a, 1, q->query_relation_set->query_relations_num)] = stats;
+        Costs[hashFunctionBestTree(a, 1)] = stats;
     }
+
+    freeJEStats(jes);
 
     int* array = createArray(q->query_relation_set->query_relations_num);	// Create an incrementing array of the relations
 
@@ -667,7 +671,7 @@ int *JoinEnumeration(table **t, Query *q) {
 
         while(arr != NULL){
 
-/*            printf("Array:\t\t");
+            /*printf("Array:\t\t");
             for(int k=0; k<i; k++)
                 printf("%d\t", arr[k]);
             printf("\n");*/
@@ -679,20 +683,16 @@ int *JoinEnumeration(table **t, Query *q) {
                    || BestTree[hashFunctionBestTree(arr, i)] == NULL)
                     continue;
 
-                //printf("Relation %d is connected to above array, with index: %d\n", array[j], hashFunction(arr, i, q->query_relation_set->query_relations_num));
+                //printf("Relation %d is connected to above array, with index: %d\n", array[j], hashFunctionBestTree(arr, i));
 
-                int index = hashFunction(arr, i, q->query_relation_set->query_relations_num);
-
-                if(Costs[index] == NULL)
-                    continue;
+                int index = hashFunctionBestTree(arr, i);
 
                 int* newArr = malloc((i+1) * sizeof(int));
                 for(int k=0; k<i; k++)
                     newArr[k] = arr[k];
                 newArr[i] = array[j];
 
-                int newIndex = hashFunction(newArr, i+1, q->query_relation_set->query_relations_num);
-/*                printf("New Array:\t\t");
+                /*printf("New Array:\t\t");
                 for(int k=0; k<=i; k++)
                     printf("%d\t", newArr[k]);
                 printf("\t\tIndex: %d\n", newIndex);*/
@@ -702,14 +702,25 @@ int *JoinEnumeration(table **t, Query *q) {
 
                 applyJoinToStats(newStats, arr, i, array[j], q->comparison_set, t, q->query_relation_set->query_relations);
 
-                Costs[newIndex] = newStats;
+                if(BestTree[treeIndex] == NULL || (Costs[treeIndex]->results_num > newStats->results_num)){
 
-                if(BestTree[treeIndex] == NULL || (Costs[hashFunction(BestTree[treeIndex], i+1, q->query_relation_set->query_relations_num)]->results_num > newStats->results_num)){
+                    if(Costs[treeIndex] != NULL){
+
+                        freeJEStats(Costs[treeIndex]);
+                        free(BestTree[treeIndex]);
+
+                    }
+
                     BestTree[treeIndex] = newArr;
+                    Costs[treeIndex] = newStats;
                 }
-
+                else {
+                    free(newArr);
+                    freeJEStats(newStats);
+                }
             }
 
+            free(arr);
 
             arr = PQPop(pq);
 
@@ -719,21 +730,14 @@ int *JoinEnumeration(table **t, Query *q) {
 
     }
 
+    free(array);
+
     int* connectedRelations = createConnectedRelationsFromGraph(q);
     int* bestTree = BestTree[hashFunctionBestTree(connectedRelations, connectedRelationsNum)];
 
-    printf("BestTree:\t\t");
-    for(int i=0; i<connectedRelationsNum; i++)
-        printf("%d\t", bestTree[i]);
-    printf("\n");
-
     int* comparisonsOrder = getComparisonsOrder(q->comparison_set, bestTree, q->query_relation_set->query_relations);
 
-    printf("Perfect order:\t\t");
-    for(int i=0; i<joinComparisonsNum; i++)
-        printf("%d\t", comparisonsOrder[i]);
-    printf("\n");
-
+    free(connectedRelations);
     for(int i=0; i<factorial(q->query_relation_set->query_relations_num + 1); i++){
         if(BestTree[i] != NULL)
             free(BestTree[i]);
@@ -741,14 +745,21 @@ int *JoinEnumeration(table **t, Query *q) {
             freeJEStats(Costs[i]);
     }
 
-    return NULL;
+    for(int i=0; i<q->query_relation_set->query_relations_num; i++)
+        free(graph[i]);
+    free(graph);
+
+    free(BestTree);
+    free(Costs);
+
+    return comparisonsOrder;
 
 }
 
 void freeJEStats(JEStats *jes) {
 
-    for(int i=0; i<jes->relations_num; i++)
-        free(jes->jesbr[i].jesbc);
+//    for(int i=0; i<jes->relations_num; i++)
+//        free(jes->jesbr[i].jesbc);
 
     free(jes->intermediateResults);
     free(jes->jesbr);
@@ -824,5 +835,3 @@ int *createConnectedRelationsFromGraph(Query* q) {
 
     return result;
 }
-
-

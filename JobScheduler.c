@@ -125,8 +125,6 @@ void* thread_start(void* argv){
             
         }
 
-        free(job);
-
         mtx_unlock(&js->scheduler_mtx);
     }
 
@@ -161,8 +159,11 @@ int *splitRelation(relation *rel) {
 
         ret[0] = 0;
 
-        for(int i=1; i<threadsNum; i++)
+        for(int i=1; i<(size%threadsNum); i++)
             ret[i] = ret[i-1] + size/threadsNum + 1;
+
+        for(int i=(size%threadsNum); i<threadsNum; i++)
+            ret[i] = ret[i-1] + size/threadsNum;
 
     }
 
@@ -217,8 +218,6 @@ void freeJobScheduler(JobScheduler* js){
 
         free(js->thread_histograms_S[i]);
         free(js->thread_histograms_R[i]);
-        free(js->thread_psums[0][i]);
-        free(js->thread_psums[1][i]);
 
     }
 
@@ -229,6 +228,7 @@ void freeJobScheduler(JobScheduler* js){
 
     free(js->thread_psums[0]);
     free(js->thread_psums[1]);
+    free(js->thread_psums);
 
     free(js->tp);
     mtx_destroy(&js->scheduler_mtx);
