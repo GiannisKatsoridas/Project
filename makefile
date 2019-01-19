@@ -2,8 +2,8 @@ CC = gcc
 FLAGS = -g
 THREADS = -lpthread -lm
 
-OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o Jobs.o JobQueue.o JobScheduler.o
-HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h Jobs.h JobQueue.h JobScheduler.h
+OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o Jobs.o JobQueue.o JobScheduler.o JoinEnumeration.o
+HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h Jobs.h JobQueue.h JobScheduler.h JoinEnumeration.h
 OUT1 = Caramel
 
 OBJ2 = DataGenerator.o
@@ -65,6 +65,9 @@ Jobs.o: Jobs.c Jobs.h JobQueue.h Globals.h Index.h
 
 JobScheduler.o: JobScheduler.c JobScheduler.h Globals.h
 	$(CC) -c JobScheduler.c $(FLAGS) $(THREADS)
+
+JoinEnumeration.o: JoinEnumeration.c JoinEnumeration.h Tables.h 
+	$(CC) -c JoinEnumeration.c $(FLAGS) -lm
 
 DataGenerator.o: DataGenerator.c DataGenerator.h Globals.h
 	$(CC) -c DataGenerator.c $(FLAGS)

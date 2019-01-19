@@ -67,29 +67,23 @@ void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S){
     res->results_amount++;
 }
 
-/*
-void print_results(result *res) {
 
-    int res_am = ;
+void print_resultsWithNum(resultsWithNum *res) {
 
-    if ((res==NULL) || (res_am==0))
+    if (res==NULL) 
     {
         return;
     }
-    result* pointer = res;
-    int i;
+    result* pointer = res->results;
 
-    while(1){
+    int tuples_printed = 0;
 
-        for(i=0; i<tuples_per_page; i++){
+    while(pointer!=NULL){
+
+        for(int i=0; (i<tuples_per_page) && (tuples_printed<res->results_amount); i++){
 
             printf("%d - %d\n", pointer->results[i].relation_R, pointer->results[i].relation_S);
-
-            res_am--;
-
-            if(res_am == 0)
-                return;
-
+            tuples_printed++;
         }
 
         pointer = pointer->next;
@@ -97,7 +91,7 @@ void print_results(result *res) {
     }
 
 }
-*/
+
 
 
 unsigned int int_to_int(unsigned int k) {

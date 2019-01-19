@@ -22,6 +22,8 @@ void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S);     // A
 
 void print_results(result *res);   // Prints the results from the given list.
 
+void print_resultsWithNum(resultsWithNum *res);
+
 
 void print_relation(relation *rel, FILE *fp);
 

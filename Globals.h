@@ -14,7 +14,7 @@
 #define R 0
 #define S 1
 
-static const char relR_name[] = "DataRelatiMonR.txt";    // Text file containing all the values of the first relation
+static const char relR_name[] = "DataRelationR.txt";    // Text file containing all the values of the first relation
 static const char relS_name[] = "DataRelationS.txt";    // Text file containing all the values of the second relation
 
 /** Type definition for a tuple */
