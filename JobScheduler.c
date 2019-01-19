@@ -151,7 +151,7 @@ int *splitRelation(relation *rel) {
 
     if(size%threadsNum == 0) {
 
-        ret[0] = size/threadsNum;
+        ret[0] = 0;
 
         for (int i = 1; i < threadsNum; i++)
             ret[i] = ret[i-1] + size / threadsNum;
