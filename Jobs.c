@@ -44,7 +44,7 @@ void HistogramJob(JobScheduler* js, JobQueueElem *argv)
 }
 
 /**
- * Copies the values of the bucket asigned to the thread into their proper position in the new relation
+ * Copies the values of the bucket assigned to the thread into their proper position in the new relation
  */
 void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 {
@@ -59,8 +59,6 @@ void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 			// Find the position of the tuple in the new relation from the psum table.
 			int tuple_index = js->thread_psums[r][argv->threadID][bucket_index];	
 
-			if(tuple_index > argv->newrels[r]->num_tuples)
-			    printf("R: %d, Tuple Index: %d, Num Tuples: %d, Thread ID: %d, Size: %d, Start: %d, End: %d\n", r, tuple_index, argv->newrels[r]->num_tuples, argv->threadID, argv->rels[r]->num_tuples, argv->start[r], argv->end[r]);
 			// Copy the value into the new relation.
 			argv->newrels[r]->tuples[tuple_index] = argv->rels[r]->tuples[indx];	
 
@@ -73,8 +71,6 @@ void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 
 void JoinJob(JobQueueElem *argv)
 {
-	//WAIT UNTIL BOTH NEW RELATIONS ARE FULLY CREATED
-
 	//create an index with a bucket_array[#of tuples in bucket] and a chain[rash2_range]
 	hash_index *indx = NULL;
     index_create(&indx, HASH2_RANGE);
@@ -86,8 +82,6 @@ void JoinJob(JobQueueElem *argv)
     //x will be the relation whose bucket will be the biggest
 
     relation *x = NULL;
-    int *x_histogram = NULL;
-    int *x_psum = NULL;
 
     relation *y = NULL;
     int *y_histogram = NULL;
@@ -104,8 +98,6 @@ void JoinJob(JobQueueElem *argv)
     if (argv->histogram[R][argv->bucket_id] > argv->histogram[S][argv->bucket_id])
     {//bucket i of relation S is smaller; S will be hashed
         x = argv->newrels[R];
-        x_histogram = argv->histogram[R];
-        x_psum = argv->psum[R];
 
         first_pos = argv->start[R];
         last_pos = argv->end[R];
@@ -128,8 +120,6 @@ void JoinJob(JobQueueElem *argv)
         pos = last_pos;
 
         x = argv->newrels[S];
-        x_histogram = argv->histogram[S];
-        x_psum = argv->psum[S];
 
         column_id = 2;
     }

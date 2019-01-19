@@ -259,7 +259,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     free(histogramS);
     free(relation_R_new->tuples);
     free(relation_R_new);
-    //free(relation_S_new->tuples);
+    free(relation_S_new->tuples);
     free(relation_S_new);
 
     freeJobScheduler(js);

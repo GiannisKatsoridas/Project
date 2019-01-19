@@ -126,6 +126,8 @@ void* thread_start(void* argv){
         }
 
         mtx_unlock(&js->scheduler_mtx);
+
+        free(job);
     }
 
     pthread_exit(NULL);
@@ -218,6 +220,8 @@ void freeJobScheduler(JobScheduler* js){
 
         free(js->thread_histograms_S[i]);
         free(js->thread_histograms_R[i]);
+        free(js->thread_psums[0][i]);
+        free(js->thread_psums[1][i]);
 
     }
 

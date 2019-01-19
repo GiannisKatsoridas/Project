@@ -157,9 +157,10 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 		return;
 	}
 
-	if((res2->results_amount == 0) || (res2->results == NULL))
+	if((res2->results_amount == 0) || (res2->results == NULL)) {
+		freeResultsWithNum(res2);
 		return;
-
+	}
 	//STEP 1: 
 	//keep address of last and prelast node of results list 1
 	//keep address of last node of results list 2

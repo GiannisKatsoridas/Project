@@ -734,6 +734,11 @@ int *JoinEnumeration(table **t, Query *q) {
 
     int* connectedRelations = createConnectedRelationsFromGraph(q);
     int* bestTree = BestTree[hashFunctionBestTree(connectedRelations, connectedRelationsNum)];
+/*
+    printf("Best Tree:\t");
+    for(int i=0; i<connectedRelationsNum; i++)
+        printf("%d\t", bestTree[i]);
+    printf("\n\n");*/
 
     int* comparisonsOrder = getComparisonsOrder(q->comparison_set, bestTree, q->query_relation_set->query_relations);
 
@@ -758,8 +763,8 @@ int *JoinEnumeration(table **t, Query *q) {
 
 void freeJEStats(JEStats *jes) {
 
-//    for(int i=0; i<jes->relations_num; i++)
-//        free(jes->jesbr[i].jesbc);
+    for(int i=0; i<jes->relations_num; i++)
+        free(jes->jesbr[i].jesbc);
 
     free(jes->intermediateResults);
     free(jes->jesbr);
