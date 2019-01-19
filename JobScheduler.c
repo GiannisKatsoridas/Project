@@ -27,14 +27,6 @@ JobScheduler *jobSchedulerCreate() {
     return js;
 }
 
-void jobSchedulerDestroy(JobScheduler *js) {
-
-    JobQueueDestroy(&js->queue);
-    free(js->tp);
-    mtx_destroy(&js->scheduler_mtx);
-    sem_destroy(&js->barrier_sem);
-
-}
 
 void schedule(JobScheduler* js, JobQueueElem *job) {
 
@@ -114,7 +106,6 @@ void* thread_start(void* argv){
                 return NULL;
         }
 
-
         mtx_lock(&js->scheduler_mtx);
         js->jobs_done++;
         if ((job->jobType == 1) && (js->jobs_done == THREAD_NUM))
@@ -133,6 +124,9 @@ void* thread_start(void* argv){
             V(&js->barrier_sem);
             
         }
+
+        free(job);
+
         mtx_unlock(&js->scheduler_mtx);
     }
 
@@ -179,8 +173,6 @@ int *splitRelation(relation *rel) {
 /**
  * Function to create the initial psums for each thread to use. Each thread copies their designated values
  * from the initial relations to the new ones.
- * @param js
- * @param buckets
  */
 void makePsums(JobScheduler *js, int buckets) {
 
@@ -217,5 +209,32 @@ void makePsums(JobScheduler *js, int buckets) {
 
         }
     }
+}
+
+void freeJobScheduler(JobScheduler* js){
+
+    for(int i=0; i<THREAD_NUM; i++){
+
+        free(js->thread_histograms_S[i]);
+        free(js->thread_histograms_R[i]);
+        free(js->thread_psums[0][i]);
+        free(js->thread_psums[1][i]);
+
+    }
+
+    free(js->thread_histograms_S);
+    free(js->thread_histograms_R);
+
+    JobQueueDestroy(&js->queue);
+
+    free(js->thread_psums[0]);
+    free(js->thread_psums[1]);
+
+    free(js->tp);
+    mtx_destroy(&js->scheduler_mtx);
+    sem_destroy(&js->barrier_sem);
+
+    free(js);
+
 }
 

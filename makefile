@@ -1,6 +1,6 @@
 CC = gcc
 FLAGS = -g
-THREADS = -lpthread
+THREADS = -lpthread -lm
 
 OBJ1 = DataParse.o RadixHashJoin.o main.o Results.o Index.o Tables.o Query.o Actions.o Jobs.o JobQueue.o JobScheduler.o
 HEAD1 = DataParse.h Results.h Globals.h Index.h Tables.h Query.h Actions.h Jobs.h JobQueue.h JobScheduler.h

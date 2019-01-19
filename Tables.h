@@ -16,6 +16,7 @@ typedef struct tableMetadata {
     uint64_t min;
     uint64_t max;
     int distincts;
+    int size;
 } Metadata;//metadata FOR EACH COLUMN OF THE TABLE
 
 typedef struct Table {

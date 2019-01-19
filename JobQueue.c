@@ -3,6 +3,7 @@
 #include <pthread.h>
 
 #include "JobQueue.h"
+#include "Results.h"
 
 
 JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2], int hash1_value, int start[2],
@@ -47,6 +48,11 @@ JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2]
 	return elem;
 }
 
+void freeJob(JobQueueElem *job) {
+
+    freeResultsWithNum(job->res);
+
+}
 
 void JobQueueInit(JobQueue** qaddr, int size)
 {

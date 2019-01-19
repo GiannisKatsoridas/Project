@@ -69,6 +69,7 @@ JobQueueElem *JobQueuePop(JobQueue* q);
 
 void JobQueueDestroy(JobQueue** qaddr);
 
+void freeJob(JobQueueElem* job);
 
 
 void mtx_init(pthread_mutex_t *mtx);

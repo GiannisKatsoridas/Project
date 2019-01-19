@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <zconf.h>
 #include <unistd.h>
 #include <string.h>
 
 #include "Actions.h"
+#include "JoinEnumeration.h"
+
 
 void executeQuery(table **t, Query *q)
 {
 	//fprintf(stderr, "Executing a query...\n");
+
+	int* order = JoinEnumeration(t, q);
 
 	int actions = q->comparison_set->comparisons_num;
 	int* rels = q->query_relation_set->query_relations;
@@ -500,6 +503,8 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		//last, delete the old result table and assign the new one to the list node
 		IntermediateResultsDel(templist->table);
 		templist->table = inResNew;
+
+		freeRelation(rel);
 	}
 	else//relation doesn't exist in an intermediate results table
 	{//a new one has to be created and will be filled with a single column

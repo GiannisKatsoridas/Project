@@ -44,4 +44,6 @@ int* splitRelation(relation* rel);
 
 void makePsums(JobScheduler* js, int buckets);
 
+void freeJobScheduler(JobScheduler* js);
+
 #endif //CARAMEL_JOBSCHEDULER_H

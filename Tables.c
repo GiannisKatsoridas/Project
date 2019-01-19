@@ -119,6 +119,8 @@ void parseTableData(table** t){
 
             findAllDistincts(t, i, j);
 
+            t[i]->metadata[j].size = (int) t[i]->size;
+
         }
 
         t[i]->tableID = i;

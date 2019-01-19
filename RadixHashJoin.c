@@ -42,8 +42,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     int *histograms[2];
     histograms[0] = histogramR;
     histograms[1] = histogramS;
-    int* psumR = initializeHistogram(buckets);
-    int* psumS = initializeHistogram(buckets);
+    int* psumR;
+    int* psumS;
     int **psums = malloc(2* sizeof(int*));
     psums[0] = psumR;
     psums[1] = psumS;
@@ -70,7 +70,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
         //push the job in the Job Queue
         schedule(js, job);
-        //printf("%d\n", i);
 
     }
 
@@ -116,22 +115,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     }
 
     barrier(js);
-
-//    int* histogramR = create_histogram(relR);    // Creates the histogram of the relation R
-//    int* histogramS = create_histogram(relS);    // Creates the histogram of the relation S
-
-//    int* psumR = create_psum(histogramR, power_of_2(suffix));     // Creates the accumulative histogram of the relation R
-//    int* psumS = create_psum(histogramS, power_of_2(suffix));     // Creates the accumulative histogram of the relation S
-
-    /*relation* relation_R_new = create_relation_new(relR, psumR, power_of_2(suffix));    // Create the new relation
-                                                                                          // used for the Join
-    relation* relation_S_new = create_relation_new(relS, psumS, power_of_2(suffix));    // Create the new relation
-                                                                                          // used for the Join*/
-
-    /*printf("Relation R after hashing:\n");
-    print_relation(relation_R_new, stdout);
-    printf("Relation S after hashing:\n");
-    print_relation(relation_S_new, stdout);*/
 
     psumR = js->thread_psums[0][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
     psumS = js->thread_psums[1][THREAD_NUM-1];
@@ -266,16 +249,18 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     //print_results(results);
 
+    //freeJobScheduler(js);
+
+    free(indexesR);
+    free(indexesS);
     free(histogramR);
     free(histogramS);
     free(relation_R_new->tuples);
     free(relation_R_new);
     free(relation_S_new->tuples);
     free(relation_S_new);
-    free(psumR);
-    free(psumS);
 
-    jobSchedulerDestroy(js);
+    freeJobScheduler(js);
 
     return res;
 }

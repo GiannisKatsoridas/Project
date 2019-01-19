@@ -14,7 +14,7 @@ add_executable(Caramel
         Actions.c
         Actions.h
         JobQueue.c
-        Jobs.c JobScheduler.c JobScheduler.h)
+        Jobs.c JobScheduler.c JobScheduler.h JoinEnumeration.c JoinEnumeration.h)
 add_executable(DataGenerator
         DataGenerator.c)
 add_executable(UnitTests
@@ -34,3 +34,4 @@ add_executable(UnitTests
         CUnit/Sources/Framework/Util.c)
 
 target_link_libraries(Caramel pthread)
+target_link_libraries(Caramel m)
