@@ -32,38 +32,37 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     //split relation into THREAD_NUM piece
     //save start of each piece
-    int* indexesR = splitRelation(relR);
-    int* indexesS = splitRelation(relS);
+    int *indexes[2];
+    indexes[R] = splitRelation(relR);
+    indexes[S] = splitRelation(relS);
 
     int buckets = power_of_2(suffix);
 
     //initialize histograms and psums
-    int* histogramR = initializeHistogram(buckets);
-    int* histogramS = initializeHistogram(buckets);
     int *histograms[2];
-    histograms[0] = histogramR;
-    histograms[1] = histogramS;
-    int *psumR = NULL;
-    int *psumS = NULL;
+    histograms[R] = initializeHistogram(buckets);
+    histograms[S] = initializeHistogram(buckets);
+
+
     int *psums[2];
-    psums[0] = psumR;
-    psums[1] = psumS;
+    psums[R] = NULL;
+    psums[S] = NULL;
 
     for(int i=0; i<(int) THREAD_NUM; i++){
         //for each relation piece 
 
         //save its bounds
         int start[2], end[2];
-        start[0] = indexesR[i];
-        start[1] = indexesS[i];
+        start[R] = indexes[R][i];
+        start[S] = indexes[S][i];
 
         if(i != ((int) THREAD_NUM - 1)){
-            end[0] = indexesR[i+1];
-            end[1] = indexesS[i+1];
+            end[R] = indexes[R][i+1];
+            end[S] = indexes[S][i+1];
         }
         else{
-            end[0] = relR->num_tuples;
-            end[1] = relS->num_tuples;
+            end[R] = relR->num_tuples;
+            end[S] = relS->num_tuples;
         }
 
         //create a HistogramJob
@@ -82,33 +81,32 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     // Initialize the new relations.
 
-    relation* relation_R_new = malloc(sizeof(relation));
-    relation* relation_S_new = malloc(sizeof(relation));
-    relation_R_new->num_tuples = relR->num_tuples;
-    relation_R_new->tuples = malloc(relation_R_new->num_tuples*sizeof(tuple));
-    relation_S_new->num_tuples = relS->num_tuples;
-    relation_S_new->tuples = malloc(relation_S_new->num_tuples*sizeof(tuple));
+    relation* newRels[2];
+    newRels[R] = malloc(sizeof(relation));
+    newRels[S] = malloc(sizeof(relation));
 
-    relation** newRels = malloc(2*sizeof(relation*));
-    newRels[0] = relation_R_new;
-    newRels[1] = relation_S_new;
+    newRels[R]->num_tuples = relR->num_tuples;
+    newRels[R]->tuples = malloc(newRels[R]->num_tuples*sizeof(tuple));
+
+    newRels[S]->num_tuples = relS->num_tuples;
+    newRels[S]->tuples = malloc(newRels[S]->num_tuples*sizeof(tuple));
 
     for(int i=0; i<(int) THREAD_NUM; i++){
 
         int start[2], end[2];
-        start[0] = indexesR[i];
-        start[1] = indexesS[i];
+        start[R] = indexes[R][i];
+        start[S] = indexes[S][i];
 
         if(i != ((int) THREAD_NUM - 1)){
-            end[0] = indexesR[i+1];
-            end[1] = indexesS[i+1];
+            end[R] = indexes[R][i+1];
+            end[S] = indexes[S][i+1];
         }
         else{
-            end[0] = relR->num_tuples;
-            end[1] = relS->num_tuples;
+            end[R] = relR->num_tuples;
+            end[S] = relS->num_tuples;
         }
 
-//        printf("PIECE #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", i, start[0], end[0], histograms[0][i], start[1], end[1], histograms[1][i]);
+//        printf("PIECE #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", i, start[R], end[R], histograms[0][i], start[S], end[S], histograms[1][i]);
 
         JobQueueElem* job = JobCreate(jobIDCounter++, i, PART_TYPE, rels, buckets, start, end, psums, NULL, &hist_mtx, newRels, 0, NULL, NULL);
 
@@ -117,11 +115,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     barrier(js);
 
-    psumR = js->thread_psums[0][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
-    psumS = js->thread_psums[1][THREAD_NUM-1];
-
-    psums[0] = psumR;
-    psums[1] = psumS;
+    psums[R] = js->thread_psums[R][THREAD_NUM-1];      // The initial psum is actually the psum of the last thread.
+    psums[S] = js->thread_psums[S][THREAD_NUM-1];
 
     //PHASE 3: Join
     resultsWithNum* res = create_resultsWithNum();
@@ -132,17 +127,17 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         int start[2], end[2];
         if(bucket_id == 0)
         {
-            start[0] = 0;
-            start[1] = 0;
+            start[R] = 0;
+            start[S] = 0;
         }
         else
         {
-            start[0] = psumR[bucket_id-1];
-            start[1] = psumS[bucket_id-1];
+            start[R] = psums[R][bucket_id-1];
+            start[S] = psums[S][bucket_id-1];
         }
 
-        end[0] = psumR[bucket_id] -1;
-        end[1] = psumS[bucket_id] -1;
+        end[R] = psums[R][bucket_id] -1;
+        end[S] = psums[S][bucket_id] -1;
 
 
         JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
@@ -186,27 +181,27 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     {
         //printf("BUCKET #%d\n", i);
         //compare size of bucket i of the relations R and S
-        if (histogramR[i] > histogramS[i])
+        if (histograms[R][i] > histograms[S][i])
         {//bucket i of relation S is smaller; S will be hashed
-            x = relation_R_new;
-            x_histogram = histogramR;
-            x_psum = psumR;
+            x = newRels[R];
+            x_histogram = histograms[R];
+            x_psum = psums[R];
 
-            y = relation_S_new;
-            y_histogram = histogramS;
-            y_psum = psumS;
+            y = newRels[S];
+            y_histogram = histograms[S];
+            y_psum = psums[S];
 
             column_id = 1;
         }
         else
         {//bucket i of relation R is smaller; R will be hashed
-            y = relation_R_new;
-            y_histogram = histogramR;
-            y_psum = psumR;
+            y = newRels[R];
+            y_histogram = histograms[R];
+            y_psum = psums[R];
 
-            x = relation_S_new;
-            x_histogram = histogramS;
-            x_psum = psumS;
+            x = newRels[S];
+            x_histogram = histograms[S];
+            x_psum = psums[S];
 
             column_id = 2;
         }
@@ -254,16 +249,15 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     //freeJobScheduler(js);
 
     //free(psums);
-    free(newRels);
 
-    free(indexesR);
-    free(indexesS);
-    free(histogramR);
-    free(histogramS);
-    free(relation_R_new->tuples);
-    free(relation_R_new);
-    free(relation_S_new->tuples);
-    free(relation_S_new);
+    free(indexes[R]);
+    free(indexes[S]);
+    free(histograms[R]);
+    free(histograms[S]);
+    free(newRels[R]->tuples);
+    free(newRels[R]);
+    free(newRels[S]->tuples);
+    free(newRels[S]);
 
     freeJobScheduler(js);
 
