@@ -13,26 +13,26 @@ int hash2(int32_t payload)
 
 void index_create(hash_index **indx_addr, int bucket_array_sz)
 {
-	(*indx_addr) = malloc(sizeof(hash_index));
-	hash_index * indx = *indx_addr;
+    (*indx_addr) = malloc(sizeof(hash_index));
+    hash_index * indx = *indx_addr;
 
-	indx -> bucket_array = malloc(bucket_array_sz * sizeof(int));
-	indx -> bucket_array_sz = bucket_array_sz;
+    indx -> bucket_array = malloc(bucket_array_sz * sizeof(int));
+    indx -> bucket_array_sz = bucket_array_sz;
 
-	indx -> chain = NULL;
-	indx -> chain_sz = -1;
+    indx -> chain = NULL;
+    indx -> chain_sz = -1;
 }
 
 void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_end)
 {//tuple amount: histogram[i] ; bucket_end : psum[i]
-	
-	//initialize bucket array
+
+    //initialize bucket array
     for (int j = 0; j < indx-> bucket_array_sz; j++)
     {
         indx->bucket_array[j] = -1;
     }
 
-	//now the bucket i of the relation y is the one that will be hashed
+    //now the bucket i of the relation y is the one that will be hashed
     //create the chain array
     indx -> chain = realloc(indx -> chain, tuple_amount * sizeof(int));
     for (int j = 0; j < tuple_amount; j++)
@@ -41,12 +41,12 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
     }
     indx -> chain_sz = tuple_amount;
 
-	//assign boundaries of the bucket i of relation y
-    int first_pos = bucket_end - tuple_amount + 1; //starting position of bucket i within relation y
-    int last_pos = bucket_end;  //ending position of bucket i within relation y
+    //assign boundaries of the bucket i of relation y
+    int first_pos = bucket_end - tuple_amount; //starting position of bucket i within relation y
+    int last_pos = bucket_end -1;  //ending position of bucket i within relation y
     int pos = last_pos;     //variable for current position
 
-	//printf("y: bucket[%d]: [%d, %d]\n", i, first_pos, last_pos);
+    //printf("y: bucket[%d]: [%d, %d]\n", i, first_pos, last_pos);
     while(pos >= first_pos)
     {//accessing bucket elements from last to first; insert their position to the index chain 
         //printf("y->pos = %d..\n", pos);
@@ -66,7 +66,7 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
         }
         pos--;
     }
-    
+
     /*fprintf(stdout, "\nBUCKET ARRAY\n");
     for (int j = 0; j < HASH2_RANGE; j++)
     {
@@ -82,29 +82,29 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
 
 void index_destroy(hash_index **indx)
 {
-	free((*indx) -> bucket_array);
-	(*indx) -> bucket_array = NULL;
-	(*indx) -> bucket_array_sz = -1;
+    free((*indx) -> bucket_array);
+    (*indx) -> bucket_array = NULL;
+    (*indx) -> bucket_array_sz = -1;
 
-	free((*indx) -> chain);
-	(*indx) -> chain = NULL;
-	(*indx) -> chain_sz = -1;
+    free((*indx) -> chain);
+    (*indx) -> chain = NULL;
+    (*indx) -> chain_sz = -1;
 
-	free(*indx);
-	*indx = NULL;
+    free(*indx);
+    *indx = NULL;
 }
 
 void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, int32_t payload, int column_id, resultsWithNum* res)
 {//search all instances equal to payload in the current index bucket of rel
-	//rel is the relation whose bucket is currently indexed
-	//bucket_start is the first index of the current bucket in rel
-	//the key and payload arguments belong to the other relation and will be compared to the contents of rel
+    //rel is the relation whose bucket is currently indexed
+    //bucket_start is the first index of the current bucket in rel
+    //the key and payload arguments belong to the other relation and will be compared to the contents of rel
 
-	int n = hash2(payload);
+    int n = hash2(payload);
 
-	if(indx->bucket_array[n] != -1)
-	{
-		int curr_pos = indx->bucket_array[n];
+    if(indx->bucket_array[n] != -1)
+    {
+        int curr_pos = indx->bucket_array[n];
         int real_pos = curr_pos + bucket_start;
         /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
         pos, real_pos,
@@ -115,29 +115,29 @@ void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, 
         {
             //fprintf(stdout, "equals!\n");
             if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-            	add_result(res, key, rel->tuples[real_pos].key);
+                add_result(res, key, rel->tuples[real_pos].key);
             else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-            	add_result(res, rel->tuples[real_pos].key, key);
+                add_result(res, rel->tuples[real_pos].key, key);
         }
         while(indx -> chain[curr_pos] != -1)
         {
-        	curr_pos = indx->chain[curr_pos];
-        	real_pos = curr_pos + bucket_start;
+            curr_pos = indx->chain[curr_pos];
+            real_pos = curr_pos + bucket_start;
             /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
 	        pos, real_pos,
 	        pos- first_pos, curr_pos,
 	        x->tuples[pos].payload, y->tuples[real_pos].payload);*/
 
-	        if (payload == rel->tuples[real_pos].payload)
-		    {
-		        //fprintf(stdout, "equals!\n");
-		        if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
-		        	add_result(res, key, rel->tuples[real_pos].key);
-		        else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
-		        	add_result(res, rel->tuples[real_pos].key, key);
-		    }
+            if (payload == rel->tuples[real_pos].payload)
+            {
+                //fprintf(stdout, "equals!\n");
+                if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
+                    add_result(res, key, rel->tuples[real_pos].key);
+                else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
+                    add_result(res, rel->tuples[real_pos].key, key);
+            }
         }
-	}
+    }
 }
 
 /*int search_all_val(relation *x, int* x_hist, int *x_psum, relation *y, int* y_hist, int* y_psum, int bucket_id, index * indx, int column_id, result* results)

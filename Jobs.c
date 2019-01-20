@@ -35,11 +35,11 @@ void HistogramJob(JobScheduler* js, JobQueueElem *argv)
 		//save local histogram
 		if(r == 0){
 			js->thread_histograms_R[argv->threadID] = localhist;
-		    printf("Thread #%d - R: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
+		    //printf("Thread #%d - R: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
 		}
 		else{
 			js->thread_histograms_S[argv->threadID] = localhist;
-		    printf("Thread #%d - S: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
+		    //printf("Thread #%d - S: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
 		}
 
 	}
@@ -74,101 +74,78 @@ void PartitionJob(JobScheduler* js, JobQueueElem *argv)
 
 void JoinJob(JobQueueElem *argv)
 {
-	//create an index with a bucket_array[#of tuples in bucket] and a chain[rash2_range]
-	hash_index *indx = NULL;
+    //create an index with a bucket_array[#of tuples in bucket] and a chain[rash2_range]
+    hash_index *indx = NULL;
     index_create(&indx, HASH2_RANGE);
 
-	//find which one of the new relations' bucket is smaller
-	
-	//create 2 temporary sets of relations, histograms and psums: x and y
+    //find which one of the new relations' bucket is smaller
+
+    //create 2 temporary sets of relations, histograms and psums: x and y
     //y will be the relation whose bucket will be the smallest (and consequently indexed)
     //x will be the relation whose bucket will be the biggest
 
     relation *x = NULL;
 
     relation *y = NULL;
+    int *y_histogram = NULL;
+    int *y_psum = NULL;
 
     int column_id;// == 1 if tuples(bucket(R)) > tuples(bucket(S)), == 2 otherwise
 
     //declare temporary position variables
-    int x_curr= -1;
-    int x_start = -1;
-    int x_end = -1;
-    int x_amount = -1;
+    int pos = -1;
+    int first_pos = -1;
+    int last_pos = -1;
 
-    int y_start = -1;
-    int y_end = -1;
-    int y_amount = -1;
-
-
- 	//compare size of bucket i of the relations R and S
+    //compare size of bucket i of the relations R and S
     if (argv->histogram[R][argv->bucket_id] > argv->histogram[S][argv->bucket_id])
     {//bucket i of relation S is smaller; S will be hashed
         x = argv->newrels[R];
 
-        x_start = argv->start[R];
-        x_end = argv->end[R];
-        x_curr = x_end;
-        x_amount = argv->histogram[R][argv->bucket_id];
-
+        first_pos = argv->start[R];
+        last_pos = argv->end[R];
+        pos = last_pos;
 
         y = argv->newrels[S];
-
-        y_start = argv->start[S];
-        y_end = argv->end[S];
-        y_amount = argv->histogram[S][argv->bucket_id];
+        y_histogram = argv->histogram[S];
+        y_psum = argv->psum[S];
 
         column_id = 1;
     }
     else
     {//bucket i of relation R is smaller; R will be hashed
         y = argv->newrels[R];
+        y_histogram = argv->histogram[R];
+        y_psum = argv->psum[R];
 
-        y_start = argv->start[R];
-        y_end = argv->end[R];
-        y_amount = argv->histogram[R][argv->bucket_id];
+        first_pos = argv->start[S];
+        last_pos = argv->end[S];
+        pos = last_pos;
 
-        
         x = argv->newrels[S];
-
-        x_start = argv->start[S];
-        x_end = argv->end[S];
-        x_curr= x_end;
-        x_amount = argv->histogram[S][argv->bucket_id];
 
         column_id = 2;
     }
     //fprintf(stderr, "BUCKET #%d\n",i);
-    if(y_start == y_end)
+    if(y_histogram[argv->bucket_id] == 0)
     {
-    	index_destroy(&indx);
+        index_destroy(&indx);
         return;
     }
 
-    mtx_lock(argv->res_mtx);
-
-   /* if(column_id == 1)
-    {
-    	printf("bucket = %02d - bucket(R) >> bucket(S) - ", argv->bucket_id);
-    	printf("bucket(R) -> [%5d, %5d]  (range: %5d) - num_tuples(R): %5d\t - ", 	x_start, 	x_end, 		x_amount, 	argv->rels[R]->num_tuples);
-    	printf("bucket(S) -> [%5d, %5d]  (range: %5d) - num_tuples(S): %5d\n", 		y_start,	y_end,		y_amount, 	argv->rels[S]->num_tuples);
-    }
-    else
-    {
-    	printf("bucket = %02d - bucket(R) << bucket(S) - ", argv->bucket_id);
-    	printf("bucket(S) -> [%5d, %5d]  (range: %5d) - num_tuples(R): %5d\t - ", 	x_start, 	x_end, 		x_amount, 	argv->rels[S]->num_tuples);
-    	printf("bucket(R) -> [%5d, %5d]  (range: %5d) - num_tuples(S): %5d\n", 		y_start, 	y_end, 		y_amount,	argv->rels[R]->num_tuples);    
-    }*/
-
-	mtx_unlock(argv->res_mtx);
-
-	//hash that bucket into the index
-    index_fill(indx, y, y_amount, y_end);
+    //hash that bucket into the index
+    index_fill(indx, y, y_histogram[argv->bucket_id], y_psum[argv->bucket_id]);
 
     //assign boundaries of the bucket of relation x
-    //x_start = x_psum[argv->bucket_id] - x_histogram[argv->bucket_id]; //starting position of bucket i within relation x
-    //x_end = x_psum[argv->bucket_id] -1;  //ending position of bucket i within relation x
-    //x_curr= x_end;     //variable for current position
+    //first_pos = x_psum[argv->bucket_id] - x_histogram[argv->bucket_id]; //starting position of bucket i within relation x
+    //last_pos = x_psum[argv->bucket_id] -1;  //ending position of bucket i within relation x
+    //pos = last_pos;     //variable for current position
+
+    int bucket_start;
+    if(argv->bucket_id>0)
+        bucket_start = y_psum[argv->bucket_id-1];
+    else
+        bucket_start = 0;
 
     //values of tuple to be searched
     int32_t key;
@@ -177,23 +154,23 @@ void JoinJob(JobQueueElem *argv)
     //local result list
     resultsWithNum* localres = create_resultsWithNum();
 
-	while(x_curr>= x_start)
-	{//for each value of the greater bucket
+    while(pos >= first_pos)
+    {//for each value of the greater bucket
 
-	    key = x->tuples[x_curr].key;
-	    payload = x->tuples[x_curr].payload;
+        key = x->tuples[pos].key;
+        payload = x->tuples[pos].payload;
 
-		//do a search_val: search for in in the index and save it in a local results list
-	    search_val(y, y_start, indx, key, payload, column_id, localres);
-	    
-	    x_curr--;
-	}
+        //do a search_val: search for in in the index and save it in a local results list
+        search_val(y, bucket_start, indx, key, payload, column_id, localres);
 
-	//concatenate local result list to the total result list
-	mtx_lock(argv->res_mtx);
-	concatResults(argv->res, localres);
-	mtx_unlock(argv->res_mtx);
+        pos--;
+    }
 
-	//destroy index
-	index_destroy(&indx);
+    //concatenate local result list to the total result list
+    mtx_lock(argv->res_mtx);
+    concatResults(argv->res, localres);
+    mtx_unlock(argv->res_mtx);
+
+    //destroy index
+    index_destroy(&indx);
 }

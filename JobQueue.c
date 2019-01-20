@@ -25,9 +25,6 @@ JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2]
     elem -> start[1] = start[1];
     elem -> end[1] = end[1];
 
-    elem -> psum[0] = psum[0];
-    elem -> psum[1] = psum[1];
-
 	if((jobType == 1) || (jobType == 3)) {
 		elem->histogram[0] = hist[0];
 		elem->histogram[1] = hist[1];
@@ -40,6 +37,8 @@ JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2]
 	}
 
 	if (jobType == 3) {
+		elem -> psum[0] = psum[0];
+		elem -> psum[1] = psum[1];
 		elem->bucket_id = bucket_id;
 		elem->res = res;
 		elem->res_mtx = res_mtx;

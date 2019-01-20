@@ -119,6 +119,8 @@ void executeQuery(table **t, Query *q)
 */
 	printActionResults(t, inRes, q->column_set, rels);
 
+	free(order);
+
 	deleteList(&inRes);
 }
 
