@@ -44,6 +44,7 @@ void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S){
     int resultnode = res->results_amount / getResultTuplesPerPage();
     int pos = res->results_amount % getResultTuplesPerPage();
 
+
     if(pos == 0)
         resultnode--;
 
@@ -155,6 +156,7 @@ void concatResults(resultsWithNum *res1, resultsWithNum *res2)
 		freeResultsWithNum(res2);
 		return;
 	}
+
 	//STEP 1: 
 	//keep address of last and prelast node of results list 1
 	//keep address of last node of results list 2

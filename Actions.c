@@ -32,6 +32,7 @@ void executeQuery(table **t, Query *q)
 		else
 			inRes = joinRelationsRadix(inRes, t, rels, cmp[order[i]].relationA, cmp[order[i]].relationB,
 									   cmp[order[i]].columnA, cmp[order[i]].columnB);
+
 	}
 
     /*//calculate action priorities
@@ -138,6 +139,8 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
 		sums[i] = 0;    
     }
     //printf("\n\n");
+
+    //printf("Final results amount: %d\n", (int) result->tupleAmount);
 
 
     for(int j=0; j<result->tupleAmount; j++){
@@ -746,13 +749,14 @@ IntermediateResults* mergeIntermediateResults(IntermediateResultsList* inRes, ta
 
     for(int j=0; j<r->tupleAmount; j++){
 
+		if(j%getResultTuplesPerPage() == 0 && j!=0)
+			pointer = pointer->next;
+
 		for(int i=0; i<getNodeFromList(inRes, indexA)->relAmount; i++)
 			r->keys[i][j] = getNodeFromList(inRes, indexA)->keys[i][pointer->results[j%getResultTuplesPerPage()].relation_R];
 		for(int i=getNodeFromList(inRes, indexA)->relAmount; i<r->relAmount; i++)
 			r->keys[i][j] = getNodeFromList(inRes, indexB)->keys[i - getNodeFromList(inRes, indexA)->relAmount][pointer->results[j%getResultTuplesPerPage()].relation_S];
 
-		if(j%getResultTuplesPerPage() == 0 && j!=0)
-			pointer = pointer->next;
     }
 
 	freeResultsWithNum(results);
@@ -773,11 +777,12 @@ IntermediateResults* addResultToNewIntermediateResult(resultsWithNum *results, I
 	inRes->relationIDs[1] = relationB;
 	for(int i=0; i<inRes->tupleAmount; i++){
 
+		if(i%getResultTuplesPerPage() == 0 && i != 0)
+			pointer = pointer->next;
+
 		inRes->keys[0][i] = pointer->results[i%getResultTuplesPerPage()].relation_R;
 		inRes->keys[1][i] = pointer->results[i%getResultTuplesPerPage()].relation_S;
 
-		if(i%getResultTuplesPerPage() == 0 && i != 0)
-			pointer = pointer->next;
 	}
 
 	return inRes;
@@ -928,6 +933,9 @@ IntermediateResults* addResultsWithNewColumn(resultsWithNum* results, Intermedia
 
 	for(int i=0; i<r->tupleAmount; i++){
 
+		if(i%getResultTuplesPerPage() == 0 && i != 0)
+			pointer = pointer->next;
+
 		for(int j=0; j<inRes->relAmount; j++){
 
 			r->keys[j][i] = relIndex == relationA ? inRes->keys[j][pointer->results[i % getResultTuplesPerPage()].relation_R] : inRes->keys[j][pointer->results[i % getResultTuplesPerPage()].relation_S];
@@ -935,8 +943,6 @@ IntermediateResults* addResultsWithNewColumn(resultsWithNum* results, Intermedia
 		}
 		r->keys[r->relAmount-1][i] = relIndex == relationA ? pointer->results[i % getResultTuplesPerPage()].relation_S : pointer->results[i % getResultTuplesPerPage()].relation_R;
 
-		if(i%getResultTuplesPerPage() == 0 && i != 0)
-			pointer = pointer->next;
 	}
 
 	//IntermediateResultsDel(inRes);

@@ -3,6 +3,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "Jobs.h"
 #include "Index.h"
@@ -166,31 +167,11 @@ void JoinJob(JobQueueElem *argv)
 
         pos--;
     }
+/*
 
-    char* filename = malloc(50*sizeof(char));
-    strcpy(filename, "\0");
-    sprintf(filename, "Thread0%dFile%d.txt", argv->JobID, argv->bucket_id);
-    FILE* f = fopen(filename, "a");
-
-    result* pointer = localres->results;
-
-    int tuples_printed = 0;
-
-    while(pointer!=NULL){
-
-        for(int i=0; (i<tuples_per_page) && (tuples_printed<localres->results_amount); i++){
-
-            fprintf(f, "%d\n", localres->results->results[i].relation_R);
-            tuples_printed++;
-        }
-
-        pointer = pointer->next;
-
-    }
-
-    printf("Amount: %d, tuples: %d\n", localres->results_amount, tuples_printed);
-
-    fclose(f);
+    if(argv->bucket_id == 0)
+        sleep(1);
+*/
 
     //concatenate local result list to the total result list
     mtx_lock(argv->res_mtx);
