@@ -788,14 +788,14 @@ int getIntermediateResultsIndex(IntermediateResultsList* inRes, int relationA, i
 	for(int i=0; i<intermediateResultsAmount; i++)
 		if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, j), relationB) && i != j)
 					return -2;
 			}
 			return i;
 		}
 		else if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, j), relationA) && i != j)
 					return -2;
 			}
 			return i;

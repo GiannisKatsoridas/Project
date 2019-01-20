@@ -14,6 +14,10 @@ int main() {
 
     parseTableData(t);
 
+    /*relation* r1 = createRelationFromTable(t[4], 0);
+    relation* r2 = createRelationFromTable(t[1], 0);
+    resultsWithNum* res = RadixHashJoin(r1, r2);*/
+
     //printf("Done\n");
 
     //freopen("queries.txt","r",stdin);
