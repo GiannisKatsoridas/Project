@@ -7,7 +7,7 @@ int main() {
 
     setTuplesPerPage();
 
-    freopen("files_and_queries.txt", "r", stdin);
+    //freopen("files_and_queries.txt", "r", stdin);
 
     table** t = createTablesArray();
 
