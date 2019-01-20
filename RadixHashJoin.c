@@ -39,7 +39,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     //initialize histograms and psums
     int* histogramR = initializeHistogram(buckets);
     int* histogramS = initializeHistogram(buckets);
-    int *histograms[2];
+    int **histograms[2];
     histograms[0] = histogramR;
     histograms[1] = histogramS;
     int *psumR = NULL;
@@ -142,7 +142,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         end[0] = psumR[bucket_id] -1;
         end[1] = psumS[bucket_id] -1;
 
-        printf("BUCKET #%d - R:[%5d,%5d] , S:[%5d,%5d]\n", bucket_id, start[0], end[0], start[1], end[1]);
+        printf("BUCKET #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", bucket_id, start[0], end[0], histograms[0][bucket_id], start[1], end[1], histograms[1][bucket_id]);
 
         JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
 
