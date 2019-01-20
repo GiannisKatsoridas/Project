@@ -167,7 +167,7 @@ void JoinJob(JobQueueElem *argv)
         pos--;
     }
 
-    char* filename = malloc(50*sizeof(char));
+  /*  char* filename = malloc(50*sizeof(char));
     strcpy(filename, "\0");
     sprintf(filename, "Thread0%dFile%d.txt", argv->JobID, argv->bucket_id);
     FILE* f = fopen(filename, "a");
@@ -191,7 +191,7 @@ void JoinJob(JobQueueElem *argv)
     printf("Amount: %d, tuples: %d\n", localres->results_amount, tuples_printed);
 
     fclose(f);
-
+*/
     //concatenate local result list to the total result list
     mtx_lock(argv->res_mtx);
     concatResults(argv->res, localres);
