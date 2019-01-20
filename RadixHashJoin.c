@@ -142,6 +142,8 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         end[0] = psumR[bucket_id] -1;
         end[1] = psumS[bucket_id] -1;
 
+        printf("BUCKET #%d - R:[%5d,%5d] , S:[%5d,%5d]\n", bucket_id, start[0], end[0], start[1], end[1]);
+
         JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
 
         schedule(js, job);

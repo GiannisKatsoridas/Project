@@ -42,8 +42,8 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
     indx -> chain_sz = tuple_amount;
 
 	//assign boundaries of the bucket i of relation y
-    int first_pos = bucket_end - tuple_amount; //starting position of bucket i within relation y
-    int last_pos = bucket_end -1;  //ending position of bucket i within relation y
+    int first_pos = bucket_end - tuple_amount + 1; //starting position of bucket i within relation y
+    int last_pos = bucket_end;  //ending position of bucket i within relation y
     int pos = last_pos;     //variable for current position
 
 	//printf("y: bucket[%d]: [%d, %d]\n", i, first_pos, last_pos);

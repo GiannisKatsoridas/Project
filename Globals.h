@@ -8,7 +8,7 @@
 #define RELR_SIZE 100                             // Relation R size
 #define RELS_SIZE 100                              // Relation S size
 #define MAX_VALUE 1000                                  // Max value that the relation values can go to
-#define RADIX_N 12
+#define RADIX_N 1
 #define THREAD_NUM 10
 
 #define R 0
