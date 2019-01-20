@@ -6,6 +6,7 @@
 
 resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
+    printf("R: %d, S; %d\n", relR->num_tuples, relS->num_tuples);
     int jobIDCounter = 0;
     relation* rels[2];
     rels[0] = relR;
@@ -44,7 +45,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     histograms[1] = histogramS;
     int *psumR = NULL;
     int *psumS = NULL;
-    int **psums = malloc(2* sizeof(int*));
+    int *psums[2];
     psums[0] = psumR;
     psums[1] = psumS;
 
@@ -107,6 +108,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             end[1] = relS->num_tuples;
         }
 
+//        printf("PIECE #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", i, start[0], end[0], histograms[0][i], start[1], end[1], histograms[1][i]);
 
         JobQueueElem* job = JobCreate(jobIDCounter++, i, PART_TYPE, rels, buckets, start, end, NULL, psums, &hist_mtx, newRels, 0, NULL, NULL);
 
@@ -142,7 +144,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
         end[0] = psumR[bucket_id] -1;
         end[1] = psumS[bucket_id] -1;
 
-        printf("BUCKET #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", bucket_id, start[0], end[0], histograms[0][bucket_id], start[1], end[1], histograms[1][bucket_id]);
 
         JobQueueElem* job = JobCreate(jobIDCounter++, -1, JOIN_TYPE, rels, buckets, start, end, histograms, psums, &hist_mtx, newRels, bucket_id, res, &res_mtx);
 
@@ -252,7 +253,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
     //freeJobScheduler(js);
 
-    free(psums);
+    //free(psums);
     free(newRels);
 
     free(indexesR);

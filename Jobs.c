@@ -35,12 +35,15 @@ void HistogramJob(JobScheduler* js, JobQueueElem *argv)
 		//save local histogram
 		if(r == 0){
 			js->thread_histograms_R[argv->threadID] = localhist;
+		    printf("Thread #%d - R: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
 		}
 		else{
 			js->thread_histograms_S[argv->threadID] = localhist;
+		    printf("Thread #%d - S: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
 		}
 
 	}
+
 }
 
 /**
