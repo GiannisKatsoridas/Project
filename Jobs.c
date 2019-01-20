@@ -3,7 +3,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "Jobs.h"
 #include "Index.h"
@@ -168,6 +167,11 @@ void JoinJob(JobQueueElem *argv)
         pos--;
     }
 /*
+
+  /*  char* filename = malloc(50*sizeof(char));
+    strcpy(filename, "\0");
+    sprintf(filename, "Thread0%dFile%d.txt", argv->JobID, argv->bucket_id);
+    FILE* f = fopen(filename, "a");
 
     if(argv->bucket_id == 0)
         sleep(1);
