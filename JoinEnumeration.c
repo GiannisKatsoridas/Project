@@ -121,20 +121,6 @@ void PQDelete(PermutationsQueue* pq){
 
 }
 
-int hashFunction(int *array, int length, int relationsLength) {
-
-    int result = length;
-
-    for(int i=0; i<length; i++){
-
-        result += (array[i]) * factorial(relationsLength-i);
-
-    }
-
-    return result;
-
-}
-
 int hashFunctionBestTree(int *array, int length) {
 
     int result = 0;

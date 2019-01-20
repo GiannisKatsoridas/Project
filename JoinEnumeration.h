@@ -67,12 +67,6 @@ void PQPush(PermutationsQueue* pq, int* array);
 void PQDelete(PermutationsQueue* pq);
 
 /**
- * Unique hash function to calculate position of permutation in the Cost hash table: A*4! + B*3! + C*2! + D*1!
- * (Given that the array given is [A, B, C, D])
- */
-int hashFunction(int* array, int length, int relationsLength);
-
-/**
  * Unique hash function to calculate position of permutation in the BestTree hash table! It calculated the position
  * inside the table by multiplying the positions where the relation is present with their respective index.
  * E.g. Relations in total: [0, 1, 2, 3]. Set to calculate: [1, 2, 3] (and [2, 3, 1] and all the others).

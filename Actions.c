@@ -14,36 +14,51 @@ void executeQuery(table **t, Query *q)
 
 	int* order = JoinEnumeration(t, q);
 
-	free(order);
+    int actions = q->comparison_set->comparisons_num;
+    int* rels = q->query_relation_set->query_relations;
 
-	int actions = q->comparison_set->comparisons_num;
-	int* rels = q->query_relation_set->query_relations;
+    IntermediateResultsList* inRes = createList();
 
-	//calculate action priorities
-	calculateActionPriorities(t, q);
+    Comparison* cmp = q->comparison_set->comparisons;
 
-	//save comparisons in an array, cmp
-	Comparison cmp[actions];
-	Comparison temp;
-	for (int i = 0; i < actions; i++)
-		cmp[i] = q->comparison_set->comparisons[i];
+    for(int i=0; i<actions; i++)
+        if(cmp[i].action != JOIN)
+            inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , cmp[i].relationA, cmp[i].columnA , cmp[i].relationB , cmp[i].action);
 
-	//sort comparisons according to their priority
-	for (int i = 0; i < actions-1; i++)
-	{
-		for (int j = 0; j < actions -i-1; j++)
-		{
-			if(cmp[j].priority > cmp[j+1].priority)
-			{
-				temp = cmp[j];
-				cmp[j] = cmp[j+1];
-				cmp[j+1] = temp;
-			}
-		}
+    for(int i=0; i<joinComparisonsNum; i++) {
+		if (cmp[order[i]].relationA == cmp[order[i]].relationB)
+			inRes = joinSameRelation(inRes, t, rels, cmp[order[i]].relationA, cmp[order[i]].columnA,
+									 cmp[order[i]].columnB);
+		else
+			inRes = joinRelationsRadix(inRes, t, rels, cmp[order[i]].relationA, cmp[order[i]].relationB,
+									   cmp[order[i]].columnA, cmp[order[i]].columnB);
 	}
 
-	//print actions in increasing priority order
-	/*for (int i = 0; i < actions; i++)
+    /*//calculate action priorities
+    calculateActionPriorities(t, q);
+
+    //save comparisons in an array, cmp
+    Comparison cmp[actions];
+    Comparison temp;
+    for (int i = 0; i < actions; i++)
+        cmp[i] = q->comparison_set->comparisons[i];
+
+    //sort comparisons according to their priority
+    for (int i = 0; i < actions-1; i++)
+    {
+        for (int j = 0; j < actions -i-1; j++)
+        {
+            if(cmp[j].priority > cmp[j+1].priority)
+            {
+                temp = cmp[j];
+                cmp[j] = cmp[j+1];
+                cmp[j+1] = temp;
+            }
+        }
+    }
+
+    //print actions in increasing priority order
+    *//*for (int i = 0; i < actions; i++)
 	{
 		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
 		if(cmp[i].action == LESS_THAN)
@@ -59,7 +74,7 @@ void executeQuery(table **t, Query *q)
 			printf("%d ", cmp[i].relationB);
 
 		printf("(pr: %d)\n", cmp[i].priority);
-	}*/
+	}*//*
 
 	//execute actions in query
 	IntermediateResultsList* inRes = createList();
@@ -101,7 +116,7 @@ void executeQuery(table **t, Query *q)
 		}
 
 	}
-
+*/
 	printActionResults(t, inRes, q->column_set, rels);
 
 	deleteList(&inRes);
@@ -121,6 +136,7 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
 		sums[i] = 0;    
     }
     //printf("\n\n");
+
 
     for(int j=0; j<result->tupleAmount; j++){
 
@@ -788,14 +804,14 @@ int getIntermediateResultsIndex(IntermediateResultsList* inRes, int relationA, i
 	for(int i=0; i<intermediateResultsAmount; i++)
 		if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, j), relationB) && i != j)
 					return -2;
 			}
 			return i;
 		}
 		else if(existsInIntermediateResults(getNodeFromList(inRes, i), relationB)){
 			for(int j=0; j<intermediateResultsAmount; j++){
-				if(existsInIntermediateResults(getNodeFromList(inRes, i), relationA) && i != j)
+				if(existsInIntermediateResults(getNodeFromList(inRes, j), relationA) && i != j)
 					return -2;
 			}
 			return i;

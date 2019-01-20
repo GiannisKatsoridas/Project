@@ -39,7 +39,7 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     //initialize histograms and psums
     int* histogramR = initializeHistogram(buckets);
     int* histogramS = initializeHistogram(buckets);
-    int **histograms[2];
+    int *histograms[2];
     histograms[0] = histogramR;
     histograms[1] = histogramS;
     int *psumR = NULL;
