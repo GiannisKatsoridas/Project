@@ -49,8 +49,6 @@ void barrier(JobScheduler* js){
 
 void stop(JobScheduler* js){
 
-    //pthread_cond_broadcast(&threadCond);
-
     V(js->queue->full);
     for(int i=0; i< (int) THREAD_NUM; i++){
         if(pthread_join(js->tp[i], NULL)!=0){

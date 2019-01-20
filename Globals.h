@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-//#define CACHE_SIZE 3145728;                             // Processor Cache
-#define CACHE_SIZE 100
 #define RELR_SIZE 100                             // Relation R size
 #define RELS_SIZE 100                              // Relation S size
 #define MAX_VALUE 1000                                  // Max value that the relation values can go to

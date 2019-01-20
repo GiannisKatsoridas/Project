@@ -6,7 +6,6 @@
 
 resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
 
-    //printf("R: %d, S; %d\n", relR->num_tuples, relS->num_tuples);
     int jobIDCounter = 0;
     relation* rels[2];
     rels[0] = relR;
@@ -106,8 +105,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
             end[S] = relS->num_tuples;
         }
 
-//        printf("PIECE #%d - R:[%5d,%5d] -> %5d , S:[%5d,%5d] -> %5d\n", i, start[R], end[R], histograms[0][i], start[S], end[S], histograms[1][i]);
-
         JobQueueElem* job = JobCreate(jobIDCounter++, i, PART_TYPE, rels, buckets, start, end, psums, NULL, &hist_mtx, newRels, 0, NULL, NULL);
 
         schedule(js, job);
@@ -147,107 +144,6 @@ resultsWithNum* RadixHashJoin(relation* relR, relation* relS){
     barrier(js);
 
     stop(js);
-/*
-    //start of payload comparison between buckets of R and S
-
-    //create index
-    hash_index *indx = NULL;
-    index_create(&indx, HASH2_RANGE);
-
-    //create 2 temporary sets of relations, histograms and psums: x and y
-    //y will be the relation whose bucket will be the smallest (and consequently indexed)
-    //x will be the relation whose bucket will be the biggest
-
-    relation *x = NULL;
-    int *x_histogram = NULL;
-    int *x_psum = NULL;
-
-    relation *y = NULL;
-    int *y_histogram = NULL;
-    int *y_psum = NULL;
-
-    int column_id;// == 1 if tuples(bucket(R)) > tuples(bucket(S)), == 2 otherwise
-
-    //declare temporary position variables
-    int pos = -1;
-    int first_pos = -1;
-    int last_pos = -1;
-
-
-
-    //for each relation bucket
-    for (int i = 0; i < power_of_2(suffix); i++)
-    {
-        //printf("BUCKET #%d\n", i);
-        //compare size of bucket i of the relations R and S
-        if (histograms[R][i] > histograms[S][i])
-        {//bucket i of relation S is smaller; S will be hashed
-            x = newRels[R];
-            x_histogram = histograms[R];
-            x_psum = psums[R];
-
-            y = newRels[S];
-            y_histogram = histograms[S];
-            y_psum = psums[S];
-
-            column_id = 1;
-        }
-        else
-        {//bucket i of relation R is smaller; R will be hashed
-            y = newRels[R];
-            y_histogram = histograms[R];
-            y_psum = psums[R];
-
-            x = newRels[S];
-            x_histogram = histograms[S];
-            x_psum = psums[S];
-
-            column_id = 2;
-        }
-        //fprintf(stderr, "BUCKET #%d\n",i);
-        if(y_histogram[i] == 0)
-            continue;
-
-        //create index for bucket i of relation y
-        index_fill(indx, y, y_histogram[i], y_psum[i]);
-        
-        //compare elements in bucket i of relation x to those on bucket i of relation y
-
-        //assign boundaries of the bucket i of relation x
-        first_pos = x_psum[i] - x_histogram[i]; //starting position of bucket i within relation x
-        last_pos = x_psum[i] -1;  //ending position of bucket i within relation x
-        pos = last_pos;     //variable for current position
-
-        int bucket_start;
-        if(i>0)
-            bucket_start = y_psum[i-1];
-        else
-            bucket_start = 0;
-
-        //values of tuple to be searched
-        int32_t key;
-        int32_t payload;
-
-        while(pos >= first_pos)
-        {
-            key = x->tuples[pos].key;
-            payload = x->tuples[pos].payload;
-
-            search_val(y, bucket_start, indx, key, payload, column_id, res);
-            
-            pos--;
-        }
-
-    }
-
-    index_destroy(&indx);
-    */
-
-    //print_results(results);
-
-    //freeJobScheduler(js);
-
-    //free(psums);
 
     free(indexes[R]);
     free(indexes[S]);

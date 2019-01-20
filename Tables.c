@@ -1,6 +1,3 @@
-//
-// Created by kats on 10/11/2018.
-//
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,8 +53,6 @@ table* loadRelation(const char* fileName){
 }
 
 table **createTablesArray() {
-
-    //freopen("input","r",stdin);
 
     relationsNum = 0;
     int i;
@@ -151,14 +146,17 @@ void findAllDistincts(table** t, int i, int j){
 
     u_int64_t range = t[i]->metadata[j].max - t[i]->metadata[j].min + 1;
 
+    if(range > MAX_TABLE_RANGE)
+        range = MAX_TABLE_RANGE;
+
     char* values = malloc(sizeof(char)*range);
     for(int k=0; k<range; k++){
         values[k] = 0;
     }
 
     for(int k=0; k<t[i]->size; k++){
-        if(values[t[i]->columns[j][k] - t[i]->metadata[j].min] == 0)
-            values[t[i]->columns[j][k] - t[i]->metadata[j].min] = 1;
+        if(values[(t[i]->columns[j][k] - t[i]->metadata[j].min) % range] == 0)
+            values[(t[i]->columns[j][k] - t[i]->metadata[j].min) % range] = 1;
     }
 
     t[i]->metadata[j].distincts = 0;
@@ -176,8 +174,6 @@ void freeTable(table** t){
     for(int i=0; i<relationsNum; i++){
 
         free(t[i]->columns);
-        //free(t[i]->inRes->keys);
-        //free(t[i]->inRes);
         free(t[i]->metadata);
         free(t[i]);
     }

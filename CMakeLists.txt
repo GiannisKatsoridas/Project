@@ -26,6 +26,10 @@ add_executable(UnitTests
         Index.c
         Query.c
         Actions.c
+        Jobs.c
+        JobQueue.c
+        JoinEnumeration.c
+        JobScheduler.c
         CUnit/Sources/Basic/Basic.c
         CUnit/Sources/Framework/CUError.c
         CUnit/Sources/Framework/MyMem.c
@@ -35,3 +39,6 @@ add_executable(UnitTests
 
 target_link_libraries(Caramel pthread)
 target_link_libraries(Caramel m)
+
+target_link_libraries(UnitTests pthread)
+target_link_libraries(UnitTests m)

@@ -6,7 +6,6 @@
 #include "JoinEnumeration.h"
 #include "Tables.h"
 
-void freeJEStats(JEStats *jes);
 
 int **createGraph(Query *query) {
 
@@ -657,19 +656,12 @@ int *JoinEnumeration(table **t, Query *q) {
 
         while(arr != NULL){
 
-            /*printf("Array:\t\t");
-            for(int k=0; k<i; k++)
-                printf("%d\t", arr[k]);
-            printf("\n");*/
-
             for(int j=0; j<q->query_relation_set->query_relations_num; j++){
 
                 if(existsInRelationInt(arr, array[j], i)
                    || !isConnected(graph, array[j], arr, i)
                    || BestTree[hashFunctionBestTree(arr, i)] == NULL)
                     continue;
-
-                //printf("Relation %d is connected to above array, with index: %d\n", array[j], hashFunctionBestTree(arr, i));
 
                 int index = hashFunctionBestTree(arr, i);
 
@@ -678,10 +670,6 @@ int *JoinEnumeration(table **t, Query *q) {
                     newArr[k] = arr[k];
                 newArr[i] = array[j];
 
-                /*printf("New Array:\t\t");
-                for(int k=0; k<=i; k++)
-                    printf("%d\t", newArr[k]);
-                printf("\t\tIndex: %d\n", newIndex);*/
                 int treeIndex = hashFunctionBestTree(newArr, i+1);
 
                 JEStats* newStats = copyJEStats(Costs[index]);
@@ -720,11 +708,6 @@ int *JoinEnumeration(table **t, Query *q) {
 
     int* connectedRelations = createConnectedRelationsFromGraph(q);
     int* bestTree = BestTree[hashFunctionBestTree(connectedRelations, connectedRelationsNum)];
-/*
-    printf("Best Tree:\t");
-    for(int i=0; i<connectedRelationsNum; i++)
-        printf("%d\t", bestTree[i]);
-    printf("\n\n");*/
 
     int* comparisonsOrder = getComparisonsOrder(q->comparison_set, bestTree, q->query_relation_set->query_relations);
 

@@ -247,10 +247,7 @@ Comparison getComparisonFromQuery(char *line) {
         {
             result.columnB = atoi(num);
             result.action = JOIN;
-            if(result.relationA == result.relationB)
-                result.priority = -1;
-            else
-                result.priority = -1;
+            result.priority = -1;
         }
         else
             result.columnB = -1;

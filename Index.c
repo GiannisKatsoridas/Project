@@ -7,7 +7,6 @@
 int hash2(int32_t payload)
 {
     int n =( payload >> RADIX_N ) % HASH2_RANGE;
-    //printf("%d -> %d\n", payload, n);
     return n;
 }
 
@@ -46,10 +45,8 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
     int last_pos = bucket_end -1;  //ending position of bucket i within relation y
     int pos = last_pos;     //variable for current position
 
-    //printf("y: bucket[%d]: [%d, %d]\n", i, first_pos, last_pos);
     while(pos >= first_pos)
     {//accessing bucket elements from last to first; insert their position to the index chain 
-        //printf("y->pos = %d..\n", pos);
         int n = hash2(rel->tuples[pos].payload);
         if (indx -> bucket_array[n]== -1)
         {
@@ -67,17 +64,6 @@ void index_fill(hash_index *indx, relation *rel, int tuple_amount, int bucket_en
         pos--;
     }
 
-    /*fprintf(stdout, "\nBUCKET ARRAY\n");
-    for (int j = 0; j < HASH2_RANGE; j++)
-    {
-        fprintf(stdout, "bucket[%02d] = %02d\n", j, bucket_array[j]);
-    }
-    fprintf(stdout, "\nCHAIN ARRAY\n");
-    for (int j = 0; j < y_histogram[i]; j++)
-    {
-        fprintf(stdout, "chain[%02d] = %02d\n", j, chain[j]);
-    }
-    fprintf(stdout, "\n");*/
 }
 
 void index_destroy(hash_index **indx)
@@ -106,14 +92,8 @@ void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, 
     {
         int curr_pos = indx->bucket_array[n];
         int real_pos = curr_pos + bucket_start;
-        /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
-        pos, real_pos,
-        pos- first_pos, curr_pos,
-        x->tuples[pos].payload, y->tuples[real_pos].payload);*/
-
         if (payload == rel->tuples[real_pos].payload)
         {
-            //fprintf(stdout, "equals!\n");
             if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
                 add_result(res, key, rel->tuples[real_pos].key);
             else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
@@ -123,14 +103,9 @@ void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, 
         {
             curr_pos = indx->chain[curr_pos];
             real_pos = curr_pos + bucket_start;
-            /*fprintf(stdout, "compairing (x[%d], y[%d]) = (xbucket[%d], ybucket[%d]) = (%d, %d)\n",
-	        pos, real_pos,
-	        pos- first_pos, curr_pos,
-	        x->tuples[pos].payload, y->tuples[real_pos].payload);*/
 
             if (payload == rel->tuples[real_pos].payload)
             {
-                //fprintf(stdout, "equals!\n");
                 if(column_id == 1)//relation R tuple (key, payload) is compared to bucket of relation S
                     add_result(res, key, rel->tuples[real_pos].key);
                 else if(column_id==2)//relation S tuple (key, payload) is compared to bucket of relation R
@@ -139,36 +114,3 @@ void search_val(relation *rel, int bucket_start, hash_index *indx, int32_t key, 
         }
     }
 }
-
-/*int search_all_val(relation *x, int* x_hist, int *x_psum, relation *y, int* y_hist, int* y_psum, int bucket_id, index * indx, int column_id, result* results)
-{
-	//searches all values of the bucket in relation x for equal payloads in the same bucket of relation y
-	int results_num = 0;
-
-     //assign boundaries of the bucket i of relation x
-    int first_pos = x_psum[i] - x_histogram[i]; //starting position of bucket i within relation x
-    int last_pos = x_psum[i] -1;  //ending position of bucket i within relation x
-    int pos = last_pos;     //variable for current position
-    
-    //values of tuple to be searched
-    int32_t key;
-    int32_t payload;
-
-    //real index of the first element of the bucket bucket_id of relation y 
-    int bucket_start;
-    if(bucket_id > 0)
-    	bucket_start = y_psum[i-1];
-    else
-    	bucket_start = 0;
-
-    while(pos >= first_pos)
-    {
-    	key = x->tuples[pos].key;
-    	payload = x->tuples[pos].payload;
-
-    	results_num = results_num + search_val(y, bucket_start, indx, key, payload, column_id, results);
-    	
-    	pos--;
-    }
-    return results_num;
-}*/

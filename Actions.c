@@ -10,8 +10,6 @@
 
 void executeQuery(table **t, Query *q)
 {
-	//fprintf(stderr, "Executing a query...\n");
-
 	int* order = JoinEnumeration(t, q);
 
     int actions = q->comparison_set->comparisons_num;
@@ -35,90 +33,7 @@ void executeQuery(table **t, Query *q)
 
 	}
 
-    /*//calculate action priorities
-    calculateActionPriorities(t, q);
-
-    //save comparisons in an array, cmp
-    Comparison cmp[actions];
-    Comparison temp;
-    for (int i = 0; i < actions; i++)
-        cmp[i] = q->comparison_set->comparisons[i];
-
-    //sort comparisons according to their priority
-    for (int i = 0; i < actions-1; i++)
-    {
-        for (int j = 0; j < actions -i-1; j++)
-        {
-            if(cmp[j].priority > cmp[j+1].priority)
-            {
-                temp = cmp[j];
-                cmp[j] = cmp[j+1];
-                cmp[j+1] = temp;
-            }
-        }
-    }
-
-    //print actions in increasing priority order
-    *//*for (int i = 0; i < actions; i++)
-	{
-		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
-		if(cmp[i].action == LESS_THAN)
-			printf(" < ");
-		else if(cmp[i].action == GREATER_THAN)
-			printf(" > ");
-		else
-			printf(" = ");
-
-		if(cmp[i].action == JOIN)
-			printf("%d.%d ", cmp[i].relationB , cmp[i].columnB);
-		else
-			printf("%d ", cmp[i].relationB);
-
-		printf("(pr: %d)\n", cmp[i].priority);
-	}*//*
-
-	//execute actions in query
-	IntermediateResultsList* inRes = createList();
-	for (int i = 0; i < actions; i++)
-	{
-//		printf("%d.%d", cmp[i].relationA, cmp[i].columnA);
-//		if(cmp[i].action == LESS_THAN)
-//			printf(" < ");
-//		else if(cmp[i].action == GREATER_THAN)
-//			printf(" > ");
-//		else
-//			printf(" = ");
-//
-//		if(cmp[i].action == JOIN)
-//			printf("%d.%d ", cmp[i].relationB , cmp[i].columnB);
-//		else
-//			printf("%d ", cmp[i].relationB);
-//
-//		printf("(pr: %f)\n", cmp[i].priority);
-		
-		if(cmp[i].action != JOIN)
-		{
-			inRes = compareColumn(inRes, t[rels[cmp[i].relationA]] , cmp[i].relationA, cmp[i].columnA , cmp[i].relationB , cmp[i].action);
-		}
-		else if(cmp[i].action == JOIN)
-		{
-			if (cmp[i].relationA == cmp[i].relationB)
-			{
-				inRes = joinSameRelation(inRes, t, rels, cmp[i].relationA, cmp[i].columnA, cmp[i].columnB);
-			}
-			else
-			{
-				inRes = joinRelationsRadix(inRes, t, rels, cmp[i].relationA, cmp[i].relationB, cmp[i].columnA, cmp[i].columnB);
-			}
-		}
-		else
-		{
-			fprintf(stderr, "wtf\n");
-		}
-
-	}
-*/
-	printActionResults(t, inRes, q->column_set, rels);
+    printActionResults(t, inRes, q->column_set, rels);
 
 	free(order);
 
@@ -127,20 +42,12 @@ void executeQuery(table **t, Query *q)
 
 void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *columns, int* rels) {
 
-	//fprintf(stderr, "Ready to print results...\n");
-
     IntermediateResults* result = getIntermediateResultFromColumns(t, inRes, columns, rels);
     int index;
 
     uint64_t sums[columns->columns_num];
     for(int i=0; i<columns->columns_num; i++)
-    {
-        //printf("(%d.%d)\t", rels[columns->columns[i].relation], columns->columns[i].column);
-		sums[i] = 0;    
-    }
-    //printf("\n\n");
-
-    //printf("Final results amount: %d\n", (int) result->tupleAmount);
+		sums[i] = 0;
 
 
     for(int j=0; j<result->tupleAmount; j++){
@@ -149,30 +56,24 @@ void printActionResults(table** t, IntermediateResultsList *inRes, Column_t *col
 
 			index = getColumnIntermediateResultsIndex(result, columns->columns[i].relation);
             sums[i] += t[rels[result->relationIDs[index]]]->columns[columns->columns[i].column][result->keys[index][j]];
-			//printf("%d\t", result->keys[index][j]);
         }
-        //printf("\n");
     }
 
     for (int i = 0; i < columns->columns_num; i++)
     {
     	if(result->tupleAmount == 0)
     		write(STDOUT_FILENO, "NULL", strlen("NULL"));
-    		//printf("NULL ");
     	else {
     		char* buf = malloc(20*sizeof(char));
     		strcpy(buf, "\0");
 			snprintf(buf, 20, "%lu", sums[i]);
 			write(STDOUT_FILENO, buf, strlen(buf));
-			//printf("%lu ", sums[i]);
 			free(buf);
 		}
         if(i < (columns->columns_num-1))
             write(STDOUT_FILENO, " ", strlen(" "));
     }
     write(STDOUT_FILENO, "\n", strlen("\n"));
-//    printf("\nTotal: %lu\n", result->tupleAmount);
-//    printf("------------------------------------------------------------\n");
 
 }
 
@@ -218,12 +119,10 @@ void calculateActionPriorities(table **t, Query *q)
 					cmp->priority = (float) tuplesA;
 				else
 					cmp->priority = (float) tuplesB;
-				//cmp->priority = distinctsA + distinctsB;
 			}
 		}
 		else if(cmp->action == EQUAL)
 		{
-			//distinctsA = t[q->query_relation_set->query_relations[cmp->relationA]]->metadata[cmp->columnA].distincts;
 			cmp->priority = 0.0;//(float) distinctsA;
 		}
 		else if (cmp->action == LESS_THAN)
@@ -452,7 +351,6 @@ int calculateSameJoinResultsAmount(relation* relA, relation* relB){
 	int counter = 0;
 	for(int i=0; i<relA->num_tuples; i++)
 		if(relA->tuples[i].payload == relB->tuples[i].payload) {
-			//printf("%d - %d\n", relA->tuples[i].key, relA->tuples[i].payload);
 			counter++;
 		}
 	return counter;
@@ -473,7 +371,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		fprintf(stderr, "compareColumn(): invalid action\n");
 		return list;
 	}
-	//printf("%d.%d (%d) %d\n", relationID, columnID, action, value);
 
 	IntermediateResultsList* templist = list->next;
 	int cnt = intermediateResultsAmount;
@@ -489,7 +386,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 
 	if(templist != NULL && cnt > 0)//relation exists in an intermediate results table
 	{//we need to remove the tuples that do not match the comparison result
-		//printf("Relation exists!\n");
 		//first, create a relation from the existing results
 		//each key of the relation will be the tupleID of the intermediate result tuple
 		relation *rel = createRelationFromIntermediateResults(templist->table, t, relationID, columnID);
@@ -532,7 +428,6 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 	else//relation doesn't exist in an intermediate results table
 	{//a new one has to be created and will be filled with a single column
 		//the column values will be the result of the comparison
-		//printf("Relation doesn't exist!\n");
 
 		//first, create relation from table
 		relation *rel = createRelationFromTable(t, columnID);
@@ -554,8 +449,7 @@ IntermediateResultsList* compareColumn(IntermediateResultsList *list , table *t,
 		{
 			if (comparePayloadToValue(rel->tuples[relSize].payload, value, action))
 			{
-				//for (int relID = 0; relID < inResNew->relAmount ; relID++)
-					inResNew -> keys[0][newTup] = rel->tuples[relSize].key;
+				inResNew -> keys[0][newTup] = rel->tuples[relSize].key;
 				newTup++;
 			}
 		}
@@ -899,10 +793,7 @@ IntermediateResults* addResultsSameIntermediateResultsSize(table** t, Intermedia
 
 	}
 
-	//IntermediateResultsDel(inRes);
-
 	return r;
-
 }
 
 
@@ -944,8 +835,6 @@ IntermediateResults* addResultsWithNewColumn(resultsWithNum* results, Intermedia
 		r->keys[r->relAmount-1][i] = relIndex == relationA ? pointer->results[i % getResultTuplesPerPage()].relation_S : pointer->results[i % getResultTuplesPerPage()].relation_R;
 
 	}
-
-	//IntermediateResultsDel(inRes);
 
 	return r;
 }

@@ -7,7 +7,7 @@
 #include "Query.h"
 #include "Results.h"
 
-#define MAX_TABLE_RANGE 100000000               // The maximum range between max and min values of a table for which
+#define MAX_TABLE_RANGE 500000000               // The maximum range between max and min values of a table for which
                                                 // the distinct values will be found.
 
 int relationsNum;

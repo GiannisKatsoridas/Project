@@ -34,14 +34,10 @@ void HistogramJob(JobScheduler* js, JobQueueElem *argv)
 		mtx_unlock(argv->hist_mtx);
 
 		//save local histogram
-		if(r == 0){
+		if(r == 0)
 			js->thread_histograms_R[argv->threadID] = localhist;
-		    //printf("Thread #%d - R: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
-		}
-		else{
+		else
 			js->thread_histograms_S[argv->threadID] = localhist;
-		    //printf("Thread #%d - S: [%5d],[%5d]. Start: %5d , End: %5d\n", argv->threadID, localhist[0],localhist[1], argv->start[r], argv->end[r]);
-		}
 
 	}
 
@@ -127,7 +123,6 @@ void JoinJob(JobQueueElem *argv)
 
         column_id = 2;
     }
-    //fprintf(stderr, "BUCKET #%d\n",i);
     if(y_histogram[argv->bucket_id] == 0)
     {
         index_destroy(&indx);
@@ -136,11 +131,6 @@ void JoinJob(JobQueueElem *argv)
 
     //hash that bucket into the index
     index_fill(indx, y, y_histogram[argv->bucket_id], y_psum[argv->bucket_id]);
-
-    //assign boundaries of the bucket of relation x
-    //first_pos = x_psum[argv->bucket_id] - x_histogram[argv->bucket_id]; //starting position of bucket i within relation x
-    //last_pos = x_psum[argv->bucket_id] -1;  //ending position of bucket i within relation x
-    //pos = last_pos;     //variable for current position
 
     int bucket_start;
     if(argv->bucket_id>0)
@@ -166,16 +156,6 @@ void JoinJob(JobQueueElem *argv)
 
         pos--;
     }
-/*
-
-  /*  char* filename = malloc(50*sizeof(char));
-    strcpy(filename, "\0");
-    sprintf(filename, "Thread0%dFile%d.txt", argv->JobID, argv->bucket_id);
-    FILE* f = fopen(filename, "a");
-
-    if(argv->bucket_id == 0)
-        sleep(1);
-*/
 
     //concatenate local result list to the total result list
     mtx_lock(argv->res_mtx);

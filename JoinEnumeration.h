@@ -176,5 +176,10 @@ int *getComparisonsOrder(Comparison_t *comparisons, int *bestTree, int* relation
  */
 int* JoinEnumeration(table** t, Query* q);
 
+/**
+ * Free the JoinEnumerationStats struct.
+ */
+void freeJEStats(JEStats *jes);
+
 
 #endif //CARAMEL_JOINENUMERATION_H

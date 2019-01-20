@@ -33,8 +33,6 @@ resultsWithNum* create_resultsWithNum(){
 
 void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S){
 
-    //static int results_num = 0;
-
     result* pointer = NULL;
 
     if(res->results == NULL)
@@ -71,7 +69,7 @@ void add_result(resultsWithNum* res, int32_t value_R, int32_t value_S){
 
 void print_resultsWithNum(resultsWithNum *res) {
 
-    if (res==NULL) 
+    if (res==NULL)
     {
         return;
     }

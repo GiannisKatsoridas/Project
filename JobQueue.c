@@ -47,11 +47,6 @@ JobQueueElem * JobCreate(int JobID, int threadID, int jobType, relation *rels[2]
 	return elem;
 }
 
-void freeJob(JobQueueElem *job) {
-
-    freeResultsWithNum(job->res);
-
-}
 
 void JobQueueInit(JobQueue** qaddr, int size)
 {
@@ -96,8 +91,6 @@ void JobQueuePush(JobQueue* q, JobQueueElem *elem)
 	q->JobArray[q->in] = elem;
 	q->in = (q->in + 1)% q->size;
 	q->counter++;
-
-	//fprintf(stderr, "JobQueuePush()\n");
 }
 
 JobQueueElem *JobQueuePop(JobQueue* q)
@@ -118,7 +111,6 @@ JobQueueElem *JobQueuePop(JobQueue* q)
 	if(elem==NULL)
 		fprintf(stderr, "WARNING: JobQueuePop(): Returning NULL element! \n");
 
-	//fprintf(stderr, "JobQueuePop()\n");
 	return elem;
 }
 

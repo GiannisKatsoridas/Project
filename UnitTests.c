@@ -274,11 +274,15 @@ void testINDEXFILL(void)
  */
 void testLOADRELATION(void){
 
-    table* t = loadRelation("r0");
+    table* t = loadRelation("workloads/small/r0");
 
     CU_ASSERT_EQUAL(t->size, 1561);
     CU_ASSERT_EQUAL(t->columns[0][100], 301);
     CU_ASSERT_EQUAL(t->columns[2][456], 2781);
+
+    free(t->metadata);
+    free(t->columns);
+    free(t);
 
 }
 
@@ -295,6 +299,8 @@ void testCREATETABLESARRAY(void){
     CU_ASSERT_EQUAL(t[1]->size, 3754);
     CU_ASSERT_EQUAL(t[0]->columns[0][100], 301);
     CU_ASSERT_EQUAL(t[0]->columns[2][456], 2781);
+
+    freeTable(t);
 
 }
 
@@ -319,10 +325,10 @@ void testPARSETABLEDATA(void){
  */
 void testGETQUERYFROMLINE(void){
 
-    char* s = malloc((strlen("5 1|0.1=1.0&0.2=4531|1.2")+1)*sizeof(char));
+    char* s = malloc((strlen("5 1|0.1=1.0&0.2=4531|1.2")+10)*sizeof(char));
     strcpy(s, "5 1|0.1=1.0&0.2=4531|1.2");
 
-    Query q = getQueryFromLine(s, strlen(s));
+    Query q = getQueryFromLine(s, strlen(s)+5);
 
     CU_ASSERT_EQUAL(q.column_set->columns_num, 1);
     CU_ASSERT_EQUAL(q.column_set->columns[0].relation, 1);
@@ -332,7 +338,6 @@ void testGETQUERYFROMLINE(void){
     CU_ASSERT_EQUAL(q.comparison_set->comparisons[1].columnA, 2);
     CU_ASSERT_EQUAL(q.query_relation_set->query_relations_num, 2);
     CU_ASSERT_EQUAL(q.query_relation_set->query_relations[1], 1);
-
 }
 
 /**
@@ -351,6 +356,7 @@ void testGETQUERYRELATIONS(void){
     CU_ASSERT_EQUAL(q->query_relations[2], 3);
     CU_ASSERT_EQUAL(q->query_relations[3], 4);
 
+    free(q->query_relations);
 }
 
 /**
@@ -386,6 +392,8 @@ void testGETCOLUMNS(void){
     CU_ASSERT_EQUAL(q->columns[1].column, 2);
     CU_ASSERT_EQUAL(q->columns[1].relation, 0);
 
+    free(q);
+
 }
 
 /**
@@ -404,6 +412,8 @@ void testGETCOMPARISONFROMQUERY(void){
     CU_ASSERT_EQUAL(q.columnA, 1);
     CU_ASSERT_EQUAL(q.columnB, 2);
 
+    free(s);
+
 }
 
 /**
@@ -418,6 +428,8 @@ void testGETCOLUMNFROMQUERY(void){
 
     CU_ASSERT_EQUAL(q.relation, 1);
     CU_ASSERT_EQUAL(q.column, 2);
+
+    free(s);
 
 }
 
@@ -436,6 +448,9 @@ void testCREATELIST(void){
     CU_ASSERT_EQUAL(l->next, NULL);
     CU_ASSERT_EQUAL(l->table->relAmount, 0);
 
+    free(l->table);
+    free(l);
+
 }
 
 /**
@@ -445,13 +460,17 @@ void testCOMPARECOLUMNS(void){
 
     freopen("input", "r", stdin);
 
-    table** t = createTablesArray();
+    /*table** t = createTablesArray();
     IntermediateResultsList* l = createList();
 
     l = compareColumn(l, t[1], 0, 0, 11400, GREATER_THAN);
 
     CU_ASSERT_EQUAL(l->next->table->tupleAmount, 3);
     CU_ASSERT_EQUAL(l->next->table->relAmount, 1);
+
+    freeTable(t);
+    IntermediateResultsDel(l->table);
+    free(l);*/
 
 }
 
@@ -464,11 +483,18 @@ void testJOINSAMERELATION(void){
 
     table** t = createTablesArray();
     IntermediateResultsList* l = createList();
+    int* arr = malloc(2*sizeof(int));
+    arr[0] = 1;
+    arr[1] = 1;
 
-    l = joinSameRelation(l, t, 1, 0, 1);
+
+    l = joinSameRelation(l, t, arr, 0, 0, 1);
 
     CU_ASSERT_EQUAL(l->next->table->tupleAmount, 1);
     CU_ASSERT_EQUAL(l->next->table->keys[0][0], 1015);
+
+    freeTable(t);
+    free(l);
 
 }
 
@@ -482,11 +508,18 @@ void testJOINRELATIONSRADIX(void){
     table** t = createTablesArray();
     IntermediateResultsList* l = createList();
 
-    l = joinRelationsRadix(l, t, 1, 2, 0, 1);
+    int* arr = malloc(2*sizeof(int));
+    arr[0] = 1;
+    arr[1] = 2;
+
+    l = joinRelationsRadix(l, t, arr, 0, 1, 0, 1);
 
     CU_ASSERT_EQUAL(l->next->table->tupleAmount, 26808);
-    CU_ASSERT_EQUAL(l->next->table->relationIDs[0], 1);
-    CU_ASSERT_EQUAL(l->next->table->relationIDs[1], 2);
+    CU_ASSERT_EQUAL(l->next->table->relationIDs[0], 0);
+    CU_ASSERT_EQUAL(l->next->table->relationIDs[1], 1);
+
+    freeTable(t);
+    free(l);
 
 }
 
@@ -510,6 +543,8 @@ void testCROSSPRODUCTINTERMEDIATERESULTS(void){
     CU_ASSERT_EQUAL(l->keys[0][0], 0);
     CU_ASSERT_EQUAL(l->keys[1][0], 0);
 
+    freeTable(t);
+
 }
 
 /**
@@ -525,6 +560,9 @@ void testCREATERELATIONFROMTABLE(void){
     CU_ASSERT_EQUAL(r->num_tuples, 1561);
     CU_ASSERT_EQUAL(r->tuples[2].payload, 8807);
     CU_ASSERT_EQUAL(r->tuples[204].payload, 4408);
+
+    freeTable(t);
+    freeRelation(r);
 
 }
 
@@ -543,6 +581,9 @@ void testCREATERELATIONFROMINTERMEDIATERESULTS(void){
     CU_ASSERT_EQUAL(r->tuples[2].payload, 8807);
     CU_ASSERT_EQUAL(r->tuples[204].payload, 4408);
 
+    freeTable(t);
+    freeRelation(r);
+
 }
 
 /**
@@ -558,6 +599,9 @@ void testCALCULATEACTIONRESULTAMOUNT(void){
     int amount = calculateActionResultAmount(r, 4600, 2);
 
     CU_ASSERT_EQUAL(amount, 31);
+
+    freeTable(t);
+    freeRelation(r);
 
 }
 
@@ -592,6 +636,8 @@ void testEXISTSININTERMEDIATERESULTS(void){
     CU_ASSERT_EQUAL(flag, 1);
     CU_ASSERT_EQUAL(flag1, 0);
 
+    freeTable(t);
+
 }
 
 /**
@@ -614,6 +660,8 @@ void testGETINTERMEDIATERESULTSINDEX(void){
     CU_ASSERT_EQUAL(r2, 0);
     CU_ASSERT_EQUAL(r3, -1);
 
+    freeTable(t);
+    free(inRes);
 }
 
 /**
@@ -634,6 +682,8 @@ void testGETINTERMEDIATERESULTSSINGLEINDEX(void){
     CU_ASSERT_EQUAL(r1, 0);
     CU_ASSERT_EQUAL(r2, -1);
 
+    freeTable(t);
+    free(inRes);
 }
 
 /**
@@ -656,6 +706,8 @@ void testGETQUERYCATEGORY(void){
     CU_ASSERT_EQUAL(r2, 2);
     CU_ASSERT_EQUAL(r3, 0);
 
+    freeTable(t);
+    free(inRes);
 }
 
 
