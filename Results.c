@@ -10,7 +10,7 @@ void setTuplesPerPage()
 
 int getResultTuplesPerPage()
 {
-    return tuples_per_page;
+    return 50;
 }
 
 result* create_results_page()

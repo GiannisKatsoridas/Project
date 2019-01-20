@@ -5,7 +5,7 @@
 
 //static int const page_size = 1048576;
 static int const page_size = 500;
-static int tuples_per_page = 10;
+static int tuples_per_page = 50;
 
 
 void setTuplesPerPage();

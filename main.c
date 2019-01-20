@@ -14,9 +14,29 @@ int main() {
 
     parseTableData(t);
 
-    /*relation* r1 = createRelationFromTable(t[4], 0);
+/*    relation* r1 = createRelationFromTable(t[0], 0);
     relation* r2 = createRelationFromTable(t[1], 0);
-    resultsWithNum* res = RadixHashJoin(r1, r2);*/
+    resultsWithNum* res = RadixHashJoin(r1, r2);
+
+    uint64_t sum = 0;
+
+    result* pointer = res->results;
+
+    int tuples_printed = 0;
+
+    while(pointer!=NULL){
+
+        for(int i=0; (i<tuples_per_page) && (tuples_printed<res->results_amount); i++){
+
+            sum += t[0]->columns[0][res->results->results[i].relation_R];
+            tuples_printed++;
+        }
+
+        pointer = pointer->next;
+
+    }
+
+    fprintf(stderr, "Result Amount: %d, Sum: %lu\n", res->results_amount, sum);*/
 
     //printf("Done\n");
 
