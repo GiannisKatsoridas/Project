@@ -9,7 +9,7 @@ JobScheduler *jobSchedulerCreate() {
     JobScheduler* js = malloc(sizeof(JobScheduler));
 
     js->tp = malloc((int) THREAD_NUM * sizeof(pthread_t));
-    JobQueueInit(&js->queue, 10);
+    JobQueueInit(&js->queue, 32);
 
     js->thread_histograms_R = malloc((int) THREAD_NUM * sizeof(int*));
     js->thread_histograms_S = malloc((int) THREAD_NUM * sizeof(int*));
