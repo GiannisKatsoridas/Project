@@ -5,12 +5,12 @@
 
 void setTuplesPerPage()
 {
-	tuples_per_page = page_size / sizeof(s_tuple);
+	tuples_per_page = 2048;
 }
 
 int getResultTuplesPerPage()
 {
-    return 50;
+    return 2048;
 }
 
 result* create_results_page()
